@@ -239,8 +239,8 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
-                        <li class="menu @if(Request::segment(1)==" report_category") active @endif">
-                            <a href="{{ url('report_category') }}" @if(in_array(Request::segment(1), ['report_category','report'])) aria-expanded="true" @endif class="dropdown-toggle">
+                        <li class="menu @if(Request::segment(1)==" transaction_code") active @endif">
+                            <a href="{{ url('transaction_code') }}" @if(in_array(Request::segment(1), ['transaction_code'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Kode Transaksi</span>

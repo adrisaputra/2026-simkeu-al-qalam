@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\TransactionCodeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -34,7 +35,15 @@ Route::post('/logout', [LoginController::class, 'logout']);
 Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index']);
     
-    
+    ## Transaction Code
+    Route::get('/transaction_code', [TransactionCodeController::class, 'index'])->name('transaction_code.index');
+    Route::get('/transaction_code/list', [TransactionCodeController::class, 'get_transaction_code_index'])->name('transaction_code.list');
+    Route::post('/transaction_code/store', [TransactionCodeController::class, 'store']);
+    Route::post('/transaction_code/validate/{action}', [TransactionCodeController::class, 'validate']);
+    Route::get('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'edit']);
+    Route::put('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'update']);
+    Route::get('/transaction_code/delete/{transaction_code}',[TransactionCodeController::class, 'delete']);
+
     ## User
     Route::get('/user', [UserController::class, 'index'])->name('users.index');
     Route::get('/user/list', [UserController::class, 'get_user_index'])->name('users.list');
