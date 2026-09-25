@@ -12,7 +12,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $title = "Dashboard";
-        if(Auth::user()->group->name == 'Admin Simkeu'){
+        if(Auth::user()->group->name == 'Admin Finance'){
             $employee = Employee::count();
             $employee_l = Employee::where('gender','Male')->count();
             $employee_p = Employee::where('gender','Female')->count();

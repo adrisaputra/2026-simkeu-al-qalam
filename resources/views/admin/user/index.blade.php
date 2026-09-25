@@ -98,7 +98,6 @@
             var name = $('#name').val();
             var email = $('#email').val();
             var group_id = $('#group_id').val();
-            var work_unit_id = $('#work_unit_id').val();
             var password = $('#password').val();
             var password_confirmation = $('#password_confirmation').val();
             var status = $('#status').val();
@@ -109,7 +108,6 @@
             formData.append('name', name);
             formData.append('email', email);
             formData.append('group_id', group_id);
-            formData.append('work_unit_id', work_unit_id);
             formData.append('password', password);
             formData.append('password_confirmation', password_confirmation);
             formData.append('status', status);
@@ -219,6 +217,7 @@
                 document.getElementById("name").value = response.data.name;
                 document.getElementById("email").value = response.data.email;
                 document.getElementById("status").value = response.data.status;
+                document.getElementById("group_id").value = response.data.group_id;
             },
             error: function (xhr) {
                 // Tangani kesalahan jika pengiriman formulir gagal

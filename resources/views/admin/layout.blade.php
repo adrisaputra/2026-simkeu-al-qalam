@@ -193,7 +193,7 @@ $setting = \App\Helpers\Helpers::setting();
                         </a>
                     </li>
 
-                    @if(in_array(Auth::user()->group->name, ['Admin Simkeu']))
+                    @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                         
                         <li class="menu @if(Request::segment(1)==" employee_kpi") active @endif">
                             <a href="{{ url('employee_kpi') }}" @if(in_array(Request::segment(1), ['employee_kpi','employee_kpi_detail','employee_kpi_period','employee_kpi_indicator_item'])) aria-expanded="true" @endif class="dropdown-toggle">
@@ -213,7 +213,7 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
-                        @if(Auth::user()->group->name == 'Admin Simkeu')
+                        @if(Auth::user()->group->name == 'Admin Finance')
                         
                         <li class="menu menu-heading">
                             <div class="heading"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus">

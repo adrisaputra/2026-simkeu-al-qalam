@@ -36,7 +36,7 @@ class UserController extends Controller
                     $query->where('id', '!=', 3);
                 })
                 ->whereHas('group.group_application', function ($query) {
-                    $query->where('application_id', 2);
+                    $query->where('application_id', 3);
                 })
                 ->where('users.name', '!=', 'superadmin')
                 ->limit(10);
@@ -47,10 +47,13 @@ class UserController extends Controller
                 return $counter++;
             })
             ->addColumn('show_group', function ($v) {
-                if($v->group_id==4){
-                    $status ='<span class="badge badge-info">Admin KPI</span>';
-                }else{
-                    $status ='<span class="badge badge-warning">Admin Unit ('.$v->work_unit?->name.')</span>';
+                $status = null;
+                if($v->group_id==6){
+                    $status ='<span class="badge badge-info">Bendahara Yayasan</span>';
+                }else if($v->group_id==7){
+                    $status ='<span class="badge badge-success">Bendahara Penerimaan</span>';
+                }else if($v->group_id==8){
+                    $status ='<span class="badge badge-danger">Bendahara Pengeluaran</span>';
                 }
                 return $status;
             })
@@ -86,7 +89,6 @@ class UserController extends Controller
                 'name' => 'Nama User',
                 'email' => 'Email',
                 'group_id' => 'Grup',
-                'work_unit_id' => 'Unit kerja',
                 'password' => 'Password',
                 'status' => 'Status'
             ];
@@ -100,9 +102,6 @@ class UserController extends Controller
                     'status' => 'required'
                 ];
 
-                if($request->group_id == 5){
-                    $rules['work_unit_id'] = 'required';
-                }
             } else {
                 if($request->password){
                     $rules = [
@@ -112,10 +111,6 @@ class UserController extends Controller
                         'status' => 'required'
                     ];
                         
-                    if($request->group_id == 5){
-                        $rules['work_unit_id'] = 'required';
-                    }
-                    
                 } else {
                     $rules = [
                         'name' => 'required|string|max:255',
@@ -123,9 +118,6 @@ class UserController extends Controller
                         'status' => 'required',
                     ];
                         
-                    if($request->group_id == 5){
-                        $rules['work_unit_id'] = 'required';
-                    }
                 }
             }
 
@@ -141,13 +133,7 @@ class UserController extends Controller
         if ($request->ajax()) {
             $user = New User();
             $user->fill($request->all());
-
             $user->group_id = $request->group_id;
-            if($request->group_id == 5){
-                $user->work_unit_id = $request->work_unit_id;
-            } else {
-                $user->work_unit_id = NULL;
-            }
             $user->save();
             
             Activity()->log('Create Data User');
@@ -171,27 +157,13 @@ class UserController extends Controller
             if($request->password){
                 $user->name = $request->name;
                 $user->email = $request->email;
-                    
                 $user->group_id = $request->group_id;
-                if($request->group_id == 5){
-                    $user->work_unit_id = $request->work_unit_id;
-                } else {
-                    $user->work_unit_id = NULL;
-                }
-
                 $user->password = Hash::make($request->password);
                 $user->status = $request->status;
             } else {
                 $user->name = $request->name;
                 $user->email = $request->email;
-                    
                 $user->group_id = $request->group_id;
-                if($request->group_id == 5){
-                    $user->work_unit_id = $request->work_unit_id;
-                } else {
-                    $user->work_unit_id = NULL;
-                }
-                
                 $user->status = $request->status;
             }
             $user->save();
@@ -224,14 +196,14 @@ class UserController extends Controller
 
             if($action==="Simpan"){
                 $rules = [
-                    'name' => 'required|string|max:255',
+                    'name' => 'required|string|regex:/^[a-z0-9_]+$/|max:255',
                     'email' => 'required|string|email|max:255|unique:users',
                     'password' => 'required|string|min:8|confirmed'
                 ];
             } else {
                 if($request->password){
                     $rules = [
-                        'name' => 'required|string|max:255',
+                        'name' => 'required|string|regex:/^[a-z0-9_]+$/|max:255',
                         'password' => 'required|string|min:8|confirmed',
                     ];
                 } else {

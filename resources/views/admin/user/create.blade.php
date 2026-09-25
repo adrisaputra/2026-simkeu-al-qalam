@@ -59,28 +59,13 @@
 
 					<div class="form-group">
 						<p>{{ __('Grup') }} <span class="required" style="color: #dd4b39;">*</span></p>
-						<select class="form-control form-control-sm" name="group_id" id="group_id" onchange=" if (this.selectedIndex==1){ 
-								document.getElementById('show_work_unit').style.display = 'none'; 
-							} else if (this.selectedIndex==2){ 
-								document.getElementById('show_work_unit').style.display = 'inline'; 
-							};">
+						<select class="form-control form-control-sm" name="group_id" id="group_id" >
 							<option value="">- Pilih -</option>
-							<option value="4">Admin KPI</option>
-							<option value="5">Admin Unit</option>
+							<option value="6">Admin Bendahara Yayasan</option>
+							<option value="7">Bendahara Penerimaan</option>
+							<option value="8">Bendahara pengeluaran</option>
 						</select>
 						<div id="group_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
-					</div>
-
-
-					<div class="form-group" id="show_work_unit" style="display:none">
-						<p>{{ __('Unit Kerja') }} <span class="required" style="color: #dd4b39;">*</span></p>
-						<select class="form-control form-control-sm" name="work_unit_id" id="work_unit_id">
-							<option value="">- Pilih -</option>
-							@foreach($work_unit as $v)
-								<option value="{{ $v->id }}">{{ $v->name }}</option>
-							@endforeach
-						</select>
-						<div id="work_unit_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
 					</div>
 
 					<div class="form-group" style="margin-top:20px">
