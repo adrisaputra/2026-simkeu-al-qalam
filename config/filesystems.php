@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'public'),
 
     /*
     |--------------------------------------------------------------------------
@@ -60,6 +60,13 @@ return [
             'report' => false,
         ],
 
+        'simpeg_storage' => [
+            'driver' => 'local',
+            'root' => base_path('../2026-simpeg-al-qalam/storage/app/public'),
+            'url' => env('SIMPEG_STORAGE_URL'),
+            'throw' => false,
+            'report' => false,
+        ],
     ],
 
     /*
