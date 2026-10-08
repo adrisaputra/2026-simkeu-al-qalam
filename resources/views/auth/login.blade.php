@@ -423,6 +423,22 @@ $setting = \App\Helpers\Helpers::setting();
                 </div>
                 @endif
 
+                @error('cf-turnstile-response')
+                <div class="alert alert-dismissible bg-danger">
+                    <div>
+                        <h4>Gagal!</h4>
+                        <span>{{ $message }}</span>
+                    </div>
+                    <button type="button" class="btn-icon" onclick="this.parentElement.style.display='none'">
+                        <span class="svg-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                @enderror
+
                 <div class="input-group">
                     <input type="text" name="name" required>
                     <label>Username / Email</label>
@@ -451,11 +467,6 @@ $setting = \App\Helpers\Helpers::setting();
                         </small>
                         @enderror
 
-                        @error('cf-turnstile-response')
-                        <small class="text-danger d-block mt-2">
-                            {{ $message }}
-                        </small>
-                        @enderror
 
                     </div>
 

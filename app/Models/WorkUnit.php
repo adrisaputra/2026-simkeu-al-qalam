@@ -21,4 +21,8 @@ class WorkUnit extends Model
         return $this->hasMany('App\Models\Employee');
     }
 
+    public function classess(){
+        return $this->hasMany('App\Models\Classes');
+    }
+
 }

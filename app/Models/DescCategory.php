@@ -5,20 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionCode extends Model
+class DescCategory extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'code',
         'name',
-        'type',
-        'description',
-        'is_active',
+        'entered_by'
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    public function income()
+    {
+        return $this->hasOne('App\Models\Income');
+    }
 
     public function expense()
     {
