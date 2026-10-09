@@ -72,7 +72,7 @@
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [
-				[0, 'desc'] // Mengatur pengurutan kolom pertama (id) secara descending
+				[0, 'asc'] // Mengatur pengurutan kolom pertama (id) secara descending
 			],
             paging: true,
             pageLength: 50,
@@ -91,11 +91,13 @@
             var action = document.getElementById('action').innerText;
             var id_expense = $('#id_expense').val();
             var date = $('#date').val();
+            var amount = $('#amount').val();
 
             // Buat objek FormData untuk mengirim data form, termasuk file
             var formData = new FormData();
             formData.append('id', id_expense);
             formData.append('date', date);
+            formData.append('amount', amount);
             formData.append('_token', "{{ csrf_token() }}");
 
             // Kirim permintaan validasi ke controller via Ajax

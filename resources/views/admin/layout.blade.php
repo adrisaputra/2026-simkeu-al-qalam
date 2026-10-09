@@ -213,6 +213,15 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
+                        <li class="menu @if(Request::segment(1)==" print") active @endif">
+                            <a href="{{ url('print') }}" @if(Request::segment(1)=="print" ) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-print-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Laporan</span>
+                                </div>
+                            </a>
+                        </li>
+
                         @if(Auth::user()->group->name == 'Admin Finance')
                         
                         <li class="menu menu-heading">
@@ -330,6 +339,12 @@ $setting = \App\Helpers\Helpers::setting();
                 }
             }
             objek.value = c;
+        }
+
+        function formatRupiah2(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0
+            }).format(angka);
         }
 
         // Get the Toast button

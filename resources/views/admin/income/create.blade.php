@@ -18,7 +18,7 @@
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_income" />
 
                     <div class="form-group">
-                        <p>{{ __('Tanggal') }}</p>
+                        <p>{{ __('Tanggal') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="text" class="form-control form-control-sm" id="date" value="{{ date('Y-m-d') }}" name="date" placeholder="Tanggal" />
                     </div>
 
@@ -46,12 +46,12 @@
 
                     <div class="form-group">
                         <p>{{ __('Peruntukan') }}</p>
-                        <textarea class="form-control form-control-sm" name="desc" id="desc"></textarea>
+                        <input type="text" class="form-control form-control-sm" name="desc" id="desc">
                         <div id="desc-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
                     <div class="form-group">
-                        <p>{{ __('Jumlah') }}</p>
+                        <p>{{ __('Jumlah') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="text" class="form-control form-control-sm" name="amount" id="amount" onkeyup="formatRupiah(this, '.')">
                         <div id="amount-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>

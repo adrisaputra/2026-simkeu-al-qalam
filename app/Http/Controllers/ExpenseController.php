@@ -66,16 +66,19 @@ class ExpenseController extends Controller
         if ($request->ajax()) {
 
             $attributes = [
-                'date' => 'Tanggal'
+                'date' => 'Tanggal',
+                'amount' => 'Jumlah'
             ];
 
             if ($action === "Simpan") {
                 $rules = [
-                    'date' => 'required|date'
+                    'date' => 'required|date',
+                    'amount' => 'required|numeric'
                 ];
             } else {
                 $rules = [
-                    'date' => 'required|date'
+                    'date' => 'required|date',
+                    'amount' => 'required|numeric'
                 ];
             }
 
@@ -95,7 +98,7 @@ class ExpenseController extends Controller
             $expense->transaction_code_id = $request->transaction_code_id;
             $expense->desc_category_id = $request->desc_category_id;
             $expense->desc = $request->desc;
-            $expense->amount = str_replace('.', '', $request->amount);
+            $expense->amount = str_replace('.', '', $request->amount) ?? 0;
             $expense->user_id = Auth::user()->id;
             $expense->save();
 
@@ -121,7 +124,7 @@ class ExpenseController extends Controller
             $expense->transaction_code_id = $request->transaction_code_id;
             $expense->desc_category_id = $request->desc_category_id;
             $expense->desc = $request->desc;
-            $expense->amount = str_replace('.', '', $request->amount);
+            $expense->amount = str_replace('.', '', $request->amount) ?? 0;
             $expense->user_id = Auth::user()->id;
             $expense->save();
 

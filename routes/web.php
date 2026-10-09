@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PrintController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TransactionCodeController;
@@ -44,6 +45,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     ## Income
     Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
     Route::get('/income/list', [IncomeController::class, 'get_income_index'])->name('income.list');
+    Route::get('/income/{income}/transaction-banks', [IncomeController::class, 'get_bank_transactions'])->name('income.transaction_banks');
     Route::post('/income/store', [IncomeController::class, 'store']);
     Route::post('/income/validate/{action}', [IncomeController::class, 'validate']);
     Route::get('/income/edit/{income}', [IncomeController::class, 'edit']);
@@ -60,6 +62,10 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/expense/edit/{expense}', [ExpenseController::class, 'update']);
     Route::get('/expense/delete/{expense}',[ExpenseController::class, 'delete']);
     
+    ## Print
+    Route::get('/print', [PrintController::class, 'index'])->name('print.index');
+    Route::post('/print', [PrintController::class, 'print']);
+
     ## Work Unit
     Route::get('/work_unit', [WorkUnitController::class, 'index'])->name('work_unit.index');
     Route::get('/work_unit/list', [WorkUnitController::class, 'get_work_unit_index'])->name('work_unit.list');

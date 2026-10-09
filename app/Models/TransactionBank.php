@@ -9,6 +9,7 @@ class TransactionBank extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'transaction_id',
         'desc_category_id',
         'student_id',
         'transaction_number',
@@ -21,6 +22,11 @@ class TransactionBank extends Model
     public function desc_category()
     {
         return $this->belongsTo('App\Models\DescCategory');
+    }
+
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class);
     }
 
     public function student()

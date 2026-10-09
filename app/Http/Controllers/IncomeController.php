@@ -4,11 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Models\DescCategory;
+use App\Models\Student;
 use App\Models\Transaction;
+use App\Models\TransactionBank;
 use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReaderException;
 
 class IncomeController extends Controller
 {
@@ -45,7 +51,13 @@ class IncomeController extends Controller
                     return Helpers::format_number($v->amount);
                 })
                 ->addColumn('action', function ($v) {
-                    $btn = '<a href="#" onClick="getData(' . $v->id . ')" id="' . $v->id . '" title="Edit" data-toggle="modal" data-target="#exampleModal">
+                    $transaction_bank = TransactionBank::where('transaction_id', $v->id)->count();
+                    if($transaction_bank > 0){
+                        $btn = '<button type="button" class="btn btn-sm btn-info" onclick="showBankTransactions(' . $v->id . ')">Transaksi Bank</button> ';
+                    } else {
+                        $btn = null;
+                    }
+                    $btn .= '<a href="#" onClick="getData(' . $v->id . ')" id="' . $v->id . '" title="Edit" data-toggle="modal" data-target="#exampleModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         </a>';
                     $btn .= '<a href="#" onclick="deleteData(' . $v->id . ')" id="' . $v->id . '" class="warning confirm" data-toggle="tooltip" data-placement="top" title="Hapus">
@@ -57,22 +69,45 @@ class IncomeController extends Controller
         }
     }
 
+    public function get_bank_transactions(Request $request, Transaction $income)
+    {
+        abort_unless($income->type === 'income', 404);
+
+        if ($request->ajax()) {
+            $bankTransactions = TransactionBank::with('student')
+                ->where('transaction_id', $income->id)
+                ->select('transaction_banks.*');
+
+            return DataTables::of($bankTransactions)
+                ->addIndexColumn()
+                ->addColumn('student_name', fn($transaction) => $transaction->student?->name ?? '-')
+                ->addColumn('display_date', fn($transaction) => $transaction->date ? Helpers::date($transaction->date) : '-')
+                ->addColumn('display_amount', fn($transaction) => Helpers::format_number($transaction->amount))
+                ->make(true);
+        }
+
+        abort(404);
+    }
+
     public function validate(Request $request, $action)
     {
 
         if ($request->ajax()) {
 
             $attributes = [
-                'date' => 'Tanggal'
+                'date' => 'Tanggal',
+                'amount' => 'Jumlah'
             ];
 
             if ($action === "Simpan") {
                 $rules = [
-                    'date' => 'required|date'
+                    'date' => 'required|date',
+                    'amount' => 'required|numeric'
                 ];
             } else {
                 $rules = [
-                    'date' => 'required|date'
+                    'date' => 'required|date',
+                    'amount' => 'required|numeric'
                 ];
             }
 
@@ -92,7 +127,7 @@ class IncomeController extends Controller
             $income->transaction_code_id = $request->transaction_code_id;
             $income->desc_category_id = $request->desc_category_id;
             $income->desc = $request->desc;
-            $income->amount = str_replace('.', '', $request->amount);
+            $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;
             $income->save();
 
@@ -118,7 +153,7 @@ class IncomeController extends Controller
             $income->transaction_code_id = $request->transaction_code_id;
             $income->desc_category_id = $request->desc_category_id;
             $income->desc = $request->desc;
-            $income->amount = str_replace('.', '', $request->amount);
+            $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;
             $income->save();
 
@@ -135,5 +170,174 @@ class IncomeController extends Controller
             activity()->log('Delete Data Transaction With ID = ' . $income->id);
             return response()->json(['success' => true, 'message' => 'Hapus Data Berhasil']);
         }
+    }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+            'desc_category_id' => 'required|exists:desc_categories,id',
+            'desc' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $spreadsheet = IOFactory::load($request->file('file')->getRealPath());
+        } catch (SpreadsheetReaderException $exception) {
+            throw ValidationException::withMessages([
+                'file' => 'File Excel tidak dapat dibaca. Pastikan file tidak rusak.',
+            ]);
+        }
+
+        $rows = $spreadsheet->getSheet(0)->toArray();
+
+        try {
+            $result = DB::transaction(function () use ($rows, $validated) {
+
+                $bankTransactions = [];
+                $totalAmount = 0;
+
+                // Buat transaction utama terlebih dahulu
+                $transaction = Transaction::create([
+                    'date' => now()->toDateString(),
+                    'type' => 'income',
+                    'transaction_code_id' => 2,
+                    'desc_category_id' => $validated['desc_category_id'],
+                    'desc' => $validated['desc'],
+                    'amount' => 0,
+                    'user_id' => Auth::id(),
+                ]);
+
+                foreach ($rows as $index => $row) {
+
+                    // Skip header / baris kosong
+                    if (
+                        $index === 0 ||
+                        empty(array_filter(
+                            $row,
+                            fn($value) => $value !== null && $value !== ''
+                        ))
+                    ) {
+                        continue;
+                    }
+
+                    // =========================
+                    // AMOUNT
+                    // =========================
+                    $amount = str_replace('.', '', $row[7] ?? 0);
+                    $amount = (float) $amount;
+
+                    // =========================
+                    // DATE & TIME
+                    // =========================
+                    $date = null;
+                    $time = null;
+
+                    $dateTime = trim((string) ($row[2] ?? ''));
+
+                    if ($dateTime !== '') {
+
+                        $parts = preg_split('/\s+/', $dateTime, 2);
+
+                        $dateParts = explode('/', $parts[0] ?? '');
+
+                        if (count($dateParts) === 3) {
+
+                            $parsedDate = \DateTime::createFromFormat(
+                                '!j/n/Y',
+                                $dateParts[0] . '/' .
+                                    $dateParts[1] . '/' .
+                                    $dateParts[2]
+                            );
+
+                            $dateErrors = \DateTime::getLastErrors();
+
+                            if (
+                                $parsedDate === false ||
+                                (
+                                    $dateErrors !== false &&
+                                    (
+                                        $dateErrors['warning_count'] > 0 ||
+                                        $dateErrors['error_count'] > 0
+                                    )
+                                )
+                            ) {
+                                throw ValidationException::withMessages([
+                                    'file' => 'Tanggal pada baris ' . ($index + 1) . ' tidak valid.',
+                                ]);
+                            }
+
+                            $date = $parsedDate->format('Y-m-d');
+                        }
+
+                        if (!empty($parts[1])) {
+
+                            $time = str_replace('.', ':', $parts[1]);
+
+                            if (substr_count($time, ':') === 1) {
+                                $time .= ':00';
+                            }
+                        }
+                    }
+
+                    // =========================
+                    // STUDENT
+                    // =========================
+                    $nis = $row[3] ?? null;
+
+                    $studentId = ($nis === null || $nis === '')
+                        ? null
+                        : Student::where('nis', $nis)->value('id');
+
+                    // =========================
+                    // DETAIL TRANSACTION
+                    // =========================
+                    $bankTransactions[] = [
+                        'transaction_id' => $transaction->id,
+                        'desc_category_id' => $validated['desc_category_id'],
+                        'student_id' => $studentId,
+                        'transaction_number' => $row[1] ?? null,
+                        'date' => $date,
+                        'time' => $time,
+                        'amount' => $amount,
+                        'user_id' => Auth::id(),
+                    ];
+
+                    $totalAmount += $amount;
+                }
+
+                // Tidak ada data
+                if ($bankTransactions === []) {
+                    throw ValidationException::withMessages([
+                        'file' => 'File Excel tidak berisi data transaksi untuk diimpor.',
+                    ]);
+                }
+
+                // Update total transaction utama
+                $transaction->update([
+                    'amount' => $totalAmount,
+                ]);
+
+                // Insert transaksi bank
+                foreach ($bankTransactions as $bankTransaction) {
+                    $transaction->transaction_banks()->create($bankTransaction);
+                }
+
+                return [
+                    'count' => count($bankTransactions),
+                    'total' => $totalAmount,
+                ];
+            });
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
+        activity()->log('Import Data Transaction');
+
+        return back()->with(
+            'success',
+            $result['count'] .
+                ' transaksi bank berhasil diimpor. Total pemasukan: ' .
+                Helpers::format_number($result['total'])
+        );
     }
 }
