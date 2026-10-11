@@ -19,7 +19,18 @@
                         @csrf
                         <div class="widget-content widget-content-area">
                             <div class="row">
+                                
                                 <div class="col-xl-3 col-md-12 col-sm-12 col-12">
+                                    <div class="form-group" style="margin-bottom: 0rem;">
+                                        <select class="form-control form-control-sm" id="category_report" name="category_report" required>
+                                            <option value="">- Jenis Laporan -</option>
+                                            <option value="1">Rekap Data Ceklis</option>
+                                            <option value="2">Rekap Keuangan Al Qalam</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{--<div class="col-xl-3 col-md-12 col-sm-12 col-12">
                                     <div class="form-group" style="margin-bottom: 0rem;">
                                         <select class="form-control form-control-sm" name="work_unit_id">
                                             
@@ -31,16 +42,16 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
+                                </div>--}}
                                 
-                                <div class="col-xl-3 col-md-12 col-sm-12 col-12">
-                                    <div class="form-group" style="margin-bottom: 0rem;">
-                                        <select class="form-control form-control-sm" id="category_report" name="category_report" required>
-                                            <option value="">- Jenis Laporan -</option>
-                                            <option value="1">Rekap Rapor</option>
-                                            <option value="3">Rekap Nilai Akhir</option>
-                                        </select>
-                                    </div>
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_month">
+                                    <select id="month" name="month" class="form-control form-control-sm">
+                                        <option value="">- Pilih Jenis Rekap -</option>
+                                        <option value="1">Catatan Harian</option>
+                                        <option value="2">Rekap Bulanan</option>
+                                        <option value="3">Aktivitas</option>
+                                        <option value="4">Neraca</option>
+                                    </select>
                                 </div>
 
                                 <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_month">

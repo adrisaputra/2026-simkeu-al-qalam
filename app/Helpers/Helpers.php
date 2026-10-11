@@ -78,4 +78,17 @@ class Helpers
     }
 
 
+    public static function date_indo_full($value)
+    {
+        if (!$value) return '-';
+
+        $timestamp = strtotime($value);
+        $day_name  = self::day_name(date('l', $timestamp));
+        $day       = date('d', $timestamp);
+        $month     = self::month_name(date('m', $timestamp));
+        $year      = date('Y', $timestamp);
+
+        return $day_name . '/ ' . $day . ' ' . $month . ' ' . $year;
+    }
+
 }

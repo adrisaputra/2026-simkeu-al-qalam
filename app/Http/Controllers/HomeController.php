@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,10 +14,9 @@ class HomeController extends Controller
     {
         $title = "Dashboard";
         if(Auth::user()->group->name == 'Admin Finance'){
-            $employee = Employee::count();
-            $employee_l = Employee::where('gender','Male')->count();
-            $employee_p = Employee::where('gender','Female')->count();
-            return view('admin.home', compact('title','employee','employee_l','employee_p'));
+            $income = Transaction::where('type', 'income')->sum('amount');
+            $expense = Transaction::where('type', 'expense')->sum('amount');
+            return view('admin.home', compact('title','income','expense'));
         } 
     }
 }

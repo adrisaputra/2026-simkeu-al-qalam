@@ -59,9 +59,9 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\WorkUnit');
     }
 
-    public function income()
+    public function transaction()
     {
-        return $this->hasOne('App\Models\Income');
+        return $this->hasOne('App\Models\Transaction');
     }
 
     public function isAdminKPI()

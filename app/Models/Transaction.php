@@ -28,6 +28,11 @@ class Transaction extends Model
         return $this->belongsTo('App\Models\DescCategory');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
     public function transaction_banks()
     {
         return $this->hasMany(TransactionBank::class);
