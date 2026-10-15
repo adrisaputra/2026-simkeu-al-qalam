@@ -7,6 +7,7 @@ use App\Models\Classes;
 use App\Models\Employee;
 use App\Models\EmployeeReport;
 use App\Models\Transaction;
+use App\Models\TransactionBank;
 use App\Models\WorkUnit;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -49,6 +50,9 @@ class PrintController extends Controller
             $query->orderBy('name', 'ASC');
         }])
             ->where('work_unit_id', $request->work_unit_id)
+            ->when($request->classes_id, function ($query, $classesId) {
+                $query->where('id', $classesId);
+            })
             ->orderBy('name', 'ASC')
             ->get();
 
@@ -146,6 +150,147 @@ class PrintController extends Controller
                 $sheet->setCellValue('A'.$rows, $no++);
                 $sheet->setCellValue('B'.$rows, $student->name);
                 $sheet->setCellValue('C'.$rows, $class->name);
+
+                ## SPP (Juli s.d Desember $first_year)
+                $columns = ['D' => 7, 'E' => 8, 'F' => 9];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $first_year)
+                        ->where('desc_category_id', 3)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+
+                $columns = ['G' => 10, 'H' => 11, 'I' => 12];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $first_year)
+                        ->where('desc_category_id', 3)
+                        ->sum('amount');
+                    
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+                
+                ## CATERING (Juli s.d Desember $first_year)
+                $columns = ['J' => 7, 'K' => 8, 'L' => 9];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $first_year)
+                        ->where('desc_category_id', 2)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+
+                $columns = ['M' => 10, 'N' => 11, 'O' => 12];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $first_year)
+                        ->where('desc_category_id', 2)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+                
+                ## SPP (Januari s.d Juni $second_year)
+                $columns = ['P' => 1, 'Q' => 2, 'R' => 3];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $second_year)
+                        ->where('desc_category_id', 3)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+
+                $columns = ['S' => 4, 'T' => 5, 'U' => 6];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $second_year)
+                        ->where('desc_category_id', 3)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+                
+                ## CATERING (Januari s.d Juni $second_year)
+                $columns = ['V' => 1, 'W' => 2, 'X' => 3];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $second_year)
+                        ->where('desc_category_id', 2)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+
+                $columns = ['Y' => 4, 'Z' => 5, 'AA' => 6];
+
+                foreach ($columns as $column => $month) {
+                    $amount = TransactionBank::where('student_id', $student->id)
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $second_year)
+                        ->where('desc_category_id', 2)
+                        ->sum('amount');
+
+                    if($amount > 0) {
+                        $sheet->setCellValue($column . $rows, $request->ceklist_type == 'nominal' ? $amount : '✓');
+                        if ($request->ceklist_type == 'nominal') {
+                            $sheet->getStyle($column . $rows)->getNumberFormat()->setFormatCode('#,##0');
+                        }
+                    }
+                }
+                
                 $rows++;
             }
 

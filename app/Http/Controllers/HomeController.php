@@ -14,8 +14,8 @@ class HomeController extends Controller
     {
         $title = "Dashboard";
         if(Auth::user()->group->name == 'Admin Finance'){
-            $income = Transaction::where('type', 'income')->sum('amount');
-            $expense = Transaction::where('type', 'expense')->sum('amount');
+            $income = Transaction::whereMonth('date', now()->month)->where('type', 'income')->sum('amount');
+            $expense = Transaction::whereMonth('date', now()->month)->where('type', 'expense')->sum('amount');
             return view('admin.home', compact('title','income','expense'));
         } 
     }

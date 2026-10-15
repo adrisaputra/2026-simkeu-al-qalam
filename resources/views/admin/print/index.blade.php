@@ -29,8 +29,9 @@
                                                 document.getElementById('show_recap').style.display = 'none'; 
                                                 document.getElementById('show_month').style.display = 'none'; 
                                                 document.getElementById('show_year').style.display = 'none'; 
-                                                document.getElementById('show_classes').style.display = 'none';
+                                                document.getElementById('show_classes').style.display = 'block';
                                                 document.getElementById('show_period').style.display = 'block'; 
+                                                document.getElementById('show_ceklist_type').style.display = 'block'; 
                                             } 
                                             else 
                                             { 
@@ -40,6 +41,7 @@
                                                 document.getElementById('show_year').style.display = 'block';
                                                 document.getElementById('show_classes').style.display = 'none';
                                                 document.getElementById('show_period').style.display = 'none';
+                                                document.getElementById('show_ceklist_type').style.display = 'none';
                                             }"
                                         required>
                                             <option value="">- Jenis Laporan -</option>
@@ -57,7 +59,7 @@
                                 } else { 
                                  document.getElementById('show_classes').style.display = 'none'; 
                                 }">
-                                    <select id="work_unit_id" name="work_unit_id" onchange="" class="form-control form-control-sm">
+                                    <select id="work_unit_id" name="work_unit_id" onchange="getClasses()" class="form-control form-control-sm">
                                         <option value="">- Pilih Jenjang -</option>
                                         @foreach($work_unit as $v)
                                             <option value="{{ $v->id }}">{{ $v->name }}</option>
@@ -66,7 +68,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_classes" style="display: none;">
-                                    <select id="classes" name="classes" class="form-control form-control-sm">
+                                    <select id="classes_id" name="classes_id" class="form-control form-control-sm">
                                         <option value="">- Pilih Kelas -</option>
                                     </select>
                                 </div>
@@ -116,6 +118,13 @@
                                     </select>
                                 </div>
                                 
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_ceklist_type" style="display: none;">
+                                    <select id="ceklist_type" name="ceklist_type" class="form-control form-control-sm">
+                                        <option value="">- Pilih Jenis Ceklist -</option>
+                                        <option value="nominal">Nominal</option>
+                                        <option value="ceklist">Ceklist</option>
+                                    </select>
+                                </div>
                                 <div class="col-xl-10 col-md-12 col-sm-12 col-12" style="margin-top:20px">
                                     <button type="submit" id="excel" class="btn btn-info" data-placement="top" title="Cetak Daftar Pegawai" name="export" value="excel">Cetak</button>
                                 </div>
@@ -132,12 +141,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function getClasses(){
-        work_unit_id = document.getElementById("work_unit").value;
+        work_unit_id = document.getElementById("work_unit_id").value;
         var url = "{{ url('/classes/get') }}";
         $.ajax({
             url: url + "/" + work_unit_id,
             success: function(response){
-                $("#classes").html(response);
+                $("#classes_id").html(response);
             }
         });
         return false;

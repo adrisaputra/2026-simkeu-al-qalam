@@ -284,10 +284,18 @@ class IncomeController extends Controller
                     // =========================
                     $nis = $row[3] ?? null;
 
-                    $studentId = ($nis === null || $nis === '')
-                        ? null
-                        : Student::where('nis', $nis)->value('id');
+                    $studentId = null;
 
+                    if ($nis !== null && trim((string) $nis) !== '') {
+                        $nis = trim((string) $nis);
+
+                        $studentId = Student::where(function ($query) use ($nis) {
+                            $query->where('nis', $nis)
+                                ->orWhere('nisn', $nis)
+                                ->orWhere('nipd', $nis);
+                        })->value('id');
+                    }
+                    
                     // =========================
                     // DETAIL TRANSACTION
                     // =========================
