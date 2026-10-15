@@ -13,9 +13,10 @@ class StudentController extends Controller
 {
     public function index($classes = null)
     {
-        $title = "Siswa";
+        $title = 'Siswa';
         $classes = Crypt::decrypt($classes);
         $classes = Classes::where('id', $classes)->first();
+
         return view('admin.student.index', compact('title', 'classes'));
     }
 
@@ -30,21 +31,22 @@ class StudentController extends Controller
             $student = Student::where('classes_id', $classes->id)->limit(10);
 
             return DataTables::of($student)
-            ->addIndexColumn()
-            ->addColumn('number', function () use (&$counters) {
-                return $counters++;
-            })
-            ->addColumn('action', function ($v) {
-                $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
+                ->addIndexColumn()
+                ->addColumn('number', function () use (&$counters) {
+                    return $counters++;
+                })
+                ->addColumn('action', function ($v) {
+                    $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         </a>';
-                $btn .= '<a href="#" onclick="deleteData('.$v->id.')" id="'.$v->id.'" class="warning confirm" data-toggle="tooltip" data-placement="top" title="Hapus">
+                    $btn .= '<a href="#" onclick="deleteData('.$v->id.')" id="'.$v->id.'" class="warning confirm" data-toggle="tooltip" data-placement="top" title="Hapus">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2 text-danger"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                         </a>';
-                return $btn;
-            })
-            ->rawColumns(['category','action'])
-            ->make(true);
+
+                    return $btn;
+                })
+                ->rawColumns(['category', 'action'])
+                ->make(true);
         }
     }
 
@@ -54,18 +56,18 @@ class StudentController extends Controller
 
             $attributes = [
                 'nis' => 'No. Induk Siswa',
-                'name' => 'Nama Siswa'
+                'name' => 'Nama Siswa',
             ];
 
-            if ($action === "Simpan") {
+            if ($action === 'Simpan') {
                 $rules = [
                     'nis' => 'required|max:255',
-                    'name' => 'required|max:255'
+                    'name' => 'required|max:255',
                 ];
             } else {
                 $rules = [
                     'nis' => 'required|max:255',
-                    'name' => 'required|max:255'
+                    'name' => 'required|max:255',
                 ];
             }
 
@@ -75,22 +77,23 @@ class StudentController extends Controller
         }
     }
 
-    ## Save Student 
+    // # Save Student
     public function store(Request $request)
     {
         if ($request->ajax()) {
 
-            $student = new Student();
+            $student = new Student;
             $student->classes_id = $request->classes_id;
             $student->nis = $request->nis;
             $student->name = $request->name;
             $student->save();
             activity()->log('Create Student Data');
+
             return response()->json(['success' => true, 'message' => 'Tambah Data Berhasil']);
         }
     }
 
-    ## Get Student
+    // # Get Student
     public function edit(Request $request, Student $student)
     {
         if ($request->ajax()) {
@@ -98,7 +101,7 @@ class StudentController extends Controller
         }
     }
 
-    ## Edit Student
+    // # Edit Student
     public function update(Request $request, Student $student)
     {
         if ($request->ajax()) {
@@ -108,29 +111,30 @@ class StudentController extends Controller
             $student->name = $request->name;
             $student->save();
 
-            activity()->log('Edit Student Data With ID = ' . $student->id);
+            activity()->log('Edit Student Data With ID = '.$student->id);
+
             return response()->json(['success' => true, 'message' => 'Ubah Data Berhasil']);
         }
     }
 
-    ## Delete Student
+    // # Delete Student
     public function delete(Request $request, Student $student)
     {
         if ($request->ajax()) {
             $student->delete();
-            activity()->log('Delete Student Data With ID = ' . $student->id);
+            activity()->log('Delete Student Data With ID = '.$student->id);
+
             return response()->json(['success' => true, 'message' => 'Hapus Data Berhasil']);
         }
     }
 
-    
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls'
+            'file' => 'required|mimes:xlsx,xls',
         ]);
 
-        $reader = new Xlsx();
+        $reader = new Xlsx;
         $spreadsheet = $reader->load($request->file('file')->getRealPath());
 
         $StudentImported = 0;
@@ -139,17 +143,41 @@ class StudentController extends Controller
 
         foreach ($data as $index => $row) {
 
-            if ($index == 0) continue;
+            if ($index == 0) {
+                continue;
+            }
 
             if (empty(array_filter($row))) {
                 continue;
             }
 
+            $classes = Classes::where('name', $row[4])->firstOrFail();
+            $data = $row[2] ?? null;
+
+            if ($data && str_contains($data, '/')) {
+                $hasil = explode('/', $data, 2);
+
+                $nisn = trim($hasil[0]);
+                $nis = trim($hasil[1]);
+            } else {
+                $data = trim((string) $data);
+
+                if (strlen($data) > 8) {
+                    $nisn = $data;
+                    $nis  = null;
+                } else {
+                    $nisn = null;
+                    $nis  = $data ?: null;
+                }
+            }
+
             Student::Create(
                 [
-                    'classes_id'          => $request->classes_id,
-                    'nis'       => $row[1] ?? null,
-                    'name'          => $row[2] ?? null
+                    'classes_id' => $classes->id,
+                    'nipd' => $row[1] ?? null,
+                    'nisn' => $nisn ?? null,
+                    'nis' => $nis ?? null,
+                    'name' => $row[3] ?? null,
                 ]
             );
 
@@ -161,5 +189,4 @@ class StudentController extends Controller
             "Student: {$StudentImported} data berhasil diimport."
         );
     }
-
 }

@@ -3,131 +3,175 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
+use App\Models\Classes;
 use App\Models\Employee;
 use App\Models\EmployeeReport;
 use App\Models\Transaction;
 use App\Models\WorkUnit;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PrintController extends Controller
 {
-    ## Show Data
+    // # Show Data
     public function index()
     {
-        $title = "Laporan";
-        return view('admin.print.index', compact('title'));
+        $title = 'Laporan';
+        $work_unit = WorkUnit::whereIn('id', [3, 4, 5, 6])->get();
+
+        return view('admin.print.index', compact('title', 'work_unit'));
     }
-    
+
     public function print(Request $request)
     {
         if ($request->category_report == 1) {
-            return $this->print_recap_report($request);
-        } else if ($request->category_report == 2) {
+            return $this->print_checklist_report($request);
+        } elseif ($request->category_report == 2) {
             return $this->print_recap_daily($request);
-        } else if ($request->category_report == 3) {
+        } elseif ($request->category_report == 3) {
             return $this->print_kpi_monthly($request);
-        } 
+        }
     }
-    
-    public function print_recap_report(Request $request)
+
+    public function print_checklist_report(Request $request)
     {
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->setActiveSheetIndex(0);
-        $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet;
 
-        if ($request->work_unit_id) {
-            $work_unit = WorkUnit::where('id', $request->work_unit_id)->first();
-            $employee = Employee::where('work_unit_id', $request->work_unit_id)->orderBy('name', 'ASC')->get();
-            
-        } else {
-            $work_unit = NULL;
-            $employee = Employee::orderBy('name', 'ASC')->get();
-        }
+        $period = $request->period;
+        [$first_year, $second_year] = explode(' - ', $period);
+        
+        $work_unit = WorkUnit::where('id', $request->work_unit_id)->first();
+        $classes = Classes::with(['students' => function ($query) {
+            $query->orderBy('name', 'ASC');
+        }])
+            ->where('work_unit_id', $request->work_unit_id)
+            ->orderBy('name', 'ASC')
+            ->get();
 
-        // Atur lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(5);   // No
-        $sheet->getColumnDimension('B')->setWidth(40);  // Nama
-        $sheet->getColumnDimension('C')->setWidth(15);  // Nilai Rapor
+        $sheetTitles = [];
 
-        if ($work_unit) {
-            $sheet->mergeCells('A1:C1');
-            $sheet->mergeCells('A2:C2');
-            $sheet->mergeCells('A3:C3');
-            $sheet->setCellValue('A1', 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI');
+        foreach ($classes as $index => $class) {
+            $sheet = $index === 0 ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
+            $sheetTitle = str_replace(['\\', '/', '?', '*', '[', ']', ':'], '-', trim($class->name));
+            $sheetTitle = trim(mb_substr($sheetTitle, 0, 31), " '");
+
+            if ($sheetTitle === '') {
+                $sheetTitle = 'Kelas '.$class->id;
+            }
+
+            $baseTitle = $sheetTitle;
+            $suffix = 2;
+
+            while (isset($sheetTitles[mb_strtolower($sheetTitle)])) {
+                $ending = ' ('.$suffix++.')';
+                $sheetTitle = mb_substr($baseTitle, 0, 31 - mb_strlen($ending)).$ending;
+            }
+
+            $sheetTitles[mb_strtolower($sheetTitle)] = true;
+            $sheet->setTitle($sheetTitle);
+
+            // Atur lebar kolom
+            $sheet->getColumnDimension('A')->setWidth(5);   // No
+            $sheet->getColumnDimension('B')->setWidth(40);  // Nama
+            $sheet->getColumnDimension('C')->setWidth(15);  // Kelas
+
+            $sheet->mergeCells('A1:AL1');
+            $sheet->mergeCells('A2:AL2');
+            $sheet->mergeCells('A3:AL3');
+            $sheet->setCellValue('A1', 'DATA CEKLIS YAYASAN PENDIDIKAN ALQALAM KENDARI');
             $sheet->setCellValue('A2', strtoupper($work_unit->name));
-            $sheet->setCellValue('A3', 'BULAN '.$request->month.' TAHUN '.$request->year);
-            $sheet->getStyle('A1:C3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:C3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-            $sheet->getStyle('A1:C3')->getFont()->setBold(true);
-            $sheet->getStyle('A1:C3')->getAlignment()->setWrapText(true);
-        } else {
-            $sheet->mergeCells('A1:C1');
-            $sheet->mergeCells('A2:C2');
-            $sheet->setCellValue('A1', 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI');
-            $sheet->setCellValue('A2', 'BULAN '.$request->month.' TAHUN '.$request->year);
-            $sheet->getStyle('A1:C2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:C2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-            $sheet->getStyle('A1:C2')->getFont()->setBold(true);
-            $sheet->getStyle('A1:C2')->getAlignment()->setWrapText(true);
+            $sheet->setCellValue('A3', 'BULAN JULI - JUNI TAHUN '.$first_year.' - '.$second_year);
+            $sheet->getStyle('A1:AL3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1:AL3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A1:AL3')->getFont()->setBold(true);
+            $sheet->getStyle('A1:AL3')->getAlignment()->setWrapText(true);
+
+            // Header tabel
+            $sheet->setCellValue('A5', 'NO');$sheet->mergeCells('A5:A7');
+            $sheet->setCellValue('B5', 'NAMA SISWA');$sheet->mergeCells('B5:B7');
+            $sheet->setCellValue('C5', 'KELAS');$sheet->mergeCells('C5:C7');
+
+            $sheet->setCellValue('D5', 'SPP (Juli s.d Desember '.$first_year.')');$sheet->mergeCells('D5:I5');
+            $sheet->setCellValue('J5', 'CATERING (Juli s.d Desember '.$first_year.')');$sheet->mergeCells('J5:O5');
+            $sheet->setCellValue('P5', 'SPP (Januari s.d Juni '.$second_year.')');$sheet->mergeCells('P5:U5');
+            $sheet->setCellValue('V5', 'CATERING (Januari s.d Juni '.$second_year.')');$sheet->mergeCells('V5:AA5');
+
+            $sheet->setCellValue('D6', 'SYARAT PTS');$sheet->mergeCells('D6:F6');
+            $sheet->setCellValue('G6', 'SYARAT PAS');$sheet->mergeCells('G6:I6');
+            $sheet->setCellValue('J6', 'SYARAT PTS');$sheet->mergeCells('J6:L6');
+            $sheet->setCellValue('M6', 'SYARAT PAS');$sheet->mergeCells('M6:O6');
+            $sheet->setCellValue('P6', 'SYARAT PTS');$sheet->mergeCells('P6:R6');
+            $sheet->setCellValue('S6', 'SYARAT PAS');$sheet->mergeCells('S6:U6');
+            $sheet->setCellValue('V6', 'SYARAT PTS');$sheet->mergeCells('V6:X6');
+            $sheet->setCellValue('Y6', 'SYARAT PAS');$sheet->mergeCells('Y6:AA6');
+
+            $sheet->setCellValue('D7', '7');
+            $sheet->setCellValue('E7', '8');
+            $sheet->setCellValue('F7', '9');
+            $sheet->setCellValue('G7', '10');
+            $sheet->setCellValue('H7', '11');
+            $sheet->setCellValue('I7', '12');
+            $sheet->setCellValue('J7', '7');
+            $sheet->setCellValue('K7', '8');
+            $sheet->setCellValue('L7', '9');
+            $sheet->setCellValue('M7', '10');
+            $sheet->setCellValue('N7', '11');
+            $sheet->setCellValue('O7', '12');
+            $sheet->setCellValue('P7', '1');
+            $sheet->setCellValue('Q7', '2');
+            $sheet->setCellValue('R7', '3');
+            $sheet->setCellValue('S7', '4');
+            $sheet->setCellValue('T7', '5');
+            $sheet->setCellValue('U7', '6');
+            $sheet->setCellValue('V7', '1');
+            $sheet->setCellValue('W7', '2');
+            $sheet->setCellValue('X7', '3');
+            $sheet->setCellValue('Y7', '4');
+            $sheet->setCellValue('Z7', '5');
+            $sheet->setCellValue('AA7', '6');
+
+            $sheet->getStyle('A5:AL5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A5:AL5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A5:AL5')->getFont()->setBold(true);
+            $sheet->getStyle('A5:AL5')->getAlignment()->setWrapText(true);
+
+            $rows = 8;
+            $no = 1;
+
+            foreach ($class->students as $student) {
+                $sheet->setCellValue('A'.$rows, $no++);
+                $sheet->setCellValue('B'.$rows, $student->name);
+                $sheet->setCellValue('C'.$rows, $class->name);
+                $rows++;
+            }
+
+            // Border dan alignment
+            $sheet->getStyle('A5:AA'.($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle('A5:A'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('C5:AA'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         }
-
-        // Header tabel
-        $sheet->setCellValue('A5', 'No');
-        $sheet->setCellValue('B5', 'Nama');
-        $sheet->setCellValue('C5', 'Nilai Rapor');
-
-        $sheet->getStyle('A5:H5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A5:H5')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A5:H5')->getFont()->setBold(true);
-        $sheet->getStyle('A5:H5')->getAlignment()->setWrapText(true);
-
-        $rows = 6;
-        $no = 1;
-
-        foreach ($employee as $v) {
-
-            $employee_report = EmployeeReport::
-                    whereHas('employee_report_period', function ($query) use ($v, $request) {
-                        $query->where('employee_id', $v->id)
-                        ->whereMonth('date', $request->month)
-                        ->whereyear('date', $request->year)
-                        ->whereHas('employee_report_category');
-                    })->sum('value');
-            
-            $sheet->setCellValue('A' . $rows, $no++);
-            $sheet->setCellValue('B' . $rows, $v->name);
-            $sheet->setCellValue('C' . $rows, $employee_report);
-            $rows++;
-        }
-
-        // Border dan alignment
-        $sheet->getStyle('A5:C' . ($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $sheet->getStyle('A5:A' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('C5:C' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         $type = 'xlsx';
-        if ($work_unit) {
-            $fileName = "REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI (" . strtoupper($work_unit->name) . ") BULAN ".$request->month." TAHUN ".$request->year.".". $type;
-        } else {
-            $fileName = "REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI BULAN ".$request->month." TAHUN ".$request->year." .". $type;
-        }
+        $fileName = 'DATA CEKLIS YAYASAN PENDIDIKAN ALQALAM KENDARI ('.strtoupper($work_unit->name).') BULAN JULI - JUNI TAHUN '.$request->year.'.'.$type;
 
         if ($type == 'xlsx') {
             $writer = new Xlsx($spreadsheet);
-        } else if ($type == 'xls') {
+        } elseif ($type == 'xls') {
             $writer = new Xls($spreadsheet);
         }
-        $writer->save("public/upload/report/" . $fileName);
-        header("Content-Type: application/vnd.ms-excel");
-        return redirect(url('/') . "/public/upload/report/" . $fileName);
+        $writer->save('public/upload/report/'.$fileName);
+        header('Content-Type: application/vnd.ms-excel');
+
+        return redirect(url('/').'/public/upload/report/'.$fileName);
     }
 
     public function print_recap_daily(Request $request)
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $spreadsheet->setActiveSheetIndex(0);
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -145,8 +189,8 @@ class PrintController extends Controller
         $sheet->mergeCells('A2:I2');
         $sheet->setCellValue('A1', 'LAPORAN KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI');
         $sheet->setCellValue('A2', 'BULAN '.$request->month.' TAHUN '.$request->year);
-        $sheet->getStyle('A1:I2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1:I2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:I2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:I2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A1:I2')->getFont()->setBold(true);
         $sheet->getStyle('A1:I2')->getAlignment()->setWrapText(true);
 
@@ -161,8 +205,8 @@ class PrintController extends Controller
         $sheet->setCellValue('H5', 'Saldo');
         $sheet->setCellValue('I5', 'Keterangan');
 
-        $sheet->getStyle('A5:I5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A5:I5')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A5:I5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:I5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A5:I5')->getFont()->setBold(true);
         $sheet->getStyle('A5:I5')->getAlignment()->setWrapText(true);
 
@@ -178,12 +222,12 @@ class PrintController extends Controller
         $openingBalance = $openingDebit - $openingCredit;
 
         $sheet->setCellValue('A6', 1);
-        $sheet->setCellValue('C6', Helpers::date_indo_full($periodStart . ' -1 day'));
+        $sheet->setCellValue('C6', Helpers::date_indo_full($periodStart.' -1 day'));
         $sheet->setCellValue('E6', 'Saldo bulan sebelumnya');
         $sheet->setCellValue('H6', $openingBalance);
         $sheet->getStyle('F6:H6')->getNumberFormat()->setFormatCode('#,##0');
 
-        $transaction = Transaction::with(['transaction_code', 'desc_category','user'])
+        $transaction = Transaction::with(['transaction_code', 'desc_category', 'user'])
             ->whereMonth('date', $request->month)
             ->whereYear('date', $request->year)
             ->orderBy('date', 'ASC')
@@ -194,17 +238,17 @@ class PrintController extends Controller
             $debit = $v->type === 'income' ? (float) $v->amount : null;
             $credit = $v->type === 'expense' ? (float) $v->amount : null;
 
-            $sheet->setCellValue('A' . $rows, $no++);
-            $sheet->setCellValue('B' . $rows, $v->transaction_code?->code ?? '');
-            $sheet->setCellValue('C' . $rows, Helpers::date_indo_full($v->date));
-            $sheet->setCellValue('D' . $rows, $v->user?->name ?? '');
-            $sheet->setCellValue('E' . $rows, $v->desc ?? '');
-            $sheet->setCellValue('F' . $rows, $debit);
-            $sheet->setCellValue('G' . $rows, $credit);
-            $balanceFormula = '=H' . ($rows - 1) . '+F' . $rows . '-G' . $rows;
-            $sheet->setCellValue('H' . $rows, $balanceFormula);
-            $sheet->setCellValue('I' . $rows, '');
-            $sheet->getStyle('F' . $rows . ':H' . $rows)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->setCellValue('A'.$rows, $no++);
+            $sheet->setCellValue('B'.$rows, $v->transaction_code?->code ?? '');
+            $sheet->setCellValue('C'.$rows, Helpers::date_indo_full($v->date));
+            $sheet->setCellValue('D'.$rows, $v->user?->name ?? '');
+            $sheet->setCellValue('E'.$rows, $v->desc ?? '');
+            $sheet->setCellValue('F'.$rows, $debit);
+            $sheet->setCellValue('G'.$rows, $credit);
+            $balanceFormula = '=H'.($rows - 1).'+F'.$rows.'-G'.$rows;
+            $sheet->setCellValue('H'.$rows, $balanceFormula);
+            $sheet->setCellValue('I'.$rows, '');
+            $sheet->getStyle('F'.$rows.':H'.$rows)->getNumberFormat()->setFormatCode('#,##0');
             $rows++;
         }
 
@@ -217,39 +261,40 @@ class PrintController extends Controller
         // $sheet->setCellValue('H' . $totalRow, '=SUM(H' . $sumStartRow . ':H' . $sumEndRow . ')');
         // $sheet->getStyle('F' . $totalRow . ':H' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
 
-        $sheet->getStyle('A5:I' . ($totalRow - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $sheet->getStyle('A5:I' . ($totalRow - 1))->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A5:I' . ($totalRow - 1))->getAlignment()->setWrapText(true);
-        $sheet->getStyle('A5:A' . ($totalRow - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('B5:B' . ($totalRow - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F5:H' . ($totalRow - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A5:I'.($totalRow - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setWrapText(true);
+        $sheet->getStyle('A5:A'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B5:B'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F5:H'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         // $sheet->getStyle('E' . $totalRow . ':H' . $totalRow)->getFont()->setBold(true);
 
         $type = 'xlsx';
-        $fileName = "REKAP KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI BULAN ".$request->month." TAHUN ".$request->year.".".$type;
+        $fileName = 'REKAP KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI BULAN '.$request->month.' TAHUN '.$request->year.'.'.$type;
 
         if ($type == 'xlsx') {
             $writer = new Xlsx($spreadsheet);
-        } else if ($type == 'xls') {
+        } elseif ($type == 'xls') {
             $writer = new Xls($spreadsheet);
         }
-        $writer->save("public/upload/report/" . $fileName);
-        header("Content-Type: application/vnd.ms-excel");
-        return redirect(url('/') . "/public/upload/report/" . $fileName);
+        $writer->save('public/upload/report/'.$fileName);
+        header('Content-Type: application/vnd.ms-excel');
+
+        return redirect(url('/').'/public/upload/report/'.$fileName);
     }
 
     public function print_kpi_yearly(Request $request)
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $spreadsheet->setActiveSheetIndex(0);
         $sheet = $spreadsheet->getActiveSheet();
 
         if ($request->work_unit_id) {
             $work_unit = WorkUnit::where('id', $request->work_unit_id)->first();
             $employee = Employee::where('work_unit_id', $request->work_unit_id)->orderBy('name', 'ASC')->get();
-            
+
         } else {
-            $work_unit = NULL;
+            $work_unit = null;
             $employee = Employee::orderBy('name', 'ASC')->get();
         }
 
@@ -285,8 +330,8 @@ class PrintController extends Controller
             $sheet->setCellValue('A1', 'REKAP BULANAN PENILAIAN KPI YAYASAN PENDIDIKAN ALQALAM KENDARI');
             $sheet->setCellValue('A2', strtoupper($work_unit->name));
             $sheet->setCellValue('A3', 'TAHUN '.$request->year);
-            $sheet->getStyle('A1:U3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:U3')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A1:U3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1:U3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $sheet->getStyle('A1:U3')->getFont()->setBold(true);
             $sheet->getStyle('A1:U3')->getAlignment()->setWrapText(true);
         } else {
@@ -294,8 +339,8 @@ class PrintController extends Controller
             $sheet->mergeCells('A2:U2');
             $sheet->setCellValue('A1', 'REKAP BULANAN PENILAIAN KPI YAYASAN PENDIDIKAN ALQALAM KENDARI');
             $sheet->setCellValue('A2', 'TAHUN '.$request->year);
-            $sheet->getStyle('A1:U2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:U2')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A1:U2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1:U2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
             $sheet->getStyle('A1:U2')->getFont()->setBold(true);
             $sheet->getStyle('A1:U2')->getAlignment()->setWrapText(true);
         }
@@ -323,8 +368,8 @@ class PrintController extends Controller
         $sheet->setCellValue('T5', 'Besaran Tukin');
         $sheet->setCellValue('U5', 'Tukin Diterima');
 
-        $sheet->getStyle('A5:U5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A5:U5')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A5:U5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:U5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A5:U5')->getFont()->setBold(true);
         $sheet->getStyle('A5:U5')->getAlignment()->setWrapText(true);
 
@@ -333,52 +378,50 @@ class PrintController extends Controller
 
         foreach ($employee as $v) {
 
-            $employee_report = EmployeeReport::
-                    whereHas('employee_report_period', function ($query) use ($v, $request) {
-                        $query->where('employee_id', $v->id)
-                        ->whereMonth('date', $request->month)
-                        ->whereyear('date', $request->year);
-                    })->sum('value');
-            
-            $employee_kpi = EmployeeReport::
-                    whereHas('employee_report_period', function ($query) use ($v, $request) {
-                        $query->where('employee_id', $v->id)
-                        ->whereMonth('date', $request->month)
-                        ->whereyear('date', $request->year);
-                    })->sum('value');
-            
-            $sheet->setCellValue('A' . $rows, $no++);
-            $sheet->setCellValue('B' . $rows, $v->name);
-            $sheet->setCellValue('C' . $rows, $employee_report);
-            $sheet->setCellValue('Q' . $rows, '=AVERAGE(E'.$rows.':P'.$rows.')');
-            $sheet->setCellValue('R' . $rows, '=IF(Q' . $rows . '>=90,"Sangat Baik",IF(Q' . $rows . '>=80,"Baik",IF(Q' . $rows . '>=70,"Cukup",IF(Q' . $rows . '>=60,"Kurang","Perlu Pembinaan"))))');
-            $sheet->setCellValue('S' . $rows, '=IF(Q' . $rows . '>=90,100%,IF(Q' . $rows . '>=80,90%,IF(Q' . $rows . '>=70,80%,IF(Q' . $rows . '>=60,70%,IF(Q' . $rows . '>=50,60%,IF(Q' . $rows . '>=40,50%,IF(Q' . $rows . '>=30,40%,30%)))))))');
-            $sheet->setCellValue('T' . $rows, '200000');
-            $sheet->setCellValue('U' . $rows,'=T' . $rows . '*S' . $rows);
-            $sheet->getStyle('T' . $rows . ':U' . $rows)->getNumberFormat()->setFormatCode('#,##0');
+            $employee_report = EmployeeReport::whereHas('employee_report_period', function ($query) use ($v, $request) {
+                $query->where('employee_id', $v->id)
+                    ->whereMonth('date', $request->month)
+                    ->whereyear('date', $request->year);
+            })->sum('value');
+
+            $employee_kpi = EmployeeReport::whereHas('employee_report_period', function ($query) use ($v, $request) {
+                $query->where('employee_id', $v->id)
+                    ->whereMonth('date', $request->month)
+                    ->whereyear('date', $request->year);
+            })->sum('value');
+
+            $sheet->setCellValue('A'.$rows, $no++);
+            $sheet->setCellValue('B'.$rows, $v->name);
+            $sheet->setCellValue('C'.$rows, $employee_report);
+            $sheet->setCellValue('Q'.$rows, '=AVERAGE(E'.$rows.':P'.$rows.')');
+            $sheet->setCellValue('R'.$rows, '=IF(Q'.$rows.'>=90,"Sangat Baik",IF(Q'.$rows.'>=80,"Baik",IF(Q'.$rows.'>=70,"Cukup",IF(Q'.$rows.'>=60,"Kurang","Perlu Pembinaan"))))');
+            $sheet->setCellValue('S'.$rows, '=IF(Q'.$rows.'>=90,100%,IF(Q'.$rows.'>=80,90%,IF(Q'.$rows.'>=70,80%,IF(Q'.$rows.'>=60,70%,IF(Q'.$rows.'>=50,60%,IF(Q'.$rows.'>=40,50%,IF(Q'.$rows.'>=30,40%,30%)))))))');
+            $sheet->setCellValue('T'.$rows, '200000');
+            $sheet->setCellValue('U'.$rows, '=T'.$rows.'*S'.$rows);
+            $sheet->getStyle('T'.$rows.':U'.$rows)->getNumberFormat()->setFormatCode('#,##0');
             $rows++;
         }
 
         // Border dan alignment
-        $sheet->getStyle('A5:U' . ($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-        $sheet->getStyle('A5:A' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('U5:U' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:U'.($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A5:A'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('U5:U'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $type = 'xlsx';
         if ($work_unit) {
-            $fileName = "REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI (" . strtoupper($work_unit->name) . ") TAHUN ".$request->year.".". $type;
+            $fileName = 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI ('.strtoupper($work_unit->name).') TAHUN '.$request->year.'.'.$type;
         } else {
-            $fileName = "REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI TAHUN ".$request->year." .". $type;
+            $fileName = 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI TAHUN '.$request->year.' .'.$type;
         }
 
         if ($type == 'xlsx') {
             $writer = new Xlsx($spreadsheet);
-        } else if ($type == 'xls') {
+        } elseif ($type == 'xls') {
             $writer = new Xls($spreadsheet);
         }
-        $writer->save("public/upload/report/" . $fileName);
-        header("Content-Type: application/vnd.ms-excel");
-        return redirect(url('/') . "/public/upload/report/" . $fileName);
-    }
+        $writer->save('public/upload/report/'.$fileName);
+        header('Content-Type: application/vnd.ms-excel');
 
+        return redirect(url('/').'/public/upload/report/'.$fileName);
+    }
 }

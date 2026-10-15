@@ -21,31 +21,58 @@
                             <div class="row">
                                 
                                 <div class="col-xl-3 col-md-12 col-sm-12 col-12">
-                                    <div class="form-group" style="margin-bottom: 0rem;">
-                                        <select class="form-control form-control-sm" id="category_report" name="category_report" required>
+                                    <div class="form-group" style="margin-bottom: 1rem;">
+                                        <select class="form-control form-control-sm" id="category_report" name="category_report" 
+                                            onchange="if(this.value == '1') 
+                                            { 
+                                                document.getElementById('show_work_unit').style.display = 'block'; 
+                                                document.getElementById('show_recap').style.display = 'none'; 
+                                                document.getElementById('show_month').style.display = 'none'; 
+                                                document.getElementById('show_year').style.display = 'none'; 
+                                                document.getElementById('show_classes').style.display = 'none';
+                                                document.getElementById('show_period').style.display = 'block'; 
+                                            } 
+                                            else 
+                                            { 
+                                                document.getElementById('show_work_unit').style.display = 'none';
+                                                document.getElementById('show_recap').style.display = 'block';
+                                                document.getElementById('show_month').style.display = 'block';
+                                                document.getElementById('show_year').style.display = 'block';
+                                                document.getElementById('show_classes').style.display = 'none';
+                                                document.getElementById('show_period').style.display = 'none';
+                                            }"
+                                        required>
                                             <option value="">- Jenis Laporan -</option>
                                             <option value="1">Rekap Data Ceklis</option>
                                             <option value="2">Rekap Keuangan Al Qalam</option>
                                         </select>
                                     </div>
                                 </div>
-
-                                {{--<div class="col-xl-3 col-md-12 col-sm-12 col-12">
-                                    <div class="form-group" style="margin-bottom: 0rem;">
-                                        <select class="form-control form-control-sm" name="work_unit_id">
-                                            
-                                            @if(Auth::user()->group->name == 'Admin KPI')
-                                                <option value="">- Pilih Unit Kerja -</option>
-                                            @endif
-                                            @foreach($work_unit as $v)
-                                            <option value="{{ $v->id }}">{{ $v->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>--}}
                                 
-                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_month">
-                                    <select id="month" name="month" class="form-control form-control-sm">
+                                <div class="col-xl-9 col-md-12 col-sm-12 col-12"></div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_work_unit" style="display: none;" 
+                                onchange="if(this.value != '') { 
+                                    getClasses(); document.getElementById('show_classes').style.display = 'block'; 
+                                } else { 
+                                 document.getElementById('show_classes').style.display = 'none'; 
+                                }">
+                                    <select id="work_unit_id" name="work_unit_id" onchange="" class="form-control form-control-sm">
+                                        <option value="">- Pilih Jenjang -</option>
+                                        @foreach($work_unit as $v)
+                                            <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_classes" style="display: none;">
+                                    <select id="classes" name="classes" class="form-control form-control-sm">
+                                        <option value="">- Pilih Kelas -</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_recap" style="display: none;">
+                                    <select id="recap_type" name="recap_type" class="form-control form-control-sm">
                                         <option value="">- Pilih Jenis Rekap -</option>
                                         <option value="1">Catatan Harian</option>
                                         <option value="2">Rekap Bulanan</option>
@@ -54,7 +81,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_month">
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_month" style="display: none;">
                                     <select id="month" name="month" class="form-control form-control-sm">
                                         <option value="01" @if(date('m') == '01') selected @endif>Januari</option>
                                         <option value="02" @if(date('m') == '02') selected @endif>Februari</option>
@@ -71,10 +98,20 @@
                                     </select>
                                 </div>
 
-                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_year">
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_year" style="display: none;">
                                     <select id="year" name="year" class="form-control form-control-sm">
                                         @for($i=2026;$i<=date('Y');$i++)
                                             <option value="{{ $i }}" @if(date('Y')==$i) selected @endif>{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_period" style="display: none;">
+                                    <select id="period" name="period" class="form-control form-control-sm">
+                                        @for($i = 2026; $i <= date('Y'); $i++)
+                                            <option value="{{ $i }} - {{ $i + 1 }}" @selected(date('Y') == $i)>
+                                                {{ $i }} - {{ $i + 1 }}
+                                            </option>
                                         @endfor
                                     </select>
                                 </div>
@@ -90,3 +127,19 @@
 
         </div>
         @endsection
+
+        
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function getClasses(){
+        work_unit_id = document.getElementById("work_unit").value;
+        var url = "{{ url('/classes/get') }}";
+        $.ajax({
+            url: url + "/" + work_unit_id,
+            success: function(response){
+                $("#classes").html(response);
+            }
+        });
+        return false;
+    }
+</script>
