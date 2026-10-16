@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\DescCategoryController;
 use App\Http\Controllers\ExpenseController;
@@ -76,6 +77,15 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/classes/edit/{classes}', [ClassesController::class, 'update']);
     Route::get('/classes/delete/{classes}', [ClassesController::class, 'delete']);
     Route::get('/classes/get/{work_unit}', [ClassesController::class, 'get']);
+
+    // # Account
+    Route::get('/account', [AccountController::class, 'index'])->name('account.index');
+    Route::get('/account/list', [AccountController::class, 'get_account_index'])->name('account.list');
+    Route::post('/account/store', [AccountController::class, 'store']);
+    Route::post('/account/validate/{action}', [AccountController::class, 'validate']);
+    Route::get('/account/edit/{account}', [AccountController::class, 'edit']);
+    Route::put('/account/edit/{account}', [AccountController::class, 'update']);
+    Route::delete('/account/delete/{account}', [AccountController::class, 'delete']);
 
     // # Student
     Route::get('/student/{classes}', [StudentController::class, 'index'])->name('student.index');

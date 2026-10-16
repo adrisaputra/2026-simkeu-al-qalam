@@ -112,13 +112,13 @@
 				{data: 'id', name: 'id', visible: false},
 				{data: 'number', name: 'number'}, // Kolom nomor urut
 				{data: 'display_transaction_code', name: 'display_transaction_code'}, // Kolom kode transaksi
-				{data: 'display_date', name: 'display_date'}, // Kolom tanggal
+				{data: 'display_date', name: 'date'}, // Kolom tanggal
 				{data: 'desc', name: 'desc'}, // Kolom u raian
 				{data: 'display_amount', name: 'amount'}, // Kolom jumlah
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [
-				[0, 'asc'] // Mengatur pengurutan kolom pertama (id) secara descending
+				[3, 'asc'] // Mengatur pengurutan kolom pertama (id) secara descending
 			],
             paging: true,
             pageLength: 50,

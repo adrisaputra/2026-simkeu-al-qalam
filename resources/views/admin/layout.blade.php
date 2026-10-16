@@ -257,6 +257,15 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
+                        <li class="menu @if(Request::segment(1)=="account") active @endif">
+                            <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Kode Akun</span>
+                                </div>
+                            </a>
+                        </li>
+
                         <li class="menu @if(Request::segment(1)==" log") active @endif">
                             <a href="{{ url('log') }}" @if(Request::segment(1)=="log" ) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
