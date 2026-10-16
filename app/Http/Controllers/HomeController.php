@@ -13,7 +13,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $title = "Dashboard";
-        if(Auth::user()->group->name == 'Admin Finance'){
+        if(in_array(Auth::user()->group->name,['Admin Finance','Revenue Treasurer','Expenditure Treasurer'])){
             $income = Transaction::whereMonth('date', now()->month)->where('type', 'income')->sum('amount');
             $expense = Transaction::whereMonth('date', now()->month)->where('type', 'expense')->sum('amount');
             return view('admin.home', compact('title','income','expense'));

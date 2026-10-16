@@ -54,7 +54,7 @@ class LoginController extends Controller
         $user = User::whereHas('group.group_application', function($query){
                 $query->where('application_id',3);
             })
-            ->whereIn('group_id',[6])
+            ->whereIn('group_id',[6,7,8])
             ->where(function ($query) use ($request) {
                 $query->where('name', $request->name)
                     ->orWhere('email', $request->name);

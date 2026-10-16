@@ -193,26 +193,30 @@ $setting = \App\Helpers\Helpers::setting();
                         </a>
                     </li>
 
-                    @if(in_array(Auth::user()->group->name, ['Admin Finance']))
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Revenue Treasurer']))
+                            <li class="menu @if(Request::segment(1)=="income") active @endif">
+                                <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                    <div class="">
+                                        <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <span>Penerimaan</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endif
+
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Expenditure Treasurer']))
+                            <li class="menu @if(Request::segment(1)=="expense") active @endif">
+                                <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                    <div class="">
+                                        <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <span>Pengeluaran</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endif
+
+                        @if(Auth::user()->group->name == 'Admin Finance')
                         
-                        <li class="menu @if(Request::segment(1)=="income") active @endif">
-                            <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Penerimaan</span>
-                                </div>
-                            </a>
-                        </li>
-
-                        <li class="menu @if(Request::segment(1)=="expense") active @endif">
-                            <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Pengeluaran</span>
-                                </div>
-                            </a>
-                        </li>
-
                         <li class="menu @if(Request::segment(1)==" print") active @endif">
                             <a href="{{ url('print') }}" @if(Request::segment(1)=="print" ) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
@@ -222,8 +226,6 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
-                        @if(Auth::user()->group->name == 'Admin Finance')
-                        
                         <li class="menu menu-heading">
                             <div class="heading"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -239,23 +241,14 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
-                        <li class="menu @if(Request::segment(1)==" desc_category") active @endif">
+                        {{--<li class="menu @if(Request::segment(1)==" desc_category") active @endif">
                             <a href="{{ url('desc_category') }}" @if(in_array(Request::segment(1), ['desc_category'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Kategori Uraian</span>
                                 </div>
                             </a>
-                        </li>
-
-                        <li class="menu @if(Request::segment(1)==" transaction_code") active @endif">
-                            <a href="{{ url('transaction_code') }}" @if(in_array(Request::segment(1), ['transaction_code'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Kode Transaksi</span>
-                                </div>
-                            </a>
-                        </li>
+                        </li>--}}
 
                         <li class="menu @if(Request::segment(1)=="account") active @endif">
                             <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account'])) aria-expanded="true" @endif class="dropdown-toggle">
@@ -285,7 +278,6 @@ $setting = \App\Helpers\Helpers::setting();
                         </li>
                         @endif
 
-                    @endif
                 </ul>
             </nav>
         </div>

@@ -51,6 +51,8 @@
 														<th>Tanggal</th>
 														<th>Waktu</th>
 														<th>Siswa</th>
+														<th>Jenjang</th>
+														<th>Kelas</th>
 														<th>Jumlah</th>
 													</tr>
 												</thead>
@@ -209,6 +211,8 @@
                 {data: 'display_date', name: 'date'},
                 {data: 'time', name: 'time', defaultContent: '-'},
                 {data: 'student_name', name: 'student.name', orderable: false, searchable: false},
+                {data: 'work_unit_name', name: 'work_unit_name', orderable: false, searchable: false},
+                {data: 'class_name', name: 'class_name', orderable: false, searchable: false},
                 {data: 'display_amount', name: 'amount', orderable: false, searchable: false}
             ],
             order: [[1, 'asc']],

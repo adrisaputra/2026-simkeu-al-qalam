@@ -38,29 +38,12 @@ Route::get('/', [LoginController::class, 'index']);
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout']);
 
-Route::middleware(['role:Admin Finance'])->group(function () {
+Route::middleware(['role:Admin Finance,Revenue Treasurer,Expenditure Treasurer'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index']);
+});
 
-    // # Income
-    Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
-    Route::get('/income/list', [IncomeController::class, 'get_income_index'])->name('income.list');
-    Route::get('/income/{income}/transaction-banks', [IncomeController::class, 'get_bank_transactions'])->name('income.transaction_banks');
-    Route::post('/income/store', [IncomeController::class, 'store']);
-    Route::post('/income/validate/{action}', [IncomeController::class, 'validate']);
-    Route::get('/income/edit/{income}', [IncomeController::class, 'edit']);
-    Route::put('/income/edit/{income}', [IncomeController::class, 'update']);
-    Route::get('/income/delete/{income}', [IncomeController::class, 'delete']);
-    Route::post('/income/import', [IncomeController::class, 'import']);
-
-    // # Expense
-    Route::get('/expense', [ExpenseController::class, 'index'])->name('expense.index');
-    Route::get('/expense/list', [ExpenseController::class, 'get_expense_index'])->name('expense.list');
-    Route::post('/expense/store', [ExpenseController::class, 'store']);
-    Route::post('/expense/validate/{action}', [ExpenseController::class, 'validate']);
-    Route::get('/expense/edit/{expense}', [ExpenseController::class, 'edit']);
-    Route::put('/expense/edit/{expense}', [ExpenseController::class, 'update']);
-    Route::get('/expense/delete/{expense}', [ExpenseController::class, 'delete']);
-
+Route::middleware(['role:Admin Finance'])->group(function () {
+    
     // # Print
     Route::get('/print', [PrintController::class, 'index'])->name('print.index');
     Route::post('/print', [PrintController::class, 'print']);
@@ -143,5 +126,34 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/setting', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/setting/validate', [SettingController::class, 'validate']);
     Route::put('/setting/edit/{setting}', [SettingController::class, 'update']);
+
+});
+
+Route::middleware(['role:Admin Finance,Revenue Treasurer'])->group(function () {
+
+    // # Income
+    Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
+    Route::get('/income/list', [IncomeController::class, 'get_income_index'])->name('income.list');
+    Route::get('/income/{income}/transaction-banks', [IncomeController::class, 'get_bank_transactions'])->name('income.transaction_banks');
+    Route::post('/income/store', [IncomeController::class, 'store']);
+    Route::post('/income/validate/{action}', [IncomeController::class, 'validate']);
+    Route::get('/income/edit/{income}', [IncomeController::class, 'edit']);
+    Route::put('/income/edit/{income}', [IncomeController::class, 'update']);
+    Route::get('/income/delete/{income}', [IncomeController::class, 'delete']);
+    Route::post('/income/import', [IncomeController::class, 'import']);
+
+});
+
+
+Route::middleware(['role:Admin Finance,Expenditure Treasurer'])->group(function () {
+    
+    // # Expense
+    Route::get('/expense', [ExpenseController::class, 'index'])->name('expense.index');
+    Route::get('/expense/list', [ExpenseController::class, 'get_expense_index'])->name('expense.list');
+    Route::post('/expense/store', [ExpenseController::class, 'store']);
+    Route::post('/expense/validate/{action}', [ExpenseController::class, 'validate']);
+    Route::get('/expense/edit/{expense}', [ExpenseController::class, 'edit']);
+    Route::put('/expense/edit/{expense}', [ExpenseController::class, 'update']);
+    Route::get('/expense/delete/{expense}', [ExpenseController::class, 'delete']);
 
 });
