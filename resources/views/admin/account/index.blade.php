@@ -34,6 +34,7 @@
                                         <th style="width: 2%">ID</th>
                                         <th style="width: 2%">No</th>
                                         <th>Nama Akun</th>
+                                        <th>Kode Transaksi</th>
                                         <th style="width: 15%"></th>
                                     </tr>
                                 </thead>
@@ -60,9 +61,10 @@
                 {data: 'id', name: 'id', visible: false},
                 {data: 'number', name: 'number'},
                 {data: 'name', name: 'name'},
+                {data: 'transaction_code', name: 'transaction_code'},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
             ],
-            order: [[0, 'desc']],
+            order: [[0, 'asc']],
             paging: true,
             pageLength: 50,
             drawCallback: function () {

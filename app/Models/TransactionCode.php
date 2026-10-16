@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class TransactionCode extends Model
 {
     use HasFactory;
+
     protected $fillable = [
+        'account_id',
         'code',
         'name',
         'type',
@@ -20,9 +22,18 @@ class TransactionCode extends Model
         'is_active' => 'boolean',
     ];
 
+    public function account()
+    {
+        return $this->belongsTo('App\Models\Account');
+    }
+
     public function expense()
     {
         return $this->hasOne('App\Models\Expense');
     }
-    
+
+    public function transaction_code_subs()
+    {
+        return $this->hasMany('App\Models\TransactionCodeSub');
+    }
 }

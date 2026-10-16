@@ -23,7 +23,8 @@
 									<div class="col-xl-8 col-md-12 col-sm-12 col-12">
 										<a href="#" class="btn mb-2 mr-1 btn-success" data-placement="top" data-toggle="modal" data-target="#exampleModal" title="Tambah Data" onClick="clearForm()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></a>
 										<a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
-									</div>
+                                        <a href="{{ url('account') }}" class="btn mb-2 mr-1 btn-danger" data-toggle="tooltip" data-placement="top" title="Kembali"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg></a>
+                                    </div>
 								</div>
 							</div>
 						</form>
@@ -31,6 +32,7 @@
 						@include('admin.transaction_code.create')
 								
                             <div class="widget-content widget-content-area" style="padding-top: 0px;">
+						    <p style="font-size:18px;font-weight:bold;text-align:center">{{ $account->name}}</p>
 							<div class="table-responsive">
 								<table class="table table-bordered table-hover mb-12" id="transaction-code-table">
 									<thead>
@@ -39,7 +41,7 @@
 											<th style="width: 2%">No</th>
 											<th>Kode</th>
 											<th>Nama Transaksi</th>
-											<th>Keterangan</th>
+											<th>Sub Kode</th>
 											<th style="width: 15%"></th>
 										</tr>
 									</thead>
@@ -59,17 +61,21 @@
         table = $('#transaction-code-table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ url('transaction_code/list') }}",
+			ajax: {
+				url: "{{ route('transaction_code.list', ['account' => Crypt::encrypt($account->id)]) }}",
+				type: 'GET',
+				dataType: 'json',
+			},
             columns: [
 				{data: 'id', name: 'id', visible: false},
 				{data: 'number', name: 'number'}, // Kolom nomor urut
                 {data: 'code', name: 'code'},
                 {data: 'name', name: 'name'},
-                {data: 'description', name: 'description'},
+                {data: 'transaction_code_sub', name: 'transaction_code_sub', orderable: false, searchable: false},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [
-				[0, 'desc'] // Mengatur pengurutan kolom pertama (id) secara descending
+				[0, 'asc'] // Mengatur pengurutan kolom pertama (id) secara descending
 			],
             paging: true,
             pageLength: 50,

@@ -16,6 +16,7 @@
 
                 <div class="modal-body">
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_transaction_code" />
+                    <input type="hidden" class="form-control form-control-sm" name="account_id" id="account_id" value="{{ $account->id }}"/>
 
                     <div class="form-group">
                         <p>{{ __('Kode') }} <span class="required" style="color: #dd4b39;">*</span></p>
@@ -29,11 +30,11 @@
                         <div id="name-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
-                    <div class="form-group">
+                    {{--<div class="form-group">
                         <p>{{ __('Keterangan') }}</p>
                         <textarea class="form-control form-control-sm" name="description" id="description"></textarea>
                         <div id="description-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
-                    </div>
+                    </div>--}}
 
                 </div>
                 <div class="modal-footer">

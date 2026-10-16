@@ -12,6 +12,7 @@ use App\Http\Controllers\PrintController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TransactionCodeController;
+use App\Http\Controllers\TransactionCodeSubController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkUnitController;
 use Illuminate\Support\Facades\Artisan;
@@ -107,13 +108,22 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/desc_category/delete/{desc_category}', [DescCategoryController::class, 'delete']);
 
     // # Transaction Code
-    Route::get('/transaction_code', [TransactionCodeController::class, 'index'])->name('transaction_code.index');
-    Route::get('/transaction_code/list', [TransactionCodeController::class, 'get_transaction_code_index'])->name('transaction_code.list');
+    Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');
+    Route::get('/transaction_code/list/{account}', [TransactionCodeController::class, 'get_transaction_code_index'])->name('transaction_code.list');
     Route::post('/transaction_code/store', [TransactionCodeController::class, 'store']);
     Route::post('/transaction_code/validate/{action}', [TransactionCodeController::class, 'validate']);
     Route::get('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'edit']);
     Route::put('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'update']);
     Route::get('/transaction_code/delete/{transaction_code}', [TransactionCodeController::class, 'delete']);
+
+    // # Transaction Code Sub
+    Route::get('/transaction_code_sub/{transaction_code}', [TransactionCodeSubController::class, 'index'])->name('transaction_code_sub.index');
+    Route::get('/transaction_code_sub/{transaction_code}/list', [TransactionCodeSubController::class, 'get_transaction_code_sub_index'])->name('transaction_code_sub.list');
+    Route::post('/transaction_code_sub/{transaction_code}/store', [TransactionCodeSubController::class, 'store'])->name('transaction_code_sub.store');
+    Route::post('/transaction_code_sub/{transaction_code}/validate/{action}', [TransactionCodeSubController::class, 'validate']);
+    Route::get('/transaction_code_sub/{transaction_code}/edit/{transaction_code_sub}', [TransactionCodeSubController::class, 'edit']);
+    Route::put('/transaction_code_sub/{transaction_code}/edit/{transaction_code_sub}', [TransactionCodeSubController::class, 'update']);
+    Route::delete('/transaction_code_sub/{transaction_code}/delete/{transaction_code_sub}', [TransactionCodeSubController::class, 'delete']);
 
     // # User
     Route::get('/user', [UserController::class, 'index'])->name('users.index');
