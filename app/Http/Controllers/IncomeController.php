@@ -185,7 +185,7 @@ class IncomeController extends Controller
     {
         $validated = $request->validate([
             'file' => 'required|file|mimes:xlsx,xls',
-            'desc_category_id' => 'required|exists:desc_categories,id',
+            'account_id' => 'required',
             'desc' => 'required|string|max:1000',
         ]);
 
@@ -200,7 +200,7 @@ class IncomeController extends Controller
         $rows = $spreadsheet->getSheet(0)->toArray();
 
         try {
-            $result = DB::transaction(function () use ($rows, $validated) {
+            $result = DB::transaction(function () use ($rows, $validated, $request) {
 
                 $bankTransactions = [];
                 $totalAmount = 0;
@@ -209,8 +209,9 @@ class IncomeController extends Controller
                 $transaction = Transaction::create([
                     'date' => now()->toDateString(),
                     'type' => 'income',
-                    'transaction_code_id' => 2,
-                    'desc_category_id' => $validated['desc_category_id'],
+                    'account_id' => $validated['account_id'],
+                    'transaction_code_id' => $request->transaction_code_id,
+                    'transaction_code_sub_id' => $request->transaction_code_sub_id,
                     'desc' => $validated['desc'],
                     'amount' => 0,
                     'user_id' => Auth::id(),
@@ -310,7 +311,9 @@ class IncomeController extends Controller
                     // =========================
                     $bankTransactions[] = [
                         'transaction_id' => $transaction->id,
-                        'desc_category_id' => $validated['desc_category_id'],
+                        'account_id' => $validated['account_id'],
+                        'transaction_code_id' => $request->transaction_code_id,
+                        'transaction_code_sub_id' => $request->transaction_code_sub_id,
                         'student_id' => $studentId,
                         'transaction_number' => $row[1] ?? null,
                         'date' => $date,

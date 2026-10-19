@@ -10,7 +10,9 @@ class TransactionBank extends Model
     use HasFactory;
     protected $fillable = [
         'transaction_id',
-        'desc_category_id',
+        'account_id',
+        'transaction_code_id',
+        'transaction_code_sub_id',
         'student_id',
         'transaction_number',
         'date',

@@ -15,19 +15,38 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="income_import_desc">{{ __('Uraian') }} <span class="required" style="color: #dd4b39;">*</span></label>
-                        <input type="text" class="form-control form-control-sm" name="desc" id="income_import_desc" maxlength="1000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="income_import_desc_category_id">{{ __('Kategori Uraian') }} <span class="required" style="color: #dd4b39;">*</span></label>
-                        <select class="form-control form-control-sm" name="desc_category_id" id="income_import_desc_category_id" required>
-                            <option value="">- Pilih -</option>
-                            @foreach($desc_category as $v)
+                    
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Akun') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="account_id" id="import_account_id" onchange="getTransactionCode2();">
+                            <option value="">- Pilih - </option>
+                            @foreach($account as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }}</option>
                             @endforeach
                         </select>
+                        <div id="account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="basic form-control form-control-sm" name="transaction_code_id" id="import_transaction_code_id" onchange="getTransactionCodeSub2()">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;margin-top: -1.25rem;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: -0.5rem;">
+                        <p>{{ __('Sub Kode Transaksi') }}</p>
+                        <select class="basic form-control form-control-sm" name="transaction_code_sub_id" id="import_transaction_code_sub_id">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <p>{{ __('Peruntukan') }}</p>
+                        <input type="text" class="form-control form-control-sm" name="desc" id="import_desc">
+                        <div id="desc-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
                     <div class="form-group">
