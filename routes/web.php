@@ -98,6 +98,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'edit']);
     Route::put('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'update']);
     Route::get('/transaction_code/delete/{transaction_code}', [TransactionCodeController::class, 'delete']);
+    Route::get('/transaction_code/get/{account_id?}/{transaction_code_id?}', [TransactionCodeController::class, 'get']);
 
     // # Transaction Code Sub
     Route::get('/transaction_code_sub/{transaction_code}', [TransactionCodeSubController::class, 'index'])->name('transaction_code_sub.index');
@@ -107,6 +108,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/transaction_code_sub/{transaction_code}/edit/{transaction_code_sub}', [TransactionCodeSubController::class, 'edit']);
     Route::put('/transaction_code_sub/{transaction_code}/edit/{transaction_code_sub}', [TransactionCodeSubController::class, 'update']);
     Route::delete('/transaction_code_sub/{transaction_code}/delete/{transaction_code_sub}', [TransactionCodeSubController::class, 'delete']);
+    Route::get('/transaction_code_sub/get/{transaction_code_id?}/{transaction_code_sub_id?}', [TransactionCodeSubController::class, 'get']);
 
     // # User
     Route::get('/user', [UserController::class, 'index'])->name('users.index');

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
-use App\Models\DescCategory;
+use App\Models\Account;
 use App\Models\Student;
 use App\Models\Transaction;
 use App\Models\TransactionBank;
-use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,9 +21,8 @@ class IncomeController extends Controller
     public function index()
     {
         $title = "pemasukan";
-        $transaction_code = TransactionCode::get();
-        $desc_category = DescCategory::get();
-        return view('admin.income.index', compact('title', 'transaction_code', 'desc_category'));
+        $account = Account::get();
+        return view('admin.income.index', compact('title','account'));
     }
 
     ## Get Data
@@ -99,18 +97,24 @@ class IncomeController extends Controller
 
             $attributes = [
                 'date' => 'Tanggal',
-                'amount' => 'Jumlah'
+                'amount' => 'Jumlah',
+                'account_id' => 'Akun',
+                'transaction_code_id' => 'Kode Transaksi'
             ];
 
             if ($action === "Simpan") {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required|numeric'
+                    'amount' => 'required',
+                    'account_id' => 'required',
+                    'transaction_code_id' => 'required'
                 ];
             } else {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required|numeric'
+                    'amount' => 'required',
+                    'account_id' => 'required',
+                    'transaction_code_id' => 'required'
                 ];
             }
 
@@ -127,8 +131,9 @@ class IncomeController extends Controller
             $income = new Transaction();
             $income->date = $request->date;
             $income->type = 'income';
+            $income->account_id = $request->account_id;
             $income->transaction_code_id = $request->transaction_code_id;
-            $income->desc_category_id = $request->desc_category_id;
+            $income->transaction_code_sub_id = $request->transaction_code_sub_id ?? null;
             $income->desc = $request->desc;
             $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;
@@ -153,8 +158,9 @@ class IncomeController extends Controller
         if ($request->ajax()) {
             $income->date = $request->date;
             $income->type = 'income';
+            $income->account_id = $request->account_id;
             $income->transaction_code_id = $request->transaction_code_id;
-            $income->desc_category_id = $request->desc_category_id;
+            $income->transaction_code_sub_id = $request->transaction_code_sub_id ?? null;
             $income->desc = $request->desc;
             $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;

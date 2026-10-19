@@ -150,4 +150,28 @@ class TransactionCodeController extends Controller
             return response()->json(['success' => true, 'message' => 'Hapus Data Berhasil']);
         }
     }
+    
+    // # Get Data
+    public function get($account_id = null, $transaction_code_id = null)
+    {
+        echo "<option value=''>- Pilih Kode Transaksi -</option>";
+
+        if (!$account_id) {
+            return;
+        }
+
+        $transactionCodes = TransactionCode::where('account_id', $account_id)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        foreach ($transactionCodes as $v) {
+            $selected = ((string) $v->id === (string) $transaction_code_id)
+                ? ' selected'
+                : '';
+
+            echo '<option value="' . $v->id . '"' . $selected . '>'
+                . e($v->code . ' | ' . $v->name)
+                . '</option>';
+        }
+    }
 }

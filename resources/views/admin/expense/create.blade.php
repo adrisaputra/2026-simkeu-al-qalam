@@ -15,38 +15,43 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" class="form-control form-control-sm" name="id" id="expense" />
+                    <input type="hidden" class="form-control form-control-sm" name="id" id="id_expense" />
 
                     <div class="form-group">
                         <p>{{ __('Tanggal') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="text" class="form-control form-control-sm" id="date" value="{{ date('Y-m-d') }}" name="date" placeholder="Tanggal" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0rem;">
-                        <p>{{ __('Kode Transaksi') }}</p>
-                        <select class="basic form-control form-control-sm" name="transaction_code_id" id="transaction_code_id">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Akun') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="account_id" id="account_id" onchange="getTransactionCode();">
                             <option value="">- Pilih - </option>
-                            @foreach($transaction_code as $v)
-                                <option value="{{ $v->id }}">{{ $v->code }} || {{ $v->name }}</option>
-                            @endforeach
-                        </select>
-                        <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 0rem;">
-                        <p>{{ __('Kategori Uraian') }}</p>
-                        <select class="basic form-control form-control-sm" name="desc_category_id" id="desc_category_id">
-                            <option value="">- Pilih - </option>
-                            @foreach($desc_category as $v)
+                            @foreach($account as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }}</option>
                             @endforeach
                         </select>
-                        <div id="desc_category_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                        <div id="account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="basic form-control form-control-sm" name="transaction_code_id" id="transaction_code_id" onchange="getTransactionCodeSub()">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;margin-top: -1.25rem;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: -0.5rem;">
+                        <p>{{ __('Sub Kode Transaksi') }}</p>
+                        <select class="basic form-control form-control-sm" name="transaction_code_sub_id" id="transaction_code_sub_id">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
                     <div class="form-group">
                         <p>{{ __('Peruntukan') }}</p>
-                        <textarea class="form-control form-control-sm" name="desc" id="desc"></textarea>
+                        <input type="text" class="form-control form-control-sm" name="desc" id="desc">
                         <div id="desc-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
@@ -66,3 +71,4 @@
     </div>
 
 </form>
+      

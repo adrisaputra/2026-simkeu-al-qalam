@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
-use App\Models\DescCategory;
+use App\Models\Account;
 use App\Models\Transaction;
-use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -16,9 +15,8 @@ class ExpenseController extends Controller
     public function index()
     {
         $title = "Pengeluaran";
-        $transaction_code = TransactionCode::get();
-        $desc_category = DescCategory::get();
-        return view('admin.expense.index', compact('title', 'transaction_code', 'desc_category'));
+        $account = Account::get();
+        return view('admin.expense.index', compact('title', 'account'));
     }
 
     ## Get Data
@@ -73,12 +71,12 @@ class ExpenseController extends Controller
             if ($action === "Simpan") {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required|numeric'
+                    'amount' => 'required'
                 ];
             } else {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required|numeric'
+                    'amount' => 'required'
                 ];
             }
 
@@ -95,8 +93,9 @@ class ExpenseController extends Controller
             $expense = new Transaction();
             $expense->date = $request->date;
             $expense->type = 'expense';
+            $expense->account_id = $request->account_id;
             $expense->transaction_code_id = $request->transaction_code_id;
-            $expense->desc_category_id = $request->desc_category_id;
+            $expense->transaction_code_sub_id = $request->transaction_code_sub_id;
             $expense->desc = $request->desc;
             $expense->amount = str_replace('.', '', $request->amount) ?? 0;
             $expense->user_id = Auth::user()->id;
@@ -121,8 +120,9 @@ class ExpenseController extends Controller
         if ($request->ajax()) {
             $expense->date = $request->date;
             $expense->type = 'expense';
+            $expense->account_id = $request->account_id;
             $expense->transaction_code_id = $request->transaction_code_id;
-            $expense->desc_category_id = $request->desc_category_id;
+            $expense->transaction_code_sub_id = $request->transaction_code_sub_id;
             $expense->desc = $request->desc;
             $expense->amount = str_replace('.', '', $request->amount) ?? 0;
             $expense->user_id = Auth::user()->id;

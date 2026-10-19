@@ -145,12 +145,16 @@
             var action = document.getElementById('action').innerText;
             var id_income = $('#id_income').val();
             var date = $('#date').val();
+            var account_id = $('#account_id').val();
+            var transaction_code_id = $('#transaction_code_id').val();
             var amount = $('#amount').val();
 
             // Buat objek FormData untuk mengirim data form, termasuk file
             var formData = new FormData();
             formData.append('id', id_income);
             formData.append('date', date);
+            formData.append('account_id', account_id);
+            formData.append('transaction_code_id', transaction_code_id);
             formData.append('amount', amount);
             formData.append('_token', "{{ csrf_token() }}");
 
@@ -223,6 +227,9 @@
     function clearForm(){
         document.getElementById("head_title").textContent = "Tambah {{ __($title) }}";
         $('#myForm')[0].reset();
+        $('#account_id').val('').trigger('change');
+        $('#transaction_code_id').val('').trigger('change');
+        $('#transaction_code_sub_id').val('').trigger('change');
         document.getElementById("action").textContent = "Simpan";
     }
 
@@ -272,27 +279,109 @@
     }
         
     // Get Data
-    function getData(id){
+    function getData(id) {
         document.getElementById("head_title").textContent = "Ubah {{ __($title) }}";
         document.getElementById("action").textContent = "Update";
-        // Kirim data formulir ke server menggunakan AJAX
 
         var url = "{{ url('/income/edit') }}";
+
         $.ajax({
             url: url + "/" + id,
             type: "GET",
-            success: function (response) {
-                document.getElementById("id_income").value = response.data.id;
-                document.getElementById("date").value = response.data.date;
-                $('#transaction_code_id').val(response.data.transaction_code_id).trigger('change');
-                $('#desc_category_id').val(response.data.desc_category_id).trigger('change');
-                document.getElementById("desc").value = response.data.desc;
-                document.getElementById("amount").value = formatRupiah2(response.data.amount);
+
+            success: function(response) {
+                let data = response.data;
+
+                $("#id_income").val(data.id);
+                $("#date").val(data.date);
+                $("#desc").val(data.desc);
+                $("#amount").val(formatRupiah2(data.amount));
+
+                $("#account_id").val(String(data.account_id));
+
+                $("#transaction_code_id").html(
+                    '<option value="">- Pilih -</option>'
+                );
+
+                $("#transaction_code_sub_id").html(
+                    '<option value="">- Pilih -</option>'
+                );
+
+                var codeUrl = "{{ url('/transaction_code/get') }}";
+
+                $.ajax({
+                    url: codeUrl + "/" + data.account_id + "/" + data.transaction_code_id,
+                    type: "GET",
+
+                    success: function(html) {
+                        $("#transaction_code_id").html(html);
+
+                        // Beri jeda sebelum memilih kode transaksi
+                        setTimeout(function() {
+                            $("#transaction_code_id")
+                                .val(String(data.transaction_code_id))
+                                .trigger("change.select2");
+
+                            var subUrl = "{{ url('/transaction_code_sub/get') }}";
+
+                            $.ajax({
+                                url: subUrl + "/" + data.transaction_code_id + "/" +
+                                    (data.transaction_code_sub_id || ""),
+                                type: "GET",
+
+                                success: function(htmlSub) {
+                                    var $sub = $("#transaction_code_sub_id");
+
+                                    $sub.html(htmlSub);
+
+                                    // Beri jeda sebelum memilih subkode
+                                    setTimeout(function() {
+                                        var selectedSubId =
+                                            data.transaction_code_sub_id != null
+                                                ? String(data.transaction_code_sub_id)
+                                                : "";
+
+                                        $sub.val(selectedSubId)
+                                            .trigger("change.select2");
+
+                                        console.log(
+                                            "Subkode tersimpan:",
+                                            selectedSubId
+                                        );
+
+                                        console.log(
+                                            "Subkode terpilih:",
+                                            $sub.val()
+                                        );
+                                    }, 300);
+                                },
+
+                                error: function(xhr) {
+                                    console.error(
+                                        "Gagal memuat subkode:",
+                                        xhr.responseText
+                                    );
+                                }
+                            });
+                        }, 300);
+                    },
+
+                    error: function(xhr) {
+                        console.error(
+                            "Gagal memuat kode transaksi:",
+                            xhr.responseText
+                        );
+                    }
+                });
             },
-            error: function (xhr) {
-                // Tangani kesalahan jika pengiriman formulir gagal
-                showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                console.error("Error pengiriman formulir:", xhr);
+
+            error: function(xhr) {
+                console.error(
+                    "Gagal mengambil data pemasukan:",
+                    xhr.responseText
+                );
+
+                showFailedToast("Gagal mengambil data pemasukan.");
             }
         });
     }
@@ -359,6 +448,69 @@
 			}
 		});
 	
+    }
+    
+    function getTransactionCode() {
+        var account_id = $("#account_id").val();
+
+        // Reset kode transaksi dan subkode
+        $("#transaction_code_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        $("#transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!account_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code/get') }}";
+
+        $.ajax({
+            url: url + "/" + account_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#transaction_code_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function getTransactionCodeSub() {
+        var transaction_code_id = $("#transaction_code_id").val();
+
+        $("#transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!transaction_code_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code_sub/get') }}";
+
+        $.ajax({
+            url: url + "/" + transaction_code_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#transaction_code_sub_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
     }
 
 </script>

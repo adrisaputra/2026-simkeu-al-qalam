@@ -32,10 +32,12 @@ class PrintController extends Controller
         if ($request->category_report == 1) {
             return $this->print_checklist_report($request);
         } elseif ($request->category_report == 2) {
-            return $this->print_recap_daily($request);
-        } elseif ($request->category_report == 3) {
-            return $this->print_kpi_monthly($request);
-        }
+            if($request->recap_type == 1){
+                return $this->print_recap_daily($request);
+            } else if($request->recap_type == 2){
+                return $this->print_recap_monthly($request);
+            }
+        } 
     }
 
     public function print_checklist_report(Request $request)
@@ -412,6 +414,258 @@ class PrintController extends Controller
         $sheet->getStyle('A5:A'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('B5:B'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('F5:H'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // $sheet->getStyle('E' . $totalRow . ':H' . $totalRow)->getFont()->setBold(true);
+
+        $type = 'xlsx';
+        $fileName = 'REKAP KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI BULAN '.$request->month.' TAHUN '.$request->year.'.'.$type;
+
+        if ($type == 'xlsx') {
+            $writer = new Xlsx($spreadsheet);
+        } elseif ($type == 'xls') {
+            $writer = new Xls($spreadsheet);
+        }
+        $writer->save('public/upload/report/'.$fileName);
+        header('Content-Type: application/vnd.ms-excel');
+
+        return redirect(url('/').'/public/upload/report/'.$fileName);
+    }
+
+    public function print_recap_monthly(Request $request)
+    {
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->setActiveSheetIndex(0);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(60);
+        $sheet->getColumnDimension('C')->setWidth(15);
+
+        $sheet->mergeCells('A1:C1');
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('A1', 'LAPORAN KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI');
+        $sheet->setCellValue('A2', 'BULAN '.$request->month.' TAHUN '.$request->year);
+        $sheet->getStyle('A1:C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:C2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:C2')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C2')->getAlignment()->setWrapText(true);
+
+        // Header tabel
+        $sheet->setCellValue('A5', 'SALDO');$sheet->mergeCells('A5:B5');
+        $sheet->setCellValue('C5', '17977204');
+        $sheet->getStyle('A5:B5')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A6', 'PEMASUKAN');$sheet->mergeCells('A6:C6');
+        $sheet->getStyle('A6:C6')->getFont()->setBold(true);
+        
+        $sheet->setCellValue('A7', 'No.');
+        $sheet->setCellValue('B7', 'Uraian');
+        $sheet->setCellValue('C7', '');
+        $sheet->getStyle('A7:C7')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A8', '1');
+        $sheet->setCellValue('B8', 'Penarikan Assalam');
+        $sheet->setCellValue('C8', '');
+        
+        $sheet->setCellValue('A9', '2');
+        $sheet->setCellValue('B9', 'Penarikan Bank Muamalat');
+        $sheet->setCellValue('C9', '');
+
+        $sheet->setCellValue('A10', '3');
+        $sheet->setCellValue('B10', 'Pengembalian dana kegiatan');
+        $sheet->setCellValue('C10', '');
+
+        $sheet->setCellValue('A11', '4');
+        $sheet->setCellValue('B11', 'Pengembalian pinjaman pegawai / unit');
+        $sheet->setCellValue('C11', '');
+
+        $sheet->setCellValue('A12', '5');
+        $sheet->setCellValue('B12', 'Raport TK');
+        $sheet->setCellValue('C12', '');
+
+        $sheet->setCellValue('A13', '6');
+        $sheet->setCellValue('B13', 'Pendapatan Lainnya');
+        $sheet->setCellValue('C13', '');
+
+        $sheet->setCellValue('A14', '7');
+        $sheet->setCellValue('B14', 'Administrasi penelitian');
+        $sheet->setCellValue('C14', '');
+
+        $sheet->setCellValue('A15', 'TOTAL 1-7');
+        $sheet->setCellValue('B15', '-');
+        $sheet->setCellValue('C15', '');
+        $sheet->getStyle('A15:C15')->getFont()->setBold(true);
+
+        // Pengeluaran
+        $sheet->setCellValue('A16', 'PENGELUARAN');
+        $sheet->getStyle('A16:C16')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A17', 'No.');
+        $sheet->setCellValue('B17', 'Uraian');
+        $sheet->setCellValue('C17', '');
+        $sheet->getStyle('A17:C17')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A18', '1');
+        $sheet->setCellValue('B18', 'Catering YAS');
+        $sheet->setCellValue('C18', '');
+
+        $sheet->setCellValue('A19', '2');
+        $sheet->setCellValue('B19', 'Snack siswa dan guru YAS');
+        $sheet->setCellValue('C19', '');
+
+        $sheet->setCellValue('A20', '3');
+        $sheet->setCellValue('B20', 'Belanja kantor & ATK');
+        $sheet->setCellValue('C20', '');
+
+        $sheet->setCellValue('A21', '4');
+        $sheet->setCellValue('B21', 'Gaji OB SDIT, SMPIT');
+        $sheet->setCellValue('C21', '');
+
+        $sheet->setCellValue('A22', '5');
+        $sheet->setCellValue('B22', 'BPJS');
+        $sheet->setCellValue('C22', '');
+
+        $sheet->setCellValue('A23', '6');
+        $sheet->setCellValue('B23', 'Penggajian TKIT, MBC, dan SMPIT');
+        $sheet->setCellValue('C23', '');
+
+        $sheet->setCellValue('A24', '7');
+        $sheet->setCellValue('B24', 'Pembimbingan olimpiade / beasiswa');
+        $sheet->setCellValue('C24', '');
+
+        $sheet->setCellValue('A25', '8');
+        $sheet->setCellValue('B25', 'Wifi');
+        $sheet->setCellValue('C25', '');
+
+        $sheet->setCellValue('A26', '9');
+        $sheet->setCellValue('B26', 'Gaji Guru SDIT');
+        $sheet->setCellValue('C26', '');
+
+        $sheet->setCellValue('A27', '10');
+        $sheet->setCellValue('B27', 'Pembayaran koran');
+        $sheet->setCellValue('C27', '');
+
+        $sheet->setCellValue('A28', '11');
+        $sheet->setCellValue('B28', 'THR');
+        $sheet->setCellValue('C28', '');
+
+        $sheet->setCellValue('A29', '12');
+        $sheet->setCellValue('B29', 'RAB Unit');
+        $sheet->setCellValue('C29', '');
+
+        $sheet->setCellValue('A30', '13');
+        $sheet->setCellValue('B30', 'Administrasi transfer / sekretariatan');
+        $sheet->setCellValue('C30', '');
+
+        $sheet->setCellValue('A31', '14');
+        $sheet->setCellValue('B31', 'Penggajian YAS, USQ, SMAIT');
+        $sheet->setCellValue('C31', '');
+
+        $sheet->setCellValue('A32', '15');
+        $sheet->setCellValue('B32', 'Kampung Inggris');
+        $sheet->setCellValue('C32', '');
+
+        $sheet->setCellValue('A33', '16');
+        $sheet->setCellValue('B33', 'Mesjid Al Qalam');
+        $sheet->setCellValue('C33', '');
+
+        $sheet->setCellValue('A34', '17');
+        $sheet->setCellValue('B34', 'Setoran ke rekening BMT');
+        $sheet->setCellValue('C34', '');
+
+        $sheet->setCellValue('A35', '18');
+        $sheet->setCellValue('B35', 'Pinjaman pegawai / unit');
+        $sheet->setCellValue('C35', '');
+
+        $sheet->setCellValue('A36', '19');
+        $sheet->setCellValue('B36', 'Listrik dan kelistrikan Al Qalam');
+        $sheet->setCellValue('C36', '');
+
+        $sheet->setCellValue('A37', '20');
+        $sheet->setCellValue('B37', 'Pengembalian dana PPDB / SPP / Catering ke ortu siswa');
+        $sheet->setCellValue('C37', '');
+
+        $sheet->setCellValue('A38', '21');
+        $sheet->setCellValue('B38', 'Operasional / grab / transport');
+        $sheet->setCellValue('C38', '');
+
+        $sheet->setCellValue('A39', '22');
+        $sheet->setCellValue('B39', 'Iuran JSIT');
+        $sheet->setCellValue('C39', '');
+
+        $sheet->setCellValue('A40', '23');
+        $sheet->setCellValue('B40', 'Snack Rapat / Tamu');
+        $sheet->setCellValue('C40', '');
+
+        $sheet->setCellValue('A41', '24');
+        $sheet->setCellValue('B41', 'Kursi SMP dan SD');
+        $sheet->setCellValue('C41', '');
+
+        $sheet->setCellValue('A42', '25');
+        $sheet->setCellValue('B42', 'Galon');
+        $sheet->setCellValue('C42', '');
+
+        $sheet->setCellValue('A43', '26');
+        $sheet->setCellValue('B43', 'Program Al Qalam Peduli');
+        $sheet->setCellValue('C43', '');
+
+        $sheet->setCellValue('A44', '27');
+        $sheet->setCellValue('B44', 'Seragam Ummi Erni');
+        $sheet->setCellValue('C44', '');
+
+        $sheet->setCellValue('A45', '28');
+        $sheet->setCellValue('B45', 'Seragam guru SDIT');
+        $sheet->setCellValue('C45', '');
+
+        $sheet->setCellValue('A46', '29');
+        $sheet->setCellValue('B46', 'Pekerjaan Lugis RKB SDIT');
+        $sheet->setCellValue('C46', '');
+
+        $sheet->setCellValue('A47', '30');
+        $sheet->setCellValue('B47', 'Infaq sosial / bantuan pernikahan / Beasiswa');
+        $sheet->setCellValue('C47', '');
+
+        $sheet->setCellValue('A48', '31');
+        $sheet->setCellValue('B48', 'Kafalah marbot');
+        $sheet->setCellValue('C48', '');
+
+        $sheet->setCellValue('A49', '32');
+        $sheet->setCellValue('B49', 'Honor pegawai dapur');
+        $sheet->setCellValue('C49', '');
+
+        $sheet->setCellValue('A50', '33');
+        $sheet->setCellValue('B50', 'Pelatihan guru / studi banding / outbond');
+        $sheet->setCellValue('C50', '');
+
+        $sheet->setCellValue('A51', '34');
+        $sheet->setCellValue('B51', 'Dana pemateri');
+        $sheet->setCellValue('C51', '');
+
+        $sheet->setCellValue('A52', '35');
+        $sheet->setCellValue('B52', 'Tunjangan Pangan');
+        $sheet->setCellValue('C52', '');
+
+        $sheet->setCellValue('A53', '36');
+        $sheet->setCellValue('B53', 'Asrama Santri (kafalah, air, uang makan, sewa BTN)');
+        $sheet->setCellValue('C53', '');
+
+        $sheet->setCellValue('A54', '37');
+        $sheet->setCellValue('B54', 'Sarpras');
+        $sheet->setCellValue('C54', '');
+
+        $sheet->setCellValue('A55', 'Total 1-37');$sheet->mergeCells('A55:B55');
+        $sheet->setCellValue('C55', '');
+        $sheet->getStyle('A55:C55')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A56', 'SALDO');$sheet->mergeCells('A56:B56');
+        $sheet->setCellValue('C56', '');
+        $sheet->getStyle('A56:C56')->getFont()->setBold(true);
+        
+        $sheet->getStyle('A5:C56')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setWrapText(true);
+        // $sheet->getStyle('A5:A'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('B5:B'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('F5:H'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         // $sheet->getStyle('E' . $totalRow . ':H' . $totalRow)->getFont()->setBold(true);
 
         $type = 'xlsx';

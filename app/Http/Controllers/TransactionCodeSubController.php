@@ -130,4 +130,31 @@ class TransactionCodeSubController extends Controller
     {
         return TransactionCode::findOrFail(Crypt::decrypt($encryptedId));
     }
+    
+    // # Get Data
+    public function get($transaction_code_id = null, $transaction_code_sub_id = null)
+    {
+        echo "<option value=''>- Pilih Sub Kode Transaksi -</option>";
+
+        if (!$transaction_code_id) {
+            return;
+        }
+
+        $transaction_code_sub = TransactionCodeSub::where(
+            'transaction_code_id',
+            $transaction_code_id
+        )
+        ->orderBy('id', 'ASC')
+        ->get();
+
+        foreach ($transaction_code_sub as $v) {
+            $selected = ((string) $v->id === (string) $transaction_code_sub_id)
+                ? ' selected'
+                : '';
+
+            echo '<option value="' . $v->id . '"' . $selected . '>'
+                . e($v->code . ' | ' . $v->name)
+                . '</option>';
+        }
+    }
 }
