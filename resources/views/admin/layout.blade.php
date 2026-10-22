@@ -193,6 +193,17 @@ $setting = \App\Helpers\Helpers::setting();
                         </a>
                     </li>
 
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance']))
+                            <li class="menu @if(Request::segment(1)=="income") active @endif">
+                                <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                    <div class="">
+                                        <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <span>Data Siswa</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endif
+
                         @if(in_array(Auth::user()->group->name, ['Admin Finance','Revenue Treasurer']))
                             <li class="menu @if(Request::segment(1)=="income") active @endif">
                                 <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
@@ -210,6 +221,17 @@ $setting = \App\Helpers\Helpers::setting();
                                     <div class="">
                                         <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Pengeluaran</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endif
+
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance']))
+                            <li class="menu @if(Request::segment(1)=="expense") active @endif">
+                                <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                    <div class="">
+                                        <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <span>Slip Gaji</span>
                                     </div>
                                 </a>
                             </li>

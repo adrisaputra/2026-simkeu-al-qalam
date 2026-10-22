@@ -26,4 +26,9 @@ class Student extends Model
     {
         return $this->hasOne('App\Models\Income');
     }
+
+    public function student_class_histories()
+    {
+        return $this->hasMany('App\Models\StudentClassHistory');
+    }
 }
