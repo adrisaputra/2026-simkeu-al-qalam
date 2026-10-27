@@ -16,8 +16,7 @@
 
                 <div class="modal-body">
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_student" />
-                    <input type="hidden" class="form-control form-control-sm" name="classes_id" id="classes_id" value="{{ $classes->id }}"/>
-
+                
                     <div class="form-group">
                         <p>{{ __('File Import') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="file" class="form-control form-control-sm" name="file" required>

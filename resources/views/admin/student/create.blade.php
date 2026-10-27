@@ -16,11 +16,35 @@
 
                 <div class="modal-body">
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_student" />
-                    <input type="hidden" class="form-control form-control-sm" name="classes_id" id="classes_id" value="{{ $classes->id }}"/>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Jenjang') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="work_unit_id" id="work_unit_id" onchange="getClasses();">
+                            <option value="">- Pilih - </option>
+                            @foreach($work_unit as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                            @endforeach
+                        </select>
+                        <div id="work_unit_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <p>{{ __('Kelas') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="basic form-control form-control-sm" name="classes_id" id="classes_id">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="classes_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;margin-top: -1.25rem;"></div>
+                    </div>
 
                     <div class="form-group">
-                        <p>{{ __('No Induk') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <p>{{ __('NIS') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="text" class="form-control form-control-sm" name="nis" id="nis">
+                        <div id="nis-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <p>{{ __('NISN') }}</p>
+                        <input type="text" class="form-control form-control-sm" name="nisn" id="nisn">
                         <div id="nis-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 

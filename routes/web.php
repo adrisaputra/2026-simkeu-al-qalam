@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\DescCategoryController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentPromotionController;
 use App\Http\Controllers\TransactionCodeController;
 use App\Http\Controllers\TransactionCodeSubController;
 use App\Http\Controllers\UserController;
@@ -43,7 +45,16 @@ Route::middleware(['role:Admin Finance,Revenue Treasurer,Expenditure Treasurer']
 });
 
 Route::middleware(['role:Admin Finance'])->group(function () {
-    
+
+    // # Academic Year and Student Promotion
+    Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
+    Route::post('/academic-years', [AcademicYearController::class, 'store'])->name('academic_years.store');
+    Route::put('/academic-years/{academicYear}', [AcademicYearController::class, 'update'])->name('academic_years.update');
+    Route::post('/academic-years/{academicYear}/activate', [AcademicYearController::class, 'activate'])->name('academic_years.activate');
+    Route::delete('/academic-years/{academicYear}', [AcademicYearController::class, 'destroy'])->name('academic_years.destroy');
+    Route::get('/student-promotions', [StudentPromotionController::class, 'index'])->name('student_promotions.index');
+    Route::post('/student-promotions', [StudentPromotionController::class, 'store'])->name('student_promotions.store');
+
     // # Print
     Route::get('/print', [PrintController::class, 'index'])->name('print.index');
     Route::post('/print', [PrintController::class, 'print']);
@@ -71,15 +82,24 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/account/edit/{account}', [AccountController::class, 'update']);
     Route::delete('/account/delete/{account}', [AccountController::class, 'delete']);
 
-    // # Student
-    Route::get('/student/{classes}', [StudentController::class, 'index'])->name('student.index');
-    Route::get('/student/list/{classes}', [StudentController::class, 'get_student_index'])->name('student.list');
+    # Student
+    Route::get('/student', [StudentController::class, 'index'])->name('student.index');
+    Route::get('/student/list', [StudentController::class, 'get_student_index'])->name('student.list');
     Route::post('/student/store', [StudentController::class, 'store']);
     Route::post('/student/validate/{action}', [StudentController::class, 'validate']);
     Route::get('/student/edit/{student}', [StudentController::class, 'edit']);
     Route::put('/student/edit/{student}', [StudentController::class, 'update']);
-    Route::get('/student/delete/{student}', [StudentController::class, 'delete']);
-    Route::post('/student/import', [StudentController::class, 'import']);
+    Route::delete('/student/delete/{student}', [StudentController::class, 'delete']);
+
+    // # Student
+    // Route::get('/student/{classes}', [StudentController::class, 'index'])->name('student.index');
+    // Route::get('/student/list/{classes}', [StudentController::class, 'get_student_index'])->name('student.list');
+    // Route::post('/student/store', [StudentController::class, 'store']);
+    // Route::post('/student/validate/{action}', [StudentController::class, 'validate']);
+    // Route::get('/student/edit/{student}', [StudentController::class, 'edit']);
+    // Route::put('/student/edit/{student}', [StudentController::class, 'update']);
+    // Route::get('/student/delete/{student}', [StudentController::class, 'delete']);
+    // Route::post('/student/import', [StudentController::class, 'import']);
 
     // # Desc Category
     Route::get('/desc_category', [DescCategoryController::class, 'index'])->name('desc_category.index');
@@ -146,9 +166,8 @@ Route::middleware(['role:Admin Finance,Revenue Treasurer'])->group(function () {
 
 });
 
-
 Route::middleware(['role:Admin Finance,Expenditure Treasurer'])->group(function () {
-    
+
     // # Expense
     Route::get('/expense', [ExpenseController::class, 'index'])->name('expense.index');
     Route::get('/expense/list', [ExpenseController::class, 'get_expense_index'])->name('expense.list');

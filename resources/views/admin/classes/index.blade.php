@@ -40,7 +40,7 @@
 											<th style="width: 2%">Number</th>
 											<th style="width: 2%">No</th>
 											<th>Nama Kelas</th>
-											<th>Siswa</th>
+											<th>Jumlah Siswa</th>
 											<th style="width: 15%"></th>
 										</tr>
 									</thead>

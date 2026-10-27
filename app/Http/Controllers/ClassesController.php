@@ -35,18 +35,7 @@ class ClassesController extends Controller
                     return $counters++;
                 })
                 ->addColumn('student', function ($v) {
-                    $url = url('student', Crypt::encrypt($v->id));
-                    $btn = '<a href="'.$url.'" class="btn btn-info btn-sm position-relative me-5" data-toggle="tooltip" data-placement="top" title="Data">
-                            <span>Lihat Siswa</span>';
-
-                    if ($v->students->count() > 0) {
-                        $btn .= '<span class="badge badge-danger counter">'.$v->students->count().'</span>';
-
-                    }
-
-                    $btn .= '</a>';
-
-                    return $btn;
+                    return $v->students->count();
                 })
                 ->addColumn('action', function ($v) {
                     $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">

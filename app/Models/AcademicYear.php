@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AcademicYear extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'start_date',
@@ -15,8 +17,8 @@ class AcademicYear extends Model
         'is_active',
     ];
 
-    public function student_class_histories()
+    public function student_class_histories(): HasMany
     {
-        return $this->hasMany('App\Models\StudentClassHistory');
+        return $this->hasMany(StudentClassHistory::class);
     }
 }

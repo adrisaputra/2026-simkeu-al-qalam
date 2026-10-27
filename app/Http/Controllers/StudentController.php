@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Classes;
 use App\Models\Student;
+use App\Models\WorkUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -11,27 +12,52 @@ use Yajra\DataTables\DataTables;
 
 class StudentController extends Controller
 {
-    public function index($classes = null)
+    public function index()
     {
         $title = 'Siswa';
-        $classes = Crypt::decrypt($classes);
-        $classes = Classes::where('id', $classes)->first();
-
-        return view('admin.student.index', compact('title', 'classes'));
+        $work_unit = WorkUnit::whereIn('id', [3, 4, 5, 6])->get();
+        return view('admin.student.index', compact('title', 'work_unit'));
     }
 
-    public function get_student_index(Request $request, $classes = null)
+    public function get_student_index(Request $request)
     {
         if ($request->ajax()) {
             $counters = 1;
 
-            $classes = Crypt::decrypt($classes);
-            $classes = Classes::where('id', $classes)->first();
+            $query = Student::query();
+                        
+            if ($request->filled('get_classes')) {
+                $get_classes = $request->input('get_classes');
 
-            $student = Student::where('classes_id', $classes->id)->limit(10);
+                $query->whereHas('classes', function ($q) use ($get_classes) {
+                    $q->where('id', $get_classes);
+                });
+            }
+
+            if ($request->filled('get_work_unit')) {
+                $get_work_unit = $request->input('get_work_unit');
+
+                $query->whereHas('classes', function ($q) use ($get_work_unit) {
+                    $q->where('work_unit_id', $get_work_unit);
+                });
+            }
+
+            $student = $query->limit(10);
 
             return DataTables::of($student)
                 ->addIndexColumn()
+                ->addColumn('display_work_unit', function ($v){
+                    return $v->classes->work_unit->name;
+                })
+                ->addColumn('display_classes', function ($v){
+                    return $v->classes->name;
+                })
+                ->addColumn('display_student_bill', function ($v){
+                    $url = url('student_bill', Crypt::encrypt($v->id));
+                    $btn = '<a href="'.$url.'" class="btn btn-info btn-sm position-relative me-5" data-toggle="tooltip" data-placement="top" title="Data">
+                            <span>Lihat Tagihan</span></a>';
+                    return $btn;
+                })
                 ->addColumn('number', function () use (&$counters) {
                     return $counters++;
                 })
@@ -45,7 +71,7 @@ class StudentController extends Controller
 
                     return $btn;
                 })
-                ->rawColumns(['category', 'action'])
+                ->rawColumns(['display_student_bill', 'action'])
                 ->make(true);
         }
     }
@@ -85,6 +111,7 @@ class StudentController extends Controller
             $student = new Student;
             $student->classes_id = $request->classes_id;
             $student->nis = $request->nis;
+            $student->nisn = $request->nisn;
             $student->name = $request->name;
             $student->save();
             activity()->log('Create Student Data');
@@ -97,7 +124,7 @@ class StudentController extends Controller
     public function edit(Request $request, Student $student)
     {
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'data' => $student]);
+            return response()->json(['success' => true, 'data' => $student, 'work_unit' => $student->classes->work_unit]);
         }
     }
 
@@ -108,6 +135,7 @@ class StudentController extends Controller
 
             $student->classes_id = $request->classes_id;
             $student->nis = $request->nis;
+            $student->nisn = $request->nisn;
             $student->name = $request->name;
             $student->save();
 

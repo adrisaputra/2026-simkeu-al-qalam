@@ -194,8 +194,8 @@ $setting = \App\Helpers\Helpers::setting();
                     </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
-                            <li class="menu @if(Request::segment(1)=="income") active @endif">
-                                <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
+                            <li class="menu @if(Request::segment(1)=="student") active @endif">
+                                <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
                                         <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Data Siswa</span>
@@ -259,6 +259,15 @@ $setting = \App\Helpers\Helpers::setting();
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Jenjang</span>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="menu @if(in_array(Request::segment(1), ['academic-years','student-promotions'])) active @endif">
+                            <a href="{{ route('academic_years.index') }}" @if(in_array(Request::segment(1), ['academic-years','student-promotions'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Tahun Ajaran</span>
                                 </div>
                             </a>
                         </li>
