@@ -3,7 +3,7 @@
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClassesController;
-use App\Http\Controllers\DescCategoryController;
+use App\Http\Controllers\StudentBillTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncomeController;
@@ -102,13 +102,13 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     // Route::post('/student/import', [StudentController::class, 'import']);
 
     // # Desc Category
-    Route::get('/desc_category', [DescCategoryController::class, 'index'])->name('desc_category.index');
-    Route::get('/desc_category/list', [DescCategoryController::class, 'get_desc_category_index'])->name('desc_category.list');
-    Route::post('/desc_category/store', [DescCategoryController::class, 'store']);
-    Route::post('/desc_category/validate/{action}', [DescCategoryController::class, 'validate']);
-    Route::get('/desc_category/edit/{desc_category}', [DescCategoryController::class, 'edit']);
-    Route::put('/desc_category/edit/{desc_category}', [DescCategoryController::class, 'update']);
-    Route::get('/desc_category/delete/{desc_category}', [DescCategoryController::class, 'delete']);
+    Route::get('/student_bill_type', [StudentBillTypeController::class, 'index'])->name('student_bill_type.index');
+    Route::get('/student_bill_type/list', [StudentBillTypeController::class, 'get_student_bill_type_index'])->name('student_bill_type.list');
+    Route::post('/student_bill_type/store', [StudentBillTypeController::class, 'store']);
+    Route::post('/student_bill_type/validate/{action}', [StudentBillTypeController::class, 'validate']);
+    Route::get('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'edit']);
+    Route::put('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'update']);
+    Route::get('/student_bill_type/delete/{student_bill_type}', [StudentBillTypeController::class, 'delete']);
 
     // # Transaction Code
     Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');

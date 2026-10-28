@@ -197,7 +197,7 @@ $setting = \App\Helpers\Helpers::setting();
                             <li class="menu @if(Request::segment(1)=="student") active @endif">
                                 <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <img src="{{ asset('storage/menu/icons8-student-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Data Siswa</span>
                                     </div>
                                 </a>
@@ -230,7 +230,7 @@ $setting = \App\Helpers\Helpers::setting();
                             <li class="menu @if(Request::segment(1)=="expense") active @endif">
                                 <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <img src="{{ asset('storage/menu/1695533471.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Slip Gaji</span>
                                     </div>
                                 </a>
@@ -272,14 +272,14 @@ $setting = \App\Helpers\Helpers::setting();
                             </a>
                         </li>
 
-                        {{--<li class="menu @if(Request::segment(1)==" desc_category") active @endif">
-                            <a href="{{ url('desc_category') }}" @if(in_array(Request::segment(1), ['desc_category'])) aria-expanded="true" @endif class="dropdown-toggle">
+                        <li class="menu @if(Request::segment(1)=="student_bill_type") active @endif">
+                            <a href="{{ url('student_bill_type') }}" @if(in_array(Request::segment(1), ['student_bill_type'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Kategori Uraian</span>
+                                    <span>Jenis Tagihan Siswa</span>
                                 </div>
                             </a>
-                        </li>--}}
+                        </li>
 
                         <li class="menu @if(Request::segment(1)=="account") active @endif">
                             <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account'])) aria-expanded="true" @endif class="dropdown-toggle">

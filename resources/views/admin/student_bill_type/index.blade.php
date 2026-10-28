@@ -20,15 +20,25 @@
 					   	<form action="{{ url(Request::segment(1).'/search') }}" method="GET">		
 							<div class="widget-content widget-content-area">
 								<div class="row">
-									<div class="col-xl-8 col-md-12 col-sm-12 col-12">
+									<div class="col-xl-9 col-md-12 col-sm-12 col-12">
 										<a href="#" class="btn mb-2 mr-1 btn-success" data-placement="top" data-toggle="modal" data-target="#exampleModal" title="Tambah Data" onClick="clearForm()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></a>
 										<a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
 									</div>
+                                    
+                                    <div class="col-xl-3 col-md-12 col-sm-12 col-12">
+                                        <select id="get_work_unit" name="get_work_unit" onchange="getClasses2();" class="form-control form-control-sm" style="height: 38px;padding: 5px;">
+                                            <option value="">- Pilih Jenjang -</option>
+                                            @foreach($work_unit as $v)
+                                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
 								</div>
 							</div>
 						</form>
 						
-						@include('admin.desc_category.create')
+						@include('admin.student_bill_type.create')
 								
                             <div class="widget-content widget-content-area" style="padding-top: 0px;">
 							<div class="table-responsive">
@@ -37,8 +47,10 @@
 										<tr>
 											<th style="width: 2%">Number</th>
 											<th style="width: 2%">No</th>
-											<th>Nama Kategori</th>
-											<th>Penginput</th>
+											<th>Jenjang</th>
+											<th>Kode Transaksi</th>
+											<th>Frekuensi Tagihan</th>
+											<th>Nominal (Rp)</th>
 											<th style="width: 15%"></th>
 										</tr>
 									</thead>
@@ -58,12 +70,21 @@
         table = $('#transaction-code-table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ url('desc_category/list') }}",
+			ajax: {
+				url: "{{ route('student_bill_type.list') }}",
+				type: 'GET',
+				dataType: 'json',
+				data: function (d) {
+					d.get_work_unit = $('#get_work_unit').val(); 
+                }
+			},
             columns: [
 				{data: 'id', name: 'id', visible: false},
 				{data: 'number', name: 'number'}, // Kolom nomor urut
-                {data: 'name', name: 'name'},
-                {data: 'entered_by', name: 'entered_by'},
+                {data: 'display_work_unit', name: 'display_work_unit'},
+                {data: 'display_transaction_code', name: 'display_transaction_code'},
+                {data: 'display_frequency', name: 'frequency'},
+                {data: 'display_default_amount', name: 'default_amount'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [
@@ -80,23 +101,29 @@
             }
         });
 
+        $('#get_work_unit').on('change', function () {
+            table.draw(); // Panggil ulang DataTable untuk memperbarui data berdasarkan filter office
+        });
+
         $('#myForm').submit(function (e) {
             e.preventDefault(); // Hindari pengiriman form secara default
 
             var action = document.getElementById('action').innerText;
-            var id_desc_category = $('#id_desc_category').val();
-            var name = $('#name').val();
-            var entered_by = $('#entered_by').val();
+            var id_student_bill_type = $('#id_student_bill_type').val();
+            var work_unit_id = $('#work_unit_id').val();
+            var transaction_code_id = $('#transaction_code_id').val();
+            var frequency = $('#frequency').val();
 
             // Buat objek FormData untuk mengirim data form, termasuk file
             var formData = new FormData();
-            formData.append('id', id_desc_category);
-            formData.append('name', name);
-            formData.append('entered_by', entered_by);
+            formData.append('id', id_student_bill_type);
+            formData.append('work_unit_id', work_unit_id);
+            formData.append('transaction_code_id', transaction_code_id);
+            formData.append('frequency', frequency);
             formData.append('_token', "{{ csrf_token() }}");
 
             // Kirim permintaan validasi ke controller via Ajax
-            var url = "{{ url('/desc_category/validate') }}";
+            var url = "{{ url('/student_bill_type/validate') }}";
             $.ajax({
                 url: url + "/" + action,
                 type: "POST",
@@ -111,7 +138,7 @@
                     if (action === "Simpan") {
                         send();
                     } else {
-                        update(id_desc_category);
+                        update(id_student_bill_type);
                     }
 
                 },
@@ -166,7 +193,7 @@
 
         // Kirim data formulir ke server menggunakan AJAX
         $.ajax({
-            url: "{{ url('desc_category/store') }}",
+            url: "{{ url('student_bill_type/store') }}",
             type: "POST",
             data: formData,
             contentType: false, // Biarkan jQuery menentukan contentType secara otomatis
@@ -190,14 +217,16 @@
         document.getElementById("action").textContent = "Update";
         // Kirim data formulir ke server menggunakan AJAX
 
-        var url = "{{ url('/desc_category/edit') }}";
+        var url = "{{ url('/student_bill_type/edit') }}";
         $.ajax({
             url: url + "/" + id,
             type: "GET",
             success: function (response) {
-                document.getElementById("id_desc_category").value = response.data.id;
-                document.getElementById("name").value = response.data.name;
-                document.getElementById("entered_by").value = response.data.entered_by;
+                document.getElementById("id_student_bill_type").value = response.data.id;
+                document.getElementById("work_unit_id").value = response.data.work_unit_id;
+                document.getElementById("transaction_code_id").value = response.data.transaction_code_id;
+                document.getElementById("frequency").value = response.data.frequency;
+                document.getElementById("default_amount").value = formatRupiah2(data.default_amount);
             },
             error: function (xhr) {
                 // Tangani kesalahan jika pengiriman formulir gagal
@@ -215,7 +244,7 @@
         
         // Kirim data formulir ke server menggunakan AJAX
 
-        var url = "{{ url('/desc_category/edit') }}";
+        var url = "{{ url('/student_bill_type/edit') }}";
         $.ajax({
             url: url + "/" + id,
             type: "POST",
@@ -252,7 +281,7 @@
 					'Data Berhasil Dihapus.',
 					'success'
 				).then(function () {
-					var url = "{{ url('/desc_category/delete') }}";
+					var url = "{{ url('/student_bill_type/delete') }}";
                     $.ajax({
                         url: url + "/" + id,
                         success: function (response) {

@@ -17,6 +17,11 @@ class WorkUnit extends Model
         return $this->hasOne('App\Models\Employee');
     }
 
+    public function student_bill_type()
+    {
+        return $this->hasOne('App\Models\StudentBillType');
+    }
+
     public function count_employee(){
         return $this->hasMany('App\Models\Employee');
     }
