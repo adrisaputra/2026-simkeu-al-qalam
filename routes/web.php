@@ -11,6 +11,7 @@ use App\Http\Controllers\LogController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StudentBillController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentPromotionController;
 use App\Http\Controllers\TransactionCodeController;
@@ -109,6 +110,10 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'edit']);
     Route::put('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'update']);
     Route::get('/student_bill_type/delete/{student_bill_type}', [StudentBillTypeController::class, 'delete']);
+
+    Route::get('/student_bill/{student}', [StudentBillController::class,'index']);
+    Route::get('/student_bill/list/{student}', [StudentBillController::class, 'get_student_bill_index'])->name('student_bill.list');
+    Route::get('/student_bill/store/{student_bill_type}', [StudentBillController::class,'store']);
 
     // # Transaction Code
     Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');

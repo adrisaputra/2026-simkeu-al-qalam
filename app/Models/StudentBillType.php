@@ -24,4 +24,8 @@ class StudentBillType extends Model
         return $this->belongsTo('App\Models\TransactionCode');
     }
     
+    public function student_bill()
+    {
+        return $this->hasOne('App\Models\StudentBill');
+    }
 }

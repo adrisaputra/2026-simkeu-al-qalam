@@ -21,4 +21,9 @@ class AcademicYear extends Model
     {
         return $this->hasMany(StudentClassHistory::class);
     }
+    
+    public function student_bill()
+    {
+        return $this->hasOne('App\Models\StudentBill');
+    }
 }

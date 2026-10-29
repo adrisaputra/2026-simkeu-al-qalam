@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
+use App\Models\AcademicYear;
+use App\Models\StudentBillAcademicYear;
 use App\Models\StudentBillType;
 use App\Models\TransactionCode;
 use App\Models\WorkUnit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Yajra\DataTables\DataTables;
 
 class StudentBillTypeController extends Controller
@@ -59,7 +62,26 @@ class StudentBillTypeController extends Controller
             ->addColumn('display_default_amount', function ($v) {
                 return Helpers::format_number($v->default_amount);
             })
+            ->addColumn('student_bill_academic_year', function ($v) {
+                $academic_year = AcademicYear::where('is_active',true)->first();
+                $url = url('student_bill/store', Crypt::encrypt($v->id));
+
+                $student_bill_academic_year = StudentBillAcademicYear::
+                                                where('academic_year_id', $academic_year->id)
+                                                ->where('student_bill_type_id', $v->id)
+                                                ->first();
+                if($student_bill_academic_year){
+                    return 'Tagihan Periode '.$academic_year->name.' Sudah Diterbitkan';
+                } else {
+                    $btn = '<a href="#" onClick="StudentBillStore('.$v->id.')" class="btn btn-info btn-sm position-relative me-5" data-toggle="tooltip" data-placement="top" title="Data">
+                                <span>Terbitkan Tagihan Periode '.$academic_year->name.'</span></a>';
+                    return $btn;
+                }
+            })
             ->addColumn('action', function ($v) {
+                $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </a>';
                 $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         </a>';
@@ -68,7 +90,7 @@ class StudentBillTypeController extends Controller
                         </a>';
                 return $btn;
             })
-            ->rawColumns(['entered_by','action'])->make(true);
+            ->rawColumns(['student_bill_academic_year','action'])->make(true);
         }
         
     }

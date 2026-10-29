@@ -52,6 +52,7 @@
 											<th>Frekuensi Tagihan</th>
 											<th>Nominal (Rp)</th>
 											<th style="width: 15%"></th>
+											<th style="width: 10%"></th>
 										</tr>
 									</thead>
 								</table>
@@ -85,6 +86,7 @@
                 {data: 'display_transaction_code', name: 'display_transaction_code'},
                 {data: 'display_frequency', name: 'frequency'},
                 {data: 'display_default_amount', name: 'default_amount'},
+                {data: 'student_bill_academic_year', name: 'student_bill_academic_year'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [
@@ -282,6 +284,40 @@
 					'success'
 				).then(function () {
 					var url = "{{ url('/student_bill_type/delete') }}";
+                    $.ajax({
+                        url: url + "/" + id,
+                        success: function (response) {
+                            showSuccessToast(response.message);
+                            $('#myForm')[0].reset();
+                            table.ajax.reload(null, false);
+                        },
+                        error: function (xhr) {
+                            showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
+                            console.error("Error pengiriman formulir:", xhr);
+                        }
+                    });
+				});
+			}
+		});
+	
+    }
+
+     function StudentBillStore(id) {
+        swal({
+			title: 'Apakah Kamu Yakin?',
+			text: "Anda tidak akan dapat mengembalikan ini!",
+			type: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Terbitkan Tagihan',
+			padding: '2em'
+		}).then(function (result) {
+			if (result.value) {
+				swal(
+					'Berhasil!',
+					'Tagihan Berhasil Diterbitkan.',
+					'success'
+				).then(function () {
+					var url = "{{ url('/student_bill/store') }}";
                     $.ajax({
                         url: url + "/" + id,
                         success: function (response) {
