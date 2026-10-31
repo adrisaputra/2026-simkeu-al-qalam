@@ -49,7 +49,8 @@
 											<th>Jenis Tagihan</th>
 											<th>Periode</th>
 											<th>Nominal (Rp)</th>
-											{{--<th>Batas Bayar</th>--}}
+											<th>Yang Terbayarkan (Rp)</th>
+											<th>Sisa Utang (Rp)</th>
 											<th>Status</th>
 											<th style="width: 15%"></th>
 										</tr>
@@ -84,6 +85,8 @@
                 {data: 'display_student_bill_type', name: 'display_student_bill_type'},
                 {data: 'display_periode', name: 'display_periode'},
                 {data: 'display_nominal', name: 'display_nominal'},
+                {data: 'display_paid_off', name: 'display_paid_off'},
+                {data: 'display_difference', name: 'display_difference'},
                 {data: 'display_status', name: 'display_status'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],

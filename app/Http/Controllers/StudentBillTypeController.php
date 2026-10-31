@@ -133,6 +133,7 @@ class StudentBillTypeController extends Controller
             $student_bill_type = New StudentBillType();
             $student_bill_type->work_unit_id = $request->work_unit_id;
             $student_bill_type->transaction_code_id = $request->transaction_code_id;
+            $student_bill_type->transaction_code_sub_id = $request->transaction_code_sub_id;
             $student_bill_type->frequency = $request->frequency;
             $student_bill_type->default_amount = str_replace('.', '', $request->default_amount) ?? 0;
             $student_bill_type->save();
@@ -156,6 +157,7 @@ class StudentBillTypeController extends Controller
         if ($request->ajax()) {
             $student_bill_type->work_unit_id = $request->work_unit_id;
             $student_bill_type->transaction_code_id = $request->transaction_code_id;
+            $student_bill_type->transaction_code_sub_id = $request->transaction_code_sub_id;
             $student_bill_type->frequency = $request->frequency;
             $student_bill_type->default_amount = str_replace('.', '', $request->default_amount) ?? 0;
             $student_bill_type->save();

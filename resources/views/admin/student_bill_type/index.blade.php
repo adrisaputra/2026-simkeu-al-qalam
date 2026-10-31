@@ -227,8 +227,30 @@
                 document.getElementById("id_student_bill_type").value = response.data.id;
                 document.getElementById("work_unit_id").value = response.data.work_unit_id;
                 document.getElementById("transaction_code_id").value = response.data.transaction_code_id;
+                
+                var url = "{{ url('/transaction_code_sub/get') }}";
+
+                $.ajax({
+                    url: url + "/" + response.data.transaction_code_id,
+                    type: "GET",
+
+                    success: function(html) {
+                        var $sub = $("#transaction_code_sub_id");
+
+                        $sub.html(html);
+
+                        // Pilih subkode yang tersimpan
+                        $sub.val(String(response.data.transaction_code_sub_id))
+                            .trigger('change');
+                    },
+
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+                
                 document.getElementById("frequency").value = response.data.frequency;
-                document.getElementById("default_amount").value = formatRupiah2(data.default_amount);
+                document.getElementById("default_amount").value = formatRupiah2(response.data.default_amount);
             },
             error: function (xhr) {
                 // Tangani kesalahan jika pengiriman formulir gagal
@@ -302,7 +324,7 @@
 	
     }
 
-     function StudentBillStore(id) {
+    function StudentBillStore(id) {
         swal({
 			title: 'Apakah Kamu Yakin?',
 			text: "Anda tidak akan dapat mengembalikan ini!",
@@ -336,6 +358,35 @@
 	
     }
 
+
+    function getTransactionCodeSub() {
+        var transaction_code_id = $("#transaction_code_id").val();
+
+        $("#transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!transaction_code_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code_sub/get') }}";
+
+        $.ajax({
+            url: url + "/" + transaction_code_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#transaction_code_sub_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
 
 
 </script>

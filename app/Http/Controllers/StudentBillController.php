@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\StudentBill;
 use App\Models\StudentBillAcademicYear;
 use App\Models\StudentBillType;
+use App\Models\TransactionBank;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -40,9 +41,9 @@ class StudentBillController extends Controller
             $get_academic_year = $request->input('get_academic_year');
             $query->where('academic_year_id', $get_academic_year);
             
-            $student = $query->where('student_id',$student)->limit(10);
+            $student_bill = $query->where('student_id',$student)->limit(10);
 
-            return DataTables::of($student)
+            return DataTables::of($student_bill)
                 ->addIndexColumn()
                 ->addColumn('number', function () use (&$counters) {
                     return $counters++;
@@ -53,18 +54,52 @@ class StudentBillController extends Controller
                 ->addColumn('display_periode', function ($v){
                     if($v->student_bill_type->frequency == 'monthly'){
                         // return '<b>'.Helpers::month_name(date('m', strtotime($v->period_start))).'</b><br>'.Helpers::date($v->period_start).' - '.Helpers::date($v->period_end) ;
-                        return '<b>'.Helpers::month_name(date('m', strtotime($v->period_start))).'</b>' ;
+                        return '<b>'.Helpers::month_name(date('m', strtotime($v->period_start))).' '.date('Y', strtotime($v->period_start)).'</b>' ;
                     }
                 })
                 ->addColumn('display_nominal', function ($v){
                     return Helpers::format_number($v->amount);
+                    
+                })
+                ->addColumn('display_paid_off', function ($v){
+                    if($v->student_bill_type->frequency == 'monthly'){
+                        $transaction_bank = TransactionBank::where('student_id', $v->student_id)
+                                            ->whereMonth('date', date('m', strtotime($v->period_start)))
+                                            ->whereYear('date', date('Y', strtotime($v->period_start)))
+                                            ->where('transaction_code_id', $v->student_bill_type->transaction_code_id)
+                                            ->sum('amount');
+                        return Helpers::format_number($transaction_bank);
+                    }
+                })
+                ->addColumn('display_difference', function ($v){
+                    if($v->student_bill_type->frequency == 'monthly'){
+                        $transaction_bank = TransactionBank::where('student_id', $v->student_id)
+                                            ->whereMonth('date', date('m', strtotime($v->period_start)))
+                                            ->whereYear('date', date('Y', strtotime($v->period_start)))
+                                            ->where('transaction_code_id', $v->student_bill_type->transaction_code_id)
+                                            ->sum('amount');
+                        return Helpers::format_number($v->amount - $transaction_bank);
+                    } else {
+                        return 0;
+                    }
                 })
                 ->addColumn('display_status', function ($v) {
-                    // if($v->status=='Active'){
-                        $status ='<span class="badge badge-success">Lunas</span>';
-                    // }else{
-                    //     $status ='<span class="badge badge-danger">Tidak Aktif</span>';
-                    // }
+                    
+                    if($v->student_bill_type->frequency == 'monthly'){
+                        $transaction_bank = TransactionBank::where('student_id', $v->student_id)
+                                            ->whereMonth('date', date('m', strtotime($v->period_start)))
+                                            ->whereYear('date', date('Y', strtotime($v->period_start)))
+                                            ->where('transaction_code_id', $v->student_bill_type->transaction_code_id)
+                                            ->sum('amount');
+                        if($v->amount == $transaction_bank){
+                            $status ='<span class="badge badge-success">Lunas</span>';
+                        }else{
+                            $status ='<span class="badge badge-danger">Belum Lunas</span>';
+                        }
+                    } else {
+                        return 0;
+                    }
+                   
                     return $status;
                 })
                 ->addColumn('action', function ($v) {
@@ -127,7 +162,9 @@ class StudentBillController extends Controller
                     break;
 
                 case 'monthly':
-                    $periodStart = $startDate->copy();
+                    $periodStart = $startDate->copy()
+                                ->startOfMonth()
+                                ->addMonth();
 
                     while ($periodStart->lte($endDate)) {
                         $periodEnd = $periodStart->copy()->endOfMonth();

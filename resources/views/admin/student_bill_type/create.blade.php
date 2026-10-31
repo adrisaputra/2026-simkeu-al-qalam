@@ -30,13 +30,21 @@
 
                     <div class="form-group" style="margin-bottom: 1rem;">
                         <p>{{ __('Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
-                        <select class="form-control form-control-sm" name="transaction_code_id" id="transaction_code_id">
+                        <select class="form-control form-control-sm" name="transaction_code_id" id="transaction_code_id" onchange="getTransactionCodeSub()">
                             <option value="">- Pilih - </option>
                             @foreach($transaction_code as $v)
                                 <option value="{{ $v->id }}">{{ $v->name }}</option>
                             @endforeach
                         </select>
                         <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group" >
+                        <p>{{ __('Sub Kode Transaksi') }}</p>
+                        <select class="form-control form-control-sm" name="transaction_code_sub_id" id="transaction_code_sub_id">
+                            <option value="">- Pilih - </option>
+                        </select>
+                        <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
                     <div class="form-group">

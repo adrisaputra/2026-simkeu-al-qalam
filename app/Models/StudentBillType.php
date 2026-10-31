@@ -11,6 +11,7 @@ class StudentBillType extends Model
     protected $fillable = [
         'work_unit_id',
         'transaction_code_id',
+        'transaction_code_sub_id',
         'frequency',
         'default_amount',
         'is_active',
@@ -22,6 +23,10 @@ class StudentBillType extends Model
     
     public function transaction_code(){
         return $this->belongsTo('App\Models\TransactionCode');
+    }
+    
+    public function transaction_code_sub(){
+        return $this->belongsTo('App\Models\TransactionCodeSub');
     }
     
     public function student_bill()
