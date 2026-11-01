@@ -32,7 +32,18 @@ class IncomeController extends Controller
         if ($request->ajax()) {
             $counter = 1;
 
-            $income = Transaction::where('type', 'income')->with('desc_category', 'transaction_code');
+            $query = Transaction::query();
+
+            if ($request->has('month')) {
+                $month = $request->input('month') ?? date('m');
+                $query->whereMonth('date', $month);
+            }
+            if ($request->has('year')) {
+                $year = $request->input('year') ?? date('Y');
+                $query->whereYear('date', $year);
+            }
+            
+            $income = $query->where('type', 'income')->with('desc_category', 'transaction_code')->limit(10);
 
             return DataTables::of($income)
                 ->addIndexColumn()

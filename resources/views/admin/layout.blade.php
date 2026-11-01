@@ -226,6 +226,23 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
+                        <li class="menu @if(Request::segment(1)=="balance_sheet_account") active @endif">
+                            <a href="{{ url('balance_sheet_account') }}" @if(in_array(Request::segment(1), ['balance_sheet_account'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Master Akun Neraca</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="menu @if(Request::segment(1)=="balance_sheet_details") active @endif">
+                            <a href="{{ url('balance_sheet_details') }}" @if(in_array(Request::segment(1), ['balance_sheet_details'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Detail Saldo Neraca</span>
+                                </div>
+                            </a>
+                        </li>
+
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                             <li class="menu @if(Request::segment(1)=="expense") active @endif">
                                 <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
@@ -282,7 +299,7 @@ $setting = \App\Helpers\Helpers::setting();
                         </li>
 
                         <li class="menu @if(Request::segment(1)=="account") active @endif">
-                            <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account'])) aria-expanded="true" @endif class="dropdown-toggle">
+                            <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account','transaction_code','transaction_code_sub'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Kode Akun</span>

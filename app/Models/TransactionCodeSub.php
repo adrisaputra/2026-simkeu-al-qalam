@@ -19,10 +19,14 @@ class TransactionCodeSub extends Model
     {
         return $this->belongsTo(TransactionCode::class);
     }
-    
+
     public function student_bill_type()
     {
         return $this->hasOne('App\Models\StudentBillType');
     }
 
+    public function balance_sheet_accounts()
+    {
+        return $this->hasMany(BalanceSheetAccount::class);
+    }
 }

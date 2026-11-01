@@ -25,6 +25,21 @@
 										<a href="#" class="btn mb-2 mr-1 btn-info" data-placement="top" data-toggle="modal" data-target="#exampleModalImport" title="Import Data"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></a>
 										<a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
 									</div>
+                                    <div class="col-xl-2 col-md-12 col-sm-12 col-12">
+                                        <select id="filter_month" class="form-control form-control-sm" style="height: 38px;padding: 5px;">
+                                            <option value="">- Semua Bulan -</option>
+                                            @foreach ([1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'] as $month => $monthName)
+                                                <option value="{{ $month }}" @if(date('m') == $month) selected @endif>{{ $monthName }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-xl-2 col-md-12 col-sm-12 col-12">
+                                        <select id="filter_year" class="form-control form-control-sm" style="height: 38px;padding: 5px;">
+                                            @for($i=2026;$i<=date('Y');$i++)
+                                                <option value="{{ $i }}" @if(date('Y')==$i) selected @endif>{{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
 								</div>
 							</div>
 						</form>
@@ -78,6 +93,9 @@
                                     </ul>
                                 </div>
                             @endif
+
+                            <div class="row mb-3">
+                            </div>
                             
 							<div class="table-responsive">
 								<table class="table table-bordered table-hover mb-12" id="transaction-code-table">
@@ -109,7 +127,14 @@
         table = $('#transaction-code-table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ url('income/list') }}",
+            ajax: {
+                url: "{{ route('income.list') }}",
+                type: 'GET',
+                data: function (d) {
+                    d.month = $('#filter_month').val();
+                    d.year = $('#filter_year').val();
+                }
+            },
             columns: [
 				{data: 'id', name: 'id', visible: false},
 				{data: 'number', name: 'number'}, // Kolom nomor urut
@@ -131,6 +156,10 @@
                     cell.innerHTML = startIndex + i + 1; // Menghitung nomor urut berdasarkan indeks baris dan nomor halaman
                 });
             }
+        });
+
+        $('#filter_month, #filter_year').on('change', function () {
+            table.ajax.reload();
         });
 
         $('#bankTransactionsModal').on('shown.bs.modal', function () {

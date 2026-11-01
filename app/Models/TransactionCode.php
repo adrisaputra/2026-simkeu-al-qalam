@@ -41,4 +41,9 @@ class TransactionCode extends Model
     {
         return $this->hasMany('App\Models\TransactionCodeSub');
     }
+
+    public function balance_sheet_accounts()
+    {
+        return $this->hasMany(BalanceSheetAccount::class);
+    }
 }

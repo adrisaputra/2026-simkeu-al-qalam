@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BalanceSheetAccountController;
+use App\Http\Controllers\BalanceSheetDetailController;
 use App\Http\Controllers\ClassesController;
-use App\Http\Controllers\StudentBillTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncomeController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StudentBillController;
+use App\Http\Controllers\StudentBillTypeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentPromotionController;
 use App\Http\Controllers\TransactionCodeController;
@@ -83,7 +85,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/account/edit/{account}', [AccountController::class, 'update']);
     Route::delete('/account/delete/{account}', [AccountController::class, 'delete']);
 
-    # Student
+    // Student
     Route::get('/student', [StudentController::class, 'index'])->name('student.index');
     Route::get('/student/list', [StudentController::class, 'get_student_index'])->name('student.list');
     Route::post('/student/store', [StudentController::class, 'store']);
@@ -111,9 +113,9 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'update']);
     Route::get('/student_bill_type/delete/{student_bill_type}', [StudentBillTypeController::class, 'delete']);
 
-    Route::get('/student_bill/{student}', [StudentBillController::class,'index']);
+    Route::get('/student_bill/{student}', [StudentBillController::class, 'index']);
     Route::get('/student_bill/list/{student}', [StudentBillController::class, 'get_student_bill_index'])->name('student_bill.list');
-    Route::get('/student_bill/store/{student_bill_type}', [StudentBillController::class,'store']);
+    Route::get('/student_bill/store/{student_bill_type}', [StudentBillController::class, 'store']);
 
     // # Transaction Code
     Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');
@@ -124,6 +126,26 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/transaction_code/edit/{transaction_code}', [TransactionCodeController::class, 'update']);
     Route::get('/transaction_code/delete/{transaction_code}', [TransactionCodeController::class, 'delete']);
     Route::get('/transaction_code/get/{account_id?}/{transaction_code_id?}', [TransactionCodeController::class, 'get']);
+
+    // # Balance Sheet Account
+    Route::get('/balance_sheet_account', [BalanceSheetAccountController::class, 'index'])->name('balance_sheet_account.index');
+    Route::get('/balance_sheet_account/list', [BalanceSheetAccountController::class, 'get_balance_sheet_account_index'])->name('balance_sheet_account.list');
+    Route::post('/balance_sheet_account/store', [BalanceSheetAccountController::class, 'store']);
+    Route::post('/balance_sheet_account/validate/{action}', [BalanceSheetAccountController::class, 'validate']);
+    Route::get('/balance_sheet_account/edit/{balance_sheet_account}', [BalanceSheetAccountController::class, 'edit']);
+    Route::put('/balance_sheet_account/edit/{balance_sheet_account}', [BalanceSheetAccountController::class, 'update']);
+    Route::get('/balance_sheet_account/delete/{balance_sheet_account}', [BalanceSheetAccountController::class, 'delete']);
+
+    // # Balance Sheet Details
+    Route::get('/balance_sheet_details', [BalanceSheetDetailController::class, 'index'])->name('balance_sheet_details.index');
+    Route::get('/balance_sheet_details/input', [BalanceSheetDetailController::class, 'create'])->name('balance_sheet_details.input');
+    Route::post('/balance_sheet_details/store-all', [BalanceSheetDetailController::class, 'storeAll'])->name('balance_sheet_details.store_all');
+    Route::get('/balance_sheet_details/list', [BalanceSheetDetailController::class, 'get_balance_sheet_detail_index'])->name('balance_sheet_details.list');
+    Route::post('/balance_sheet_details/store', [BalanceSheetDetailController::class, 'store']);
+    Route::post('/balance_sheet_details/validate/{action}', [BalanceSheetDetailController::class, 'validate']);
+    Route::get('/balance_sheet_details/edit/{balance_sheet_detail}', [BalanceSheetDetailController::class, 'edit']);
+    Route::put('/balance_sheet_details/edit/{balance_sheet_detail}', [BalanceSheetDetailController::class, 'update']);
+    Route::get('/balance_sheet_details/delete/{balance_sheet_detail}', [BalanceSheetDetailController::class, 'delete']);
 
     // # Transaction Code Sub
     Route::get('/transaction_code_sub/{transaction_code}', [TransactionCodeSubController::class, 'index'])->name('transaction_code_sub.index');

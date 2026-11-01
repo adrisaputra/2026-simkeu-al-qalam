@@ -26,7 +26,18 @@ class ExpenseController extends Controller
         if ($request->ajax()) {
             $counter = 1;
 
-            $expense = Transaction::where('type', 'expense')->with('desc_category', 'transaction_code')->limit(10);
+            $query = Transaction::query();
+
+            if ($request->has('month')) {
+                $month = $request->input('month') ?? date('m');
+                $query->whereMonth('date', $month);
+            }
+            if ($request->has('year')) {
+                $year = $request->input('year') ?? date('Y');
+                $query->whereYear('date', $year);
+            }
+            
+            $expense = $query->where('type', 'expense')->with('desc_category', 'transaction_code')->limit(10);
 
             return DataTables::of($expense)
                 ->addIndexColumn()
