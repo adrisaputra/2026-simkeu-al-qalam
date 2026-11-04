@@ -74,7 +74,17 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_recap" style="display: none;">
-                                    <select id="recap_type" name="recap_type" class="form-control form-control-sm">
+                                    <select id="recap_type" name="recap_type" class="form-control form-control-sm"
+                                    onchange="if(this.value == '1' || this.value == '2') 
+                                            { 
+                                                document.getElementById('show_month').style.display = 'block'; 
+                                                document.getElementById('show_year').style.display = 'block'; 
+                                            } 
+                                            else 
+                                            { 
+                                                document.getElementById('show_month').style.display = 'none';
+                                                document.getElementById('show_year').style.display = 'block';
+                                            }">
                                         <option value="">- Pilih Jenis Rekap -</option>
                                         <option value="1">Catatan Harian</option>
                                         <option value="2">Rekap Bulanan</option>

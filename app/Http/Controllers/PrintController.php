@@ -36,6 +36,8 @@ class PrintController extends Controller
                 return $this->print_recap_daily($request);
             } else if($request->recap_type == 2){
                 return $this->print_recap_monthly($request);
+            } else if($request->recap_type == 3){
+                return $this->print_activity($request);
             }
         } 
     }
@@ -160,7 +162,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $first_year)
-                        ->where('desc_category_id', 3)
+                        ->where('transaction_code_id',2)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -177,7 +179,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $first_year)
-                        ->where('desc_category_id', 3)
+                        ->where('transaction_code_id',2)
                         ->sum('amount');
                     
                     if($amount > 0) {
@@ -195,7 +197,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $first_year)
-                        ->where('desc_category_id', 2)
+                        ->where('transaction_code_id',3)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -212,7 +214,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $first_year)
-                        ->where('desc_category_id', 2)
+                        ->where('transaction_code_id',3)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -230,7 +232,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $second_year)
-                        ->where('desc_category_id', 3)
+                        ->where('transaction_code_id',2)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -247,7 +249,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $second_year)
-                        ->where('desc_category_id', 3)
+                        ->where('transaction_code_id',2)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -265,7 +267,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $second_year)
-                        ->where('desc_category_id', 2)
+                        ->where('transaction_code_id',3)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -282,7 +284,7 @@ class PrintController extends Controller
                     $amount = TransactionBank::where('student_id', $student->id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $second_year)
-                        ->where('desc_category_id', 2)
+                        ->where('transaction_code_id',3)
                         ->sum('amount');
 
                     if($amount > 0) {
@@ -453,6 +455,7 @@ class PrintController extends Controller
         $sheet->setCellValue('A5', 'SALDO');$sheet->mergeCells('A5:B5');
         $sheet->setCellValue('C5', '17977204');
         $sheet->getStyle('A5:B5')->getFont()->setBold(true);
+        $sheet->getStyle('C5')->getNumberFormat()->setFormatCode('#,##0');
 
         $sheet->setCellValue('A6', 'PEMASUKAN');$sheet->mergeCells('A6:C6');
         $sheet->getStyle('A6:C6')->getFont()->setBold(true);
@@ -682,136 +685,168 @@ class PrintController extends Controller
         return redirect(url('/').'/public/upload/report/'.$fileName);
     }
 
-    public function print_kpi_yearly(Request $request)
+    public function print_activity(Request $request)
     {
         $spreadsheet = new Spreadsheet;
         $spreadsheet->setActiveSheetIndex(0);
         $sheet = $spreadsheet->getActiveSheet();
 
-        if ($request->work_unit_id) {
-            $work_unit = WorkUnit::where('id', $request->work_unit_id)->first();
-            $employee = Employee::where('work_unit_id', $request->work_unit_id)->orderBy('name', 'ASC')->get();
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(60);
+        $sheet->getColumnDimension('C')->setWidth(15);
 
-        } else {
-            $work_unit = null;
-            $employee = Employee::orderBy('name', 'ASC')->get();
-        }
-
-        // Atur lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(5);   // No
-        $sheet->getColumnDimension('B')->setWidth(40);  // Nama
-        $sheet->getColumnDimension('C')->setWidth(8);  // Nilai Rapor
-        $sheet->getColumnDimension('D')->setWidth(8);  // KPI
-
-        $sheet->getColumnDimension('E')->setWidth(8);  // Jan
-        $sheet->getColumnDimension('F')->setWidth(8);  // Feb
-        $sheet->getColumnDimension('G')->setWidth(8);  // Mar
-        $sheet->getColumnDimension('H')->setWidth(8);  // Apr
-        $sheet->getColumnDimension('I')->setWidth(8);  // Mei
-        $sheet->getColumnDimension('J')->setWidth(8);  // Jun
-        $sheet->getColumnDimension('K')->setWidth(8);  // Jul
-        $sheet->getColumnDimension('L')->setWidth(8);  // Agu
-        $sheet->getColumnDimension('M')->setWidth(8);  // Sep
-        $sheet->getColumnDimension('N')->setWidth(8);  // Okt
-        $sheet->getColumnDimension('O')->setWidth(8);  // Nov
-        $sheet->getColumnDimension('P')->setWidth(8);  // Des
-
-        $sheet->getColumnDimension('Q')->setWidth(15);
-        $sheet->getColumnDimension('R')->setWidth(15);
-        $sheet->getColumnDimension('S')->setWidth(15);
-        $sheet->getColumnDimension('T')->setWidth(15);
-        $sheet->getColumnDimension('U')->setWidth(15);
-
-        if ($work_unit) {
-            $sheet->mergeCells('A1:U1');
-            $sheet->mergeCells('A2:U2');
-            $sheet->mergeCells('A3:U3');
-            $sheet->setCellValue('A1', 'REKAP BULANAN PENILAIAN KPI YAYASAN PENDIDIKAN ALQALAM KENDARI');
-            $sheet->setCellValue('A2', strtoupper($work_unit->name));
-            $sheet->setCellValue('A3', 'TAHUN '.$request->year);
-            $sheet->getStyle('A1:U3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:U3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $sheet->getStyle('A1:U3')->getFont()->setBold(true);
-            $sheet->getStyle('A1:U3')->getAlignment()->setWrapText(true);
-        } else {
-            $sheet->mergeCells('A1:U1');
-            $sheet->mergeCells('A2:U2');
-            $sheet->setCellValue('A1', 'REKAP BULANAN PENILAIAN KPI YAYASAN PENDIDIKAN ALQALAM KENDARI');
-            $sheet->setCellValue('A2', 'TAHUN '.$request->year);
-            $sheet->getStyle('A1:U2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('A1:U2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-            $sheet->getStyle('A1:U2')->getFont()->setBold(true);
-            $sheet->getStyle('A1:U2')->getAlignment()->setWrapText(true);
-        }
+        $sheet->mergeCells('A1:C1');
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('A1', 'LAPORAN KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI');
+        $sheet->setCellValue('A2', 'TAHUN '.$request->year);
+        $sheet->getStyle('A1:C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:C2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:C2')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C2')->getAlignment()->setWrapText(true);
 
         // Header tabel
-        $sheet->setCellValue('A5', 'No');
-        $sheet->setCellValue('B5', 'Nama');
-        $sheet->setCellValue('C5', 'Rapor');
-        $sheet->setCellValue('D5', 'KPI');
-        $sheet->setCellValue('E5', 'Jan');
-        $sheet->setCellValue('F5', 'Feb');
-        $sheet->setCellValue('G5', 'Mar');
-        $sheet->setCellValue('H5', 'Apr');
-        $sheet->setCellValue('I5', 'Mei');
-        $sheet->setCellValue('J5', 'Jun');
-        $sheet->setCellValue('K5', 'Jul');
-        $sheet->setCellValue('L5', 'Agu');
-        $sheet->setCellValue('M5', 'Sep');
-        $sheet->setCellValue('N5', 'Okt');
-        $sheet->setCellValue('O5', 'Nov');
-        $sheet->setCellValue('P5', 'Des');
-        $sheet->setCellValue('Q5', 'Rata-rata Tahunan');
-        $sheet->setCellValue('R5', 'Predikat');
-        $sheet->setCellValue('S5', 'Tukin');
-        $sheet->setCellValue('T5', 'Besaran Tukin');
-        $sheet->setCellValue('U5', 'Tukin Diterima');
+        $sheet->setCellValue('A5', 'PENERIMAAN TAHUN '.$request->year);$sheet->mergeCells('A5:B5');
+        $sheet->setCellValue('C5', '17977204');
+        $sheet->getStyle('A5:B5')->getFont()->setBold(true);
+        $sheet->getStyle('C5')->getNumberFormat()->setFormatCode('#,##0');
 
-        $sheet->getStyle('A5:U5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A5:U5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A5:U5')->getFont()->setBold(true);
-        $sheet->getStyle('A5:U5')->getAlignment()->setWrapText(true);
+        $sheet->setCellValue('A6', '1');
+        $sheet->setCellValue('B6', 'INFAK GEDUNG');
+        $sheet->setCellValue('C6', '');
 
-        $rows = 6;
-        $no = 1;
+        $sheet->setCellValue('A7', '2');
+        $sheet->setCellValue('B7', 'INFAQ TANAH');
+        $sheet->setCellValue('C7', '');
 
-        foreach ($employee as $v) {
+        $sheet->setCellValue('A8', '3');
+        $sheet->setCellValue('B8', 'PENINGKATAN MUTU');
+        $sheet->setCellValue('C8', '');
 
-            $employee_report = EmployeeReport::whereHas('employee_report_period', function ($query) use ($v, $request) {
-                $query->where('employee_id', $v->id)
-                    ->whereMonth('date', $request->month)
-                    ->whereyear('date', $request->year);
-            })->sum('value');
+        $sheet->setCellValue('A9', '4');
+        $sheet->setCellValue('B9', 'SPP');
+        $sheet->setCellValue('C9', '');
 
-            $employee_kpi = EmployeeReport::whereHas('employee_report_period', function ($query) use ($v, $request) {
-                $query->where('employee_id', $v->id)
-                    ->whereMonth('date', $request->month)
-                    ->whereyear('date', $request->year);
-            })->sum('value');
+        $sheet->setCellValue('A10', '5');
+        $sheet->setCellValue('B10', 'CATERING');
+        $sheet->setCellValue('C10', '');
 
-            $sheet->setCellValue('A'.$rows, $no++);
-            $sheet->setCellValue('B'.$rows, $v->name);
-            $sheet->setCellValue('C'.$rows, $employee_report);
-            $sheet->setCellValue('Q'.$rows, '=AVERAGE(E'.$rows.':P'.$rows.')');
-            $sheet->setCellValue('R'.$rows, '=IF(Q'.$rows.'>=90,"Sangat Baik",IF(Q'.$rows.'>=80,"Baik",IF(Q'.$rows.'>=70,"Cukup",IF(Q'.$rows.'>=60,"Kurang","Perlu Pembinaan"))))');
-            $sheet->setCellValue('S'.$rows, '=IF(Q'.$rows.'>=90,100%,IF(Q'.$rows.'>=80,90%,IF(Q'.$rows.'>=70,80%,IF(Q'.$rows.'>=60,70%,IF(Q'.$rows.'>=50,60%,IF(Q'.$rows.'>=40,50%,IF(Q'.$rows.'>=30,40%,30%)))))))');
-            $sheet->setCellValue('T'.$rows, '200000');
-            $sheet->setCellValue('U'.$rows, '=T'.$rows.'*S'.$rows);
-            $sheet->getStyle('T'.$rows.':U'.$rows)->getNumberFormat()->setFormatCode('#,##0');
-            $rows++;
-        }
+        $sheet->setCellValue('A11', '6');
+        $sheet->setCellValue('B11', 'RAPORT');
+        $sheet->setCellValue('C11', '');
 
-        // Border dan alignment
-        $sheet->getStyle('A5:U'.($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle('A5:A'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('U5:U'.($rows - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('A12', '7');
+        $sheet->setCellValue('B12', 'SERAGAM');
+        $sheet->setCellValue('C12', '');
+
+        $sheet->setCellValue('A13', '8');
+        $sheet->setCellValue('B13', 'BOS / BOP');
+        $sheet->setCellValue('C13', '');
+
+        $sheet->setCellValue('A14', '9');
+        $sheet->setCellValue('B14', 'WISUDA');
+        $sheet->setCellValue('C14', '');
+
+        $sheet->setCellValue('A15', '10');
+        $sheet->setCellValue('B15', 'FORMULIR PPDB');
+        $sheet->setCellValue('C15', '');
+
+        $sheet->setCellValue('A16', '11');
+        $sheet->setCellValue('B16', 'QURBAN');
+        $sheet->setCellValue('C16', '');
+
+        $sheet->setCellValue('A17', '12');
+        $sheet->setCellValue('B17', "INFAQ KELAS / INFAQ JUM'AT / DONASI KEMANUSIAAN");
+        $sheet->setCellValue('C17', '');
+
+        $sheet->setCellValue('A18', '13');
+        $sheet->setCellValue('B18', 'PENDAPATAN LAIN-LAIN');
+        $sheet->setCellValue('C18', '');
+
+        $sheet->setCellValue('A19', 'JUMLAH PEMASUKAN');$sheet->mergeCells('A19:B19');
+        $sheet->setCellValue('B19', '-');
+        $sheet->setCellValue('C19', '');
+        $sheet->getStyle('A19:C19')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A20', '');$sheet->mergeCells('A20:C20');
+
+        // Pengeluaran
+        $sheet->setCellValue('A21', 'PENGELUARAN TAHUN '.$request->year);$sheet->mergeCells('A21:B21');
+        $sheet->getStyle('A21:C21')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A22', '1');
+        $sheet->setCellValue('B22', 'PINJAMAN GURU / PEGAWAI / UNIT');
+        $sheet->setCellValue('C22', '');
+
+        $sheet->setCellValue('A23', '2');
+        $sheet->setCellValue('B23', 'GAJI GURU DAN PEGAWAI');
+        $sheet->setCellValue('C23', '');
+
+        $sheet->setCellValue('A24', '3');
+        $sheet->setCellValue('B24', 'BIAYA KESEKRETARIATAN');
+        $sheet->setCellValue('C24', '');
+
+        $sheet->setCellValue('A25', '4');
+        $sheet->setCellValue('B25', 'BIAYA KANTOR DAN PEMELIHARAAN');
+        $sheet->setCellValue('C25', '');
+
+        $sheet->setCellValue('A26', '5');
+        $sheet->setCellValue('B26', 'BIAYA BBM, PARKIR DAN TRANSPORT');
+        $sheet->setCellValue('C26', '');
+
+        $sheet->setCellValue('A27', '6');
+        $sheet->setCellValue('B27', 'BIAYA LISTRIK, AIR, TELPON DAN INTERNET');
+        $sheet->setCellValue('C27', '');
+
+        $sheet->setCellValue('A28', '7');
+        $sheet->setCellValue('B28', 'BIAYA ASURANSI, INFAQ DAN PAJAK');
+        $sheet->setCellValue('C28', '');
+
+        $sheet->setCellValue('A29', '8');
+        $sheet->setCellValue('B29', 'BIAYA PROGRAM DAN KEGIATAN');
+        $sheet->setCellValue('C29', '');
+
+        $sheet->setCellValue('A30', '9');
+        $sheet->setCellValue('B30', 'BIAYA KONSUMSI GURU, SISWA DAN KONSUMSI RAPAT');
+        $sheet->setCellValue('C30', '');
+
+        $sheet->setCellValue('A31', '10');
+        $sheet->setCellValue('B31', 'BIAYA ADMINISTRASI DAN UMUM LAINNYA');
+        $sheet->setCellValue('C31', '');
+
+        $sheet->setCellValue('A32', '11');
+        $sheet->setCellValue('B32', 'BIAYA PENDIDIKAN, KESEHATAN DAN SOSIAL');
+        $sheet->setCellValue('C32', '');
+
+        $sheet->setCellValue('A33', '12');
+        $sheet->setCellValue('B33', 'SERAGAM');
+        $sheet->setCellValue('C33', '');
+
+        $sheet->setCellValue('A34', '13');
+        $sheet->setCellValue('B34', 'BIAYA PERJALANAN DINAS');
+        $sheet->setCellValue('C34', '');
+
+        $sheet->setCellValue('A35', '14');
+        $sheet->setCellValue('B35', 'INVENTARIS DAN PERALATAN');
+        $sheet->setCellValue('C35', '');
+
+        $sheet->setCellValue('A36', 'JUMLAH PENGELUARAN');$sheet->mergeCells('A36:B36');
+        $sheet->setCellValue('C36', '');
+        $sheet->getStyle('A36:C36')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A37', 'SELISIH');$sheet->mergeCells('A37:B37');
+        $sheet->setCellValue('C37', '');
+        $sheet->getStyle('A37:C37')->getFont()->setBold(true);
+
+        $sheet->getStyle('A5:C37')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setWrapText(true);
+        // $sheet->getStyle('A5:A'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('B5:B'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('F5:H'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // $sheet->getStyle('E' . $totalRow . ':H' . $totalRow)->getFont()->setBold(true);
 
         $type = 'xlsx';
-        if ($work_unit) {
-            $fileName = 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI ('.strtoupper($work_unit->name).') TAHUN '.$request->year.'.'.$type;
-        } else {
-            $fileName = 'REKAP RAPOR YAYASAN PENDIDIKAN ALQALAM KENDARI TAHUN '.$request->year.' .'.$type;
-        }
+        $fileName = 'REKAP AKTIVITAS YAYASAN PENDIDIKAN ALQALAM KENDARI TAHUN '.$request->year.'.'.$type;
 
         if ($type == 'xlsx') {
             $writer = new Xlsx($spreadsheet);
@@ -823,4 +858,5 @@ class PrintController extends Controller
 
         return redirect(url('/').'/public/upload/report/'.$fileName);
     }
+
 }
