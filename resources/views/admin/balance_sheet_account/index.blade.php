@@ -164,33 +164,6 @@
         });
     }
 
-    function getTransactionCodeSub(selectedId) {
-        var transactionCodeId = $('#transaction_code_id').val();
-        var url = "{{ url('/transaction_code_sub/get') }}/" + transactionCodeId;
-        var $subCode = $('#transaction_code_sub_id');
-
-        if (!transactionCodeId) {
-            $subCode.html('<option value="">- Pilih Sub Kode Transaksi -</option>');
-            return;
-        }
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function (html) {
-                $subCode.html(html);
-
-                if (selectedId) {
-                    $subCode.val(String(selectedId));
-                }
-            },
-            error: function (xhr) {
-                showFailedToast(xhr.responseJSON?.message || 'Sub kode transaksi gagal dimuat.');
-                console.error('Error mengambil sub kode transaksi:', xhr);
-            }
-        });
-    }
-
     function send() {
         var formData = new FormData($('#myForm')[0]);
 
@@ -224,12 +197,90 @@
             success: function (response) {
                 var data = response.data;
                 $('#id_balance_sheet_account').val(data.id);
-                $('#transaction_code_id').val(data.transaction_code_id);
-                getTransactionCodeSub(data.transaction_code_sub_id);
+                // $('#transaction_code_id').val(data.transaction_code_id);
+                // getTransactionCodeSub(data.transaction_code_sub_id);
                 $('#name').val(data.name);
                 $('#category').val(data.category);
                 $('#is_active').val(data.is_active ? '1' : '0');
-                $('.invalid-feedback').html('');
+                // $('.invalid-feedback').html('');
+
+                
+                $("#account_id").val(String(data.account_id));
+
+                $("#transaction_code_id").html(
+                    '<option value="">- Pilih -</option>'
+                );
+
+                $("#transaction_code_sub_id").html(
+                    '<option value="">- Pilih -</option>'
+                );
+
+                var codeUrl = "{{ url('/transaction_code/get') }}";
+
+                $.ajax({
+                    url: codeUrl + "/" + data.account_id + "/" + data.transaction_code_id,
+                    type: "GET",
+
+                    success: function(html) {
+                        $("#transaction_code_id").html(html);
+
+                        // Beri jeda sebelum memilih kode transaksi
+                        setTimeout(function() {
+                            $("#transaction_code_id")
+                                .val(String(data.transaction_code_id))
+                                .trigger("change.select2");
+
+                            var subUrl = "{{ url('/transaction_code_sub/get') }}";
+
+                            $.ajax({
+                                url: subUrl + "/" + data.transaction_code_id + "/" +
+                                    (data.transaction_code_sub_id || ""),
+                                type: "GET",
+
+                                success: function(htmlSub) {
+                                    var $sub = $("#transaction_code_sub_id");
+
+                                    $sub.html(htmlSub);
+
+                                    // Beri jeda sebelum memilih subkode
+                                    setTimeout(function() {
+                                        var selectedSubId =
+                                            data.transaction_code_sub_id != null
+                                                ? String(data.transaction_code_sub_id)
+                                                : "";
+
+                                        $sub.val(selectedSubId)
+                                            .trigger("change.select2");
+
+                                        console.log(
+                                            "Subkode tersimpan:",
+                                            selectedSubId
+                                        );
+
+                                        console.log(
+                                            "Subkode terpilih:",
+                                            $sub.val()
+                                        );
+                                    }, 300);
+                                },
+
+                                error: function(xhr) {
+                                    console.error(
+                                        "Gagal memuat subkode:",
+                                        xhr.responseText
+                                    );
+                                }
+                            });
+                        }, 300);
+                    },
+
+                    error: function(xhr) {
+                        console.error(
+                            "Gagal memuat kode transaksi:",
+                            xhr.responseText
+                        );
+                    }
+                });
             },
             error: function (xhr) {
                 showFailedToast(xhr.responseJSON?.message || 'Data gagal dimuat.');
@@ -288,5 +339,133 @@
             }
         });
     }
+
+    
+    function getTransactionCode() {
+        var account_id = $("#account_id").val();
+
+        // Reset kode transaksi dan subkode
+        $("#transaction_code_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        $("#transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!account_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code/get') }}";
+
+        $.ajax({
+            url: url + "/" + account_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#transaction_code_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function getTransactionCode2() {
+        var account_id = $("#import_account_id").val();
+
+        // Reset kode transaksi dan subkode
+        $("#import_transaction_code_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        $("#import_transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!account_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code/get') }}";
+
+        $.ajax({
+            url: url + "/" + account_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#import_transaction_code_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function getTransactionCodeSub() {
+        var transaction_code_id = $("#transaction_code_id").val();
+
+        $("#transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!transaction_code_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code_sub/get') }}";
+
+        $.ajax({
+            url: url + "/" + transaction_code_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#transaction_code_sub_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function getTransactionCodeSub2() {
+        var transaction_code_id = $("#import_transaction_code_id").val();
+
+        $("#import_transaction_code_sub_id").html(
+            '<option value="">- Pilih -</option>'
+        );
+
+        if (!transaction_code_id) {
+            return false;
+        }
+
+        var url = "{{ url('/transaction_code_sub/get') }}";
+
+        $.ajax({
+            url: url + "/" + transaction_code_id,
+            type: "GET",
+
+            success: function(html) {
+                $("#import_transaction_code_sub_id").html(html);
+            },
+
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
 </script>
 @endsection

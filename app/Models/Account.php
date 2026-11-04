@@ -22,4 +22,9 @@ class Account extends Model
     {
         return $this->hasMany('App\Models\TransactionCode');
     }
+    
+    public function balance_sheet_accounts()
+    {
+        return $this->hasMany(BalanceSheetAccount::class);
+    }
 }

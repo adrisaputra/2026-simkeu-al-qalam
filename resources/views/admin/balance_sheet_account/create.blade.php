@@ -18,20 +18,28 @@
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_balance_sheet_account" />
 
                     <div class="form-group">
+                        <p>{{ __('Akun') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="account_id" id="account_id" onchange="getTransactionCode();">
+                            <option value="">- Pilih - </option>
+                            @foreach($account as $v)
+                                <option value="{{ $v->id }}">{{ $v->name }}</option>
+                            @endforeach
+                        </select>
+                        <div id="account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group">
                         <p>{{ __('Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <select class="form-control form-control-sm" name="transaction_code_id" id="transaction_code_id" onchange="getTransactionCodeSub()">
-                            <option value="">- Pilih Kode Transaksi -</option>
-                            @foreach($transaction_code as $v)
-                                <option value="{{ $v->id }}">{{ $v->code }} - {{ $v->name }}</option>
-                            @endforeach
+                            <option value="">- Pilih - </option>
                         </select>
                         <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
                     <div class="form-group">
-                        <p>{{ __('Sub Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <p>{{ __('Sub Kode Transaksi') }}</p>
                         <select class="form-control form-control-sm" name="transaction_code_sub_id" id="transaction_code_sub_id">
-                            <option value="">- Pilih Sub Kode Transaksi -</option>
+                            <option value="">- Pilih - </option>
                         </select>
                         <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
@@ -47,8 +55,8 @@
                         <select class="form-control form-control-sm" name="category" id="category">
                             <option value="">- Pilih Kategori -</option>
                             <option value="asset">Aset</option>
-                            <option value="liability">Liabilitas</option>
-                            <option value="net_asset">Aset Neto</option>
+                            <option value="liability">Kewajian</option>
+                            <option value="net_asset">Modal</option>
                         </select>
                         <div id="category-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>

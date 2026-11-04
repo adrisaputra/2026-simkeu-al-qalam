@@ -35,7 +35,7 @@
 
                     <div class="form-group">
                         <p>{{ __('Jumlah Saldo') }} <span class="required" style="color: #dd4b39;">*</span></p>
-                        <input type="number" class="form-control form-control-sm" name="amount" id="amount" step="0.01">
+                        <input type="text" class="form-control form-control-sm" name="amount" id="amount" onkeyup="formatRupiah(this, '.')">
                         <div id="amount-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 

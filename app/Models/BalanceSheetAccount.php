@@ -10,6 +10,7 @@ class BalanceSheetAccount extends Model
     use HasFactory;
 
     protected $fillable = [
+        'account_id',
         'transaction_code_id',
         'transaction_code_sub_id',
         'name',
@@ -20,6 +21,11 @@ class BalanceSheetAccount extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
 
     public function transaction_code()
     {

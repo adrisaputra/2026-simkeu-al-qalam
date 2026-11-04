@@ -16,15 +16,14 @@
 					   	<form method="GET" action="{{ route('balance_sheet_details.input') }}">
                             <div class="widget-content widget-content-area">
 								<div class="row">
-									<div class="col-xl-8 col-md-12 col-sm-12 col-12">
+									<div class="col-xl-10 col-md-12 col-sm-12 col-12">
 										</div>
-                                    <div class="col-xl-4 col-md-12 col-sm-12 col-12">
-										<select id="year" name="year" class="form-control form-control-sm" style="height: 38px;padding: 5px;">
-                                            @for($i=2026;$i<=date('Y');$i++)
-                                                <option value="{{ $i }}" @if(date('Y')==$i) selected @endif>{{ $i }}</option>
+                                    <div class="col-xl-2 col-md-12 col-sm-12 col-12">
+										<select id="year" name="year" class="form-control form-control-sm" style="height: 38px;padding: 5px;" onchange="this.form.submit()">
+                                            @for($i=2024;$i<=date('Y');$i++)
+                                                <option value="{{ $i }}" @if($year==$i) selected @endif>{{ $i }}</option>
                                             @endfor
                                         </select>
-                                        <button type="submit" class="btn btn-info btn-sm">Tampilkan Akun</button>
                                     </div>
 								</div>
 							</div>
@@ -52,6 +51,7 @@
                                             <tr>
                                                 <th style="width: 5%">No</th>
                                                 <th>Nama Akun Neraca</th>
+                                                <th>Kategori</th>
                                                 <th style="width: 30%">Nominal Saldo (Rp)</th>
                                             </tr>
                                         </thead>
@@ -59,14 +59,23 @@
                                             @foreach($balance_sheet_accounts as $index => $account)
                                                 @php
                                                     $existingDetail = $account->balance_sheet_details->first();
-                                                    $amount = old('amounts.'.$account->id, $existingDetail?->amount ?? '0.00');
+                                                    $amount = old('amounts.'.$account->id, $existingDetail?->amount ?? '0');
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $account->name }}</td>
+                                                    <td>                                   
+                                                        @if($account->category=='asset')
+                                                            <span class="badge badge-primary">Aset</span>
+                                                        @elseif($account->category=='liability')
+                                                            <span class="badge badge-warning">Kewajiban</span>
+                                                        @elseif($account->category=='net_asset')
+                                                            <span class="badge badge-success">Modal</span>
+                                                        @endif
+                                                    </td>
                                                     <td>
-                                                        <input type="number" class="form-control form-control-sm @error('amounts.'.$account->id) is-invalid @enderror"
-                                                            name="amounts[{{ $account->id }}]" value="{{ $amount }}" step="0.01" required>
+                                                        <input type="text" class="form-control form-control-sm @error('amounts.'.$account->id) is-invalid @enderror"
+                                                            name="amounts[{{ $account->id }}]" value="{{ $amount }}" onkeyup="formatRupiah(this, '.')" required>
                                                         @error('amounts.'.$account->id)
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
@@ -77,7 +86,7 @@
                                     </table>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Simpan Semua Saldo</button>
-                                <a href="{{ route('balance_sheet_details.index') }}" class="btn btn-secondary">Kembali</a>
+                                <a href="{{ route('balance_sheet_details.index') }}"  class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Kembali"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg></a>
                             </form>
                         @endif
                 </div>

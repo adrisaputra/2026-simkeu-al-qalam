@@ -195,7 +195,7 @@ $setting = \App\Helpers\Helpers::setting();
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                             <li class="menu @if(Request::segment(1)=="student") active @endif">
-                                <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student','student_bill'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
                                         <img src="{{ asset('storage/menu/icons8-student-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Data Siswa</span>
@@ -226,21 +226,24 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
-                        <li class="menu @if(Request::segment(1)=="balance_sheet_account") active @endif">
-                            <a href="{{ url('balance_sheet_account') }}" @if(in_array(Request::segment(1), ['balance_sheet_account'])) aria-expanded="true" @endif class="dropdown-toggle">
+                        <li class="menu @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) active @endif">
+                            <a href="#employee" data-toggle="collapse" @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Master Akun Neraca</span>
+                                    <img src="{{ asset('storage/menu/icons8-profile-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    Neraca
+                                </div>
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
                                 </div>
                             </a>
-                        </li>
-                        <li class="menu @if(Request::segment(1)=="balance_sheet_details") active @endif">
-                            <a href="{{ url('balance_sheet_details') }}" @if(in_array(Request::segment(1), ['balance_sheet_details'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Detail Saldo Neraca</span>
-                                </div>
-                            </a>
+                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) show @endif" id="employee" data-parent="#accordionExample">
+                                <li @if(Request::segment(1)=="balance_sheet_account") class="active" @endif">
+                                    <a href="{{ url('balance_sheet_account') }}">Akun Neraca</a>
+                                </li>
+                                <li @if(Request::segment(1)=="balance_sheet_details") class="active" @endif" >
+                                    <a href="{{ url('balance_sheet_details') }}">Saldo Neraca</a>
+                                </li>
+                            </ul>
                         </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\BalanceSheetAccount;
 use App\Models\BalanceSheetDetail;
 use App\Models\TransactionCode;
@@ -14,10 +15,11 @@ class BalanceSheetAccountController extends Controller
     public function index()
     {
         $title = 'Akun Neraca';
-        $transaction_code = TransactionCode::where('account_id', 3)->orderBy('code')->get();
+        // $transaction_code = TransactionCode::where('account_id', 3)->orderBy('code')->get();
+        $account = Account::whereIn('id',[3,4])->get();
         $years = BalanceSheetDetail::query()->distinct()->orderByDesc('year')->pluck('year');
 
-        return view('admin.balance_sheet_account.index', compact('title', 'transaction_code', 'years'));
+        return view('admin.balance_sheet_account.index', compact('title', 'account', 'years'));
     }
 
     public function get_balance_sheet_account_index(Request $request)
@@ -48,7 +50,13 @@ class BalanceSheetAccountController extends Controller
                         : '-';
                 })
                 ->addColumn('display_category', function ($v) use ($categories) {
-                    return $categories[$v->category] ?? $v->category;
+                    if($v->category=='asset'){
+                        return '<span class="badge badge-primary">Aset</span>';
+                    }elseif($v->category=='liability'){
+                        return '<span class="badge badge-warning">Kewajiban</span>';
+                    }elseif($v->category=='net_asset'){
+                        return '<span class="badge badge-success">Modal</span>';
+                    }
                 })
                 ->addColumn('display_is_active', function ($v) {
                     return $v->is_active
@@ -65,7 +73,7 @@ class BalanceSheetAccountController extends Controller
 
                     return $btn;
                 })
-                ->rawColumns(['display_is_active', 'action'])
+                ->rawColumns(['display_category','display_is_active', 'action'])
                 ->make(true);
         }
     }
@@ -74,6 +82,7 @@ class BalanceSheetAccountController extends Controller
     {
         if ($request->ajax()) {
             $attributes = [
+                'account_id' => 'Kode Akun',
                 'transaction_code_id' => 'Kode Transaksi',
                 'name' => 'Nama Akun Neraca',
                 'category' => 'Kategori',
@@ -81,6 +90,7 @@ class BalanceSheetAccountController extends Controller
             ];
 
             $rules = [
+                'account_id' => 'required',
                 'transaction_code_id' => ['required', 'integer', Rule::exists('transaction_codes', 'id')],
                 'name' => 'required|max:255',
                 'category' => ['required', Rule::in(['asset', 'liability', 'net_asset'])],
@@ -99,7 +109,9 @@ class BalanceSheetAccountController extends Controller
         if ($request->ajax()) {
 
             $balance_sheet_account = new BalanceSheetAccount;
+            $balance_sheet_account->account_id = $request->account_id;
             $balance_sheet_account->transaction_code_id = $request->transaction_code_id;
+            $balance_sheet_account->transaction_code_sub_id = $request->transaction_code_sub_id;
             $balance_sheet_account->name = $request->name;
             $balance_sheet_account->category = $request->category;
             $balance_sheet_account->is_active = $request->is_active;
@@ -124,7 +136,9 @@ class BalanceSheetAccountController extends Controller
     {
         if ($request->ajax()) {
 
+            $balance_sheet_account->account_id = $request->account_id;
             $balance_sheet_account->transaction_code_id = $request->transaction_code_id;
+            $balance_sheet_account->transaction_code_sub_id = $request->transaction_code_sub_id;
             $balance_sheet_account->name = $request->name;
             $balance_sheet_account->category = $request->category;
             $balance_sheet_account->is_active = $request->is_active;

@@ -52,6 +52,7 @@
                                                 <th style="width: 2%">Number</th>
                                                 <th style="width: 2%">No</th>
                                                 <th>Nama Akun Neraca</th>
+                                                <th>Kategori</th>
                                                 <th>Tahun</th>
                                                 <th>Jumlah Saldo</th>
                                                 <th>Catatan</th>
@@ -89,6 +90,7 @@
                 {data: 'id', name: 'id', visible: false},
                 {data: 'number', name: 'number'},
                 {data: 'account_name', name: 'account_name', orderable: false, searchable: false},
+                {data: 'display_category', name: 'display_category'},
                 {data: 'year', name: 'year'},
                 {data: 'display_amount', name: 'amount'},
                 {data: 'notes', name: 'notes', defaultContent: '-'},
@@ -217,7 +219,7 @@
                 document.getElementById('id_balance_sheet_detail').value = response.data.id;
                 document.getElementById('balance_sheet_account_id').value = response.data.balance_sheet_account_id;
                 document.getElementById('year').value = response.data.year;
-                document.getElementById('amount').value = response.data.amount;
+                document.getElementById('amount').value = formatRupiah2(response.data.amount);
                 document.getElementById('notes').value = response.data.notes;
             },
             error: function (xhr) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
 use App\Models\BalanceSheetAccount;
 use App\Models\BalanceSheetDetail;
 use Illuminate\Contracts\View\View;
@@ -16,7 +17,7 @@ class BalanceSheetDetailController extends Controller
 {
     public function index(): View
     {
-        $title = 'Detail Saldo Neraca';
+        $title = 'Saldo Neraca';
         $balance_sheet_accounts = BalanceSheetAccount::orderBy('name')->get();
         $years = BalanceSheetDetail::query()->distinct()->orderByDesc('year')->pluck('year');
 
@@ -38,7 +39,7 @@ class BalanceSheetDetailController extends Controller
             ->with(['balance_sheet_details' => function ($query) use ($year) {
                 $query->where('year', $year);
             }])
-            ->orderBy('name')
+            ->orderBy('category')
             ->get();
 
         return view('admin.balance_sheet_details.input', compact('title', 'year', 'balance_sheet_accounts'));
@@ -52,11 +53,13 @@ class BalanceSheetDetailController extends Controller
                 'year' => ['nullable', 'integer', 'between:1900,9999'],
             ]);
 
-            $balance_sheet_details = BalanceSheetDetail::with('balance_sheet_account');
+            $query = BalanceSheetDetail::with('balance_sheet_account');
 
             if (isset($validated['year'])) {
-                $balance_sheet_details->where('year', $validated['year']);
+                $query->where('year', $validated['year']);
             }
+
+            $balance_sheet_details = $query->limit(10);
 
             return DataTables::of($balance_sheet_details)
                 ->addIndexColumn()
@@ -66,8 +69,17 @@ class BalanceSheetDetailController extends Controller
                 ->addColumn('account_name', function ($v) {
                     return $v->balance_sheet_account?->name ?? '-';
                 })
+                ->addColumn('display_category', function ($v) {
+                    if($v->balance_sheet_account->category=='asset'){
+                        return '<span class="badge badge-primary">Aset</span>';
+                    }elseif($v->balance_sheet_account->category=='liability'){
+                        return '<span class="badge badge-warning">Kewajiban</span>';
+                    }elseif($v->balance_sheet_account->category=='net_asset'){
+                        return '<span class="badge badge-success">Modal</span>';
+                    }
+                })
                 ->addColumn('display_amount', function ($v) {
-                    return number_format((float) $v->amount, 2, ',', '.');
+                    return Helpers::format_number($v->amount);
                 })
                 ->addColumn('action', function ($v) {
                     $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
@@ -78,7 +90,7 @@ class BalanceSheetDetailController extends Controller
                             </a>';
                     return $btn;
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['display_category','action'])
                 ->make(true);
         }
 
@@ -141,7 +153,7 @@ class BalanceSheetDetailController extends Controller
             $balance_sheet_detail = new BalanceSheetDetail;
             $balance_sheet_detail->balance_sheet_account_id = $data['balance_sheet_account_id'];
             $balance_sheet_detail->year = $data['year'];
-            $balance_sheet_detail->amount = $data['amount'];
+            $balance_sheet_detail->amount = str_replace('.', '', $data['amount']) ?? 0;
             $balance_sheet_detail->notes = $data['notes'] ?? null;
             $balance_sheet_detail->save();
             activity()->log('Create Balance Sheet Detail Data');
@@ -154,8 +166,8 @@ class BalanceSheetDetailController extends Controller
     {
         $data = $request->validate([
             'year' => ['required', 'integer', 'min:1900', 'max:9999'],
-            'amounts' => ['required', 'array', 'min:1'],
-            'amounts.*' => ['required', 'numeric', 'between:-9999999999999.99,9999999999999.99', 'decimal:0,2'],
+            'amounts' => ['required'],
+            'amounts.*' => ['required'],
         ], [], [
             'year' => 'Tahun',
             'amounts' => 'Nominal saldo',
@@ -190,7 +202,7 @@ class BalanceSheetDetailController extends Controller
                         'balance_sheet_account_id' => (int) $accountId,
                         'year' => $data['year'],
                     ],
-                    ['amount' => $amount]
+                    ['amount' => str_replace('.', '', $amount) ?? 0]
                 );
             }
         });
@@ -225,7 +237,7 @@ class BalanceSheetDetailController extends Controller
                         ->where('balance_sheet_account_id', $request->input('balance_sheet_account_id'))
                         ->ignore($balance_sheet_detail->id),
                 ],
-                'amount' => ['required', 'numeric', 'between:-9999999999999.99,9999999999999.99', 'decimal:0,2'],
+                'amount' => ['required'],
                 'notes' => 'nullable|string',
             ], [], [
                 'balance_sheet_account_id' => 'Akun Neraca',
@@ -236,7 +248,7 @@ class BalanceSheetDetailController extends Controller
 
             $balance_sheet_detail->balance_sheet_account_id = $data['balance_sheet_account_id'];
             $balance_sheet_detail->year = $data['year'];
-            $balance_sheet_detail->amount = $data['amount'];
+            $balance_sheet_detail->amount = str_replace('.', '', $data['amount']) ?? 0;
             $balance_sheet_detail->notes = $data['notes'] ?? null;
             $balance_sheet_detail->save();
 
