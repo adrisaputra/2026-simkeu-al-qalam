@@ -859,4 +859,178 @@ class PrintController extends Controller
         return redirect(url('/').'/public/upload/report/'.$fileName);
     }
 
+    public function print_salary(Request $request)
+    {
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->setActiveSheetIndex(0);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(60);
+        $sheet->getColumnDimension('C')->setWidth(15);
+
+        $sheet->mergeCells('A1:C1');
+        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('A1', 'LAPORAN KEUANGAN YAYASAN PENDIDIKAN ALQALAM KENDARI');
+        $sheet->setCellValue('A2', 'TAHUN '.$request->year);
+        $sheet->getStyle('A1:C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:C2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:C2')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C2')->getAlignment()->setWrapText(true);
+
+        // Header tabel
+        $sheet->setCellValue('A5', 'PENERIMAAN TAHUN '.$request->year);$sheet->mergeCells('A5:B5');
+        $sheet->setCellValue('C5', '17977204');
+        $sheet->getStyle('A5:B5')->getFont()->setBold(true);
+        $sheet->getStyle('C5')->getNumberFormat()->setFormatCode('#,##0');
+
+        $sheet->setCellValue('A6', '1');
+        $sheet->setCellValue('B6', 'INFAK GEDUNG');
+        $sheet->setCellValue('C6', '');
+
+        $sheet->setCellValue('A7', '2');
+        $sheet->setCellValue('B7', 'INFAQ TANAH');
+        $sheet->setCellValue('C7', '');
+
+        $sheet->setCellValue('A8', '3');
+        $sheet->setCellValue('B8', 'PENINGKATAN MUTU');
+        $sheet->setCellValue('C8', '');
+
+        $sheet->setCellValue('A9', '4');
+        $sheet->setCellValue('B9', 'SPP');
+        $sheet->setCellValue('C9', '');
+
+        $sheet->setCellValue('A10', '5');
+        $sheet->setCellValue('B10', 'CATERING');
+        $sheet->setCellValue('C10', '');
+
+        $sheet->setCellValue('A11', '6');
+        $sheet->setCellValue('B11', 'RAPORT');
+        $sheet->setCellValue('C11', '');
+
+        $sheet->setCellValue('A12', '7');
+        $sheet->setCellValue('B12', 'SERAGAM');
+        $sheet->setCellValue('C12', '');
+
+        $sheet->setCellValue('A13', '8');
+        $sheet->setCellValue('B13', 'BOS / BOP');
+        $sheet->setCellValue('C13', '');
+
+        $sheet->setCellValue('A14', '9');
+        $sheet->setCellValue('B14', 'WISUDA');
+        $sheet->setCellValue('C14', '');
+
+        $sheet->setCellValue('A15', '10');
+        $sheet->setCellValue('B15', 'FORMULIR PPDB');
+        $sheet->setCellValue('C15', '');
+
+        $sheet->setCellValue('A16', '11');
+        $sheet->setCellValue('B16', 'QURBAN');
+        $sheet->setCellValue('C16', '');
+
+        $sheet->setCellValue('A17', '12');
+        $sheet->setCellValue('B17', "INFAQ KELAS / INFAQ JUM'AT / DONASI KEMANUSIAAN");
+        $sheet->setCellValue('C17', '');
+
+        $sheet->setCellValue('A18', '13');
+        $sheet->setCellValue('B18', 'PENDAPATAN LAIN-LAIN');
+        $sheet->setCellValue('C18', '');
+
+        $sheet->setCellValue('A19', 'JUMLAH PEMASUKAN');$sheet->mergeCells('A19:B19');
+        $sheet->setCellValue('B19', '-');
+        $sheet->setCellValue('C19', '');
+        $sheet->getStyle('A19:C19')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A20', '');$sheet->mergeCells('A20:C20');
+
+        // Pengeluaran
+        $sheet->setCellValue('A21', 'PENGELUARAN TAHUN '.$request->year);$sheet->mergeCells('A21:B21');
+        $sheet->getStyle('A21:C21')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A22', '1');
+        $sheet->setCellValue('B22', 'PINJAMAN GURU / PEGAWAI / UNIT');
+        $sheet->setCellValue('C22', '');
+
+        $sheet->setCellValue('A23', '2');
+        $sheet->setCellValue('B23', 'GAJI GURU DAN PEGAWAI');
+        $sheet->setCellValue('C23', '');
+
+        $sheet->setCellValue('A24', '3');
+        $sheet->setCellValue('B24', 'BIAYA KESEKRETARIATAN');
+        $sheet->setCellValue('C24', '');
+
+        $sheet->setCellValue('A25', '4');
+        $sheet->setCellValue('B25', 'BIAYA KANTOR DAN PEMELIHARAAN');
+        $sheet->setCellValue('C25', '');
+
+        $sheet->setCellValue('A26', '5');
+        $sheet->setCellValue('B26', 'BIAYA BBM, PARKIR DAN TRANSPORT');
+        $sheet->setCellValue('C26', '');
+
+        $sheet->setCellValue('A27', '6');
+        $sheet->setCellValue('B27', 'BIAYA LISTRIK, AIR, TELPON DAN INTERNET');
+        $sheet->setCellValue('C27', '');
+
+        $sheet->setCellValue('A28', '7');
+        $sheet->setCellValue('B28', 'BIAYA ASURANSI, INFAQ DAN PAJAK');
+        $sheet->setCellValue('C28', '');
+
+        $sheet->setCellValue('A29', '8');
+        $sheet->setCellValue('B29', 'BIAYA PROGRAM DAN KEGIATAN');
+        $sheet->setCellValue('C29', '');
+
+        $sheet->setCellValue('A30', '9');
+        $sheet->setCellValue('B30', 'BIAYA KONSUMSI GURU, SISWA DAN KONSUMSI RAPAT');
+        $sheet->setCellValue('C30', '');
+
+        $sheet->setCellValue('A31', '10');
+        $sheet->setCellValue('B31', 'BIAYA ADMINISTRASI DAN UMUM LAINNYA');
+        $sheet->setCellValue('C31', '');
+
+        $sheet->setCellValue('A32', '11');
+        $sheet->setCellValue('B32', 'BIAYA PENDIDIKAN, KESEHATAN DAN SOSIAL');
+        $sheet->setCellValue('C32', '');
+
+        $sheet->setCellValue('A33', '12');
+        $sheet->setCellValue('B33', 'SERAGAM');
+        $sheet->setCellValue('C33', '');
+
+        $sheet->setCellValue('A34', '13');
+        $sheet->setCellValue('B34', 'BIAYA PERJALANAN DINAS');
+        $sheet->setCellValue('C34', '');
+
+        $sheet->setCellValue('A35', '14');
+        $sheet->setCellValue('B35', 'INVENTARIS DAN PERALATAN');
+        $sheet->setCellValue('C35', '');
+
+        $sheet->setCellValue('A36', 'JUMLAH PENGELUARAN');$sheet->mergeCells('A36:B36');
+        $sheet->setCellValue('C36', '');
+        $sheet->getStyle('A36:C36')->getFont()->setBold(true);
+
+        $sheet->setCellValue('A37', 'SELISIH');$sheet->mergeCells('A37:B37');
+        $sheet->setCellValue('C37', '');
+        $sheet->getStyle('A37:C37')->getFont()->setBold(true);
+
+        $sheet->getStyle('A5:C37')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        // $sheet->getStyle('A5:I'.($totalRow - 1))->getAlignment()->setWrapText(true);
+        // $sheet->getStyle('A5:A'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('B5:B'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle('F5:H'.($totalRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // $sheet->getStyle('E' . $totalRow . ':H' . $totalRow)->getFont()->setBold(true);
+
+        $type = 'xlsx';
+        $fileName = 'REKAP AKTIVITAS YAYASAN PENDIDIKAN ALQALAM KENDARI TAHUN '.$request->year.'.'.$type;
+
+        if ($type == 'xlsx') {
+            $writer = new Xlsx($spreadsheet);
+        } elseif ($type == 'xls') {
+            $writer = new Xls($spreadsheet);
+        }
+        $writer->save('public/upload/report/'.$fileName);
+        header('Content-Type: application/vnd.ms-excel');
+
+        return redirect(url('/').'/public/upload/report/'.$fileName);
+    }
+
 }

@@ -247,8 +247,8 @@ $setting = \App\Helpers\Helpers::setting();
                         </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
-                            <li class="menu @if(Request::segment(1)=="expense") active @endif">
-                                <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
+                            <li class="menu @if(Request::segment(1)=="salary") active @endif">
+                                <a href="{{ url('salary') }}" @if(in_array(Request::segment(1), ['salary'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
                                         <img src="{{ asset('storage/menu/1695533471.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Slip Gaji</span>

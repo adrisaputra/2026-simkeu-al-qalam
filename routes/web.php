@@ -11,6 +11,7 @@ use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PrintController;
+use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StudentBillController;
 use App\Http\Controllers\StudentBillTypeController;
@@ -94,15 +95,14 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::put('/student/edit/{student}', [StudentController::class, 'update']);
     Route::delete('/student/delete/{student}', [StudentController::class, 'delete']);
 
-    // # Student
-    // Route::get('/student/{classes}', [StudentController::class, 'index'])->name('student.index');
-    // Route::get('/student/list/{classes}', [StudentController::class, 'get_student_index'])->name('student.list');
-    // Route::post('/student/store', [StudentController::class, 'store']);
-    // Route::post('/student/validate/{action}', [StudentController::class, 'validate']);
-    // Route::get('/student/edit/{student}', [StudentController::class, 'edit']);
-    // Route::put('/student/edit/{student}', [StudentController::class, 'update']);
-    // Route::get('/student/delete/{student}', [StudentController::class, 'delete']);
-    // Route::post('/student/import', [StudentController::class, 'import']);
+    # Student
+    Route::get('/salary', [SalaryController::class, 'index'])->name('salary.index');
+    Route::get('/salary/list', [SalaryController::class, 'get_salary_index'])->name('salary.list');
+    Route::post('/salary/validate', [SalaryController::class, 'validate']);
+    Route::get('/salary/edit/{salary}', [SalaryController::class, 'edit']);
+    Route::put('/salary/edit/{salary}', [SalaryController::class, 'update']);
+    Route::delete('/salary/delete/{salary}', [SalaryController::class, 'delete']);
+    Route::post('/salary/sync', [SalaryController::class, 'sync']);
 
     // # Desc Category
     Route::get('/student_bill_type', [StudentBillTypeController::class, 'index'])->name('student_bill_type.index');
