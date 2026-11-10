@@ -78,7 +78,7 @@
                 {data: 'number', name: 'number'},
                 {data: 'transaction_code', name: 'transaction_code', orderable: false, searchable: false},
                 {data: 'transaction_code_sub', name: 'transaction_code_sub', orderable: false, searchable: false},
-                {data: 'name', name: 'name'},
+                {data: 'display_name', name: 'display_name'},
                 {data: 'display_category', name: 'category'},
                 {data: 'display_is_active', name: 'is_active', orderable: false, searchable: false},
                 {data: 'action', name: 'action', orderable: false, searchable: false}

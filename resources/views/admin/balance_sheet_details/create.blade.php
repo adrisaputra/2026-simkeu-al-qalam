@@ -29,7 +29,7 @@
 
                     <div class="form-group">
                         <p>{{ __('Tahun') }} <span class="required" style="color: #dd4b39;">*</span></p>
-                        <input type="number" class="form-control form-control-sm" name="year" id="year" min="1900" max="9999">
+                        <input type="text" class="form-control form-control-sm" name="year" id="year" readonly>
                         <div id="year-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 

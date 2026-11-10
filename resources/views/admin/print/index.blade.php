@@ -26,17 +26,32 @@
                                             onchange="if(this.value == '1') 
                                             { 
                                                 document.getElementById('show_work_unit').style.display = 'block'; 
+                                                document.getElementById('show_work_unit2').style.display = 'none'; 
                                                 document.getElementById('show_recap').style.display = 'none'; 
+                                                document.getElementById('show_salary').style.display = 'none';
                                                 document.getElementById('show_month').style.display = 'none'; 
                                                 document.getElementById('show_year').style.display = 'none'; 
                                                 document.getElementById('show_classes').style.display = 'block';
                                                 document.getElementById('show_period').style.display = 'block'; 
                                                 document.getElementById('show_ceklist_type').style.display = 'block'; 
                                             } 
-                                            else 
+                                            else if(this.value == '2') 
                                             { 
                                                 document.getElementById('show_work_unit').style.display = 'none';
+                                                document.getElementById('show_work_unit2').style.display = 'none'; 
                                                 document.getElementById('show_recap').style.display = 'block';
+                                                document.getElementById('show_salary').style.display = 'none';
+                                                document.getElementById('show_month').style.display = 'block';
+                                                document.getElementById('show_year').style.display = 'block';
+                                                document.getElementById('show_classes').style.display = 'none';
+                                                document.getElementById('show_period').style.display = 'none';
+                                                document.getElementById('show_ceklist_type').style.display = 'none';
+                                            }else 
+                                            { 
+                                                document.getElementById('show_work_unit').style.display = 'none';
+                                                document.getElementById('show_work_unit2').style.display = 'block'; 
+                                                document.getElementById('show_recap').style.display = 'none';
+                                                document.getElementById('show_salary').style.display = 'block';
                                                 document.getElementById('show_month').style.display = 'block';
                                                 document.getElementById('show_year').style.display = 'block';
                                                 document.getElementById('show_classes').style.display = 'none';
@@ -47,6 +62,7 @@
                                             <option value="">- Jenis Laporan -</option>
                                             <option value="1">Rekap Data Ceklis</option>
                                             <option value="2">Rekap Keuangan Al Qalam</option>
+                                            <option value="3">Gaji</option>
                                         </select>
                                     </div>
                                 </div>
@@ -90,6 +106,23 @@
                                         <option value="2">Rekap Bulanan</option>
                                         <option value="3">Aktivitas</option>
                                         <option value="4">Neraca</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_salary" style="display: none;">
+                                    <select id="salary_type" name="salary_type" class="form-control form-control-sm">
+                                        <option value="">- Pilih Jenis Laporan -</option>
+                                        <option value="1">Rekap Gaji</option>
+                                        <option value="2">Slip Gaji</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-xl-3 col-md-12 col-sm-12 col-12" id="show_work_unit2" style="display: none;" >
+                                    <select id="work_unit_id2" name="work_unit_id2" class="form-control form-control-sm">
+                                        <option value="">- Pilih Unit Kerja -</option>
+                                        @foreach($work_unit2 as $v)
+                                            <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 

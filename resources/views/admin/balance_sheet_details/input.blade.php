@@ -63,7 +63,7 @@
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $account->name }}</td>
+                                                    <td>{{ $account->transaction_code->name }}</td>
                                                     <td>                                   
                                                         @if($account->category=='asset')
                                                             <span class="badge badge-primary">Aset</span>

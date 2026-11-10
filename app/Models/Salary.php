@@ -30,4 +30,9 @@ class Salary extends Model
         'amount_received',
         'status',
     ];
+    
+    public function employee(){
+        return $this->belongsTo('App\Models\Employee')->withTrashed();
+    }
+
 }

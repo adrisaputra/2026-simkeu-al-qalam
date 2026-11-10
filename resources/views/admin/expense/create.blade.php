@@ -50,6 +50,19 @@
                     </div>
 
                     <div class="form-group">
+                        <p>{{ __('Akun Pembayaran') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="payment_account_id" id="payment_account_id">
+                            <option value="">- Pilih -</option>
+                            @foreach ($payment_accounts as $v)
+                                <option value="{{ $v->id }}">
+                                    {{ $v->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div id="payment_account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group">
                         <p>{{ __('Peruntukan') }}</p>
                         <input type="text" class="form-control form-control-sm" name="desc" id="desc">
                         <div id="desc-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>

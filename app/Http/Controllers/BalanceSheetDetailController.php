@@ -67,7 +67,7 @@ class BalanceSheetDetailController extends Controller
                     return $counters++;
                 })
                 ->addColumn('account_name', function ($v) {
-                    return $v->balance_sheet_account?->name ?? '-';
+                    return $v->balance_sheet_account?->transaction_code?->name ?? '-';
                 })
                 ->addColumn('display_category', function ($v) {
                     if($v->balance_sheet_account->category=='asset'){
@@ -115,9 +115,8 @@ class BalanceSheetDetailController extends Controller
             }
 
             $rules = [
-                'balance_sheet_account_id' => 'required|integer|exists:balance_sheet_accounts,id',
-                'year' => ['required', 'integer', 'min:1900', 'max:9999', $uniqueYear],
-                'amount' => ['required', 'numeric', 'between:-9999999999999.99,9999999999999.99', 'decimal:0,2'],
+                'balance_sheet_account_id' => 'required',
+                'amount' => 'required',
                 'notes' => 'nullable|string',
             ];
 

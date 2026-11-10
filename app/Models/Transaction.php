@@ -14,6 +14,7 @@ class Transaction extends Model
         'account_id',
         'transaction_code_id',
         'transaction_code_sub_id',
+        'payment_account_id',
         'desc',
         'amount',
         'user_id'

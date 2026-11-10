@@ -44,11 +44,11 @@
                         <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <p>{{ __('Nama Akun Neraca') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <input type="text" class="form-control form-control-sm" name="name" id="name">
                         <div id="name-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
-                    </div>
+                    </div> -->
 
                     <div class="form-group">
                         <p>{{ __('Kategori') }} <span class="required" style="color: #dd4b39;">*</span></p>

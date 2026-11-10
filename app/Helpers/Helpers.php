@@ -3,19 +3,20 @@
 namespace App\Helpers;
 
 use App\Models\Setting;   //nama model
+use App\Models\Transaction;
 
 class Helpers
 {
-    
+
     public static function setting()
     {
         $setting = Setting::find(1);
         return $setting;
     }
-    
+
     public static function format_number($value)
     {
-        $value = number_format($value,0,",",".");;
+        $value = number_format($value, 0, ",", ".");;
         return $value;
     }
 
@@ -25,7 +26,8 @@ class Helpers
         return $value;
     }
 
-    public static function day_name($day) {
+    public static function day_name($day)
+    {
         switch ($day) {
             case "Monday":
                 return "Senin";
@@ -46,7 +48,8 @@ class Helpers
         }
     }
 
-    public static function month_name($month) {
+    public static function month_name($month)
+    {
         switch ($month) {
             case "01":
                 return "Januari";
@@ -91,4 +94,38 @@ class Helpers
         return $day_name . '/ ' . $day . ' ' . $month . ' ' . $year;
     }
 
+
+    public static function opening_balance()
+    {
+        return [
+            18 => 10000000, // Kas Tunai
+            19 => 50000000, // Kas Bank
+        ];
+    }
+    
+    public static function cash_balance($payment_account_id, $year)
+    {
+        $first_year = 2026;
+
+        // Saldo awal
+        if ($year == $first_year) {
+            $saldo_awal = self::opening_balance()[$payment_account_id] ?? 0;
+        } else {
+            $saldo_awal = self::cash_balance($payment_account_id, $year - 1);
+        }
+
+        // Pemasukan tahun berjalan
+        $pemasukan = Transaction::where('type', 'income')
+            ->where('payment_account_id', $payment_account_id)
+            ->whereYear('date', $year)
+            ->sum('amount');
+
+        // Pengeluaran tahun berjalan
+        $pengeluaran = Transaction::where('type', 'expense')
+            ->where('payment_account_id', $payment_account_id)
+            ->whereYear('date', $year)
+            ->sum('amount');
+
+        return $saldo_awal + $pemasukan - $pengeluaran;
+    }
 }

@@ -41,12 +41,17 @@ class BalanceSheetAccountController extends Controller
                 })
                 ->addColumn('transaction_code', function ($v) {
                     return $v->transaction_code
-                        ? $v->transaction_code->code.' - '.$v->transaction_code->name
+                        ? $v->transaction_code->code
                         : '-';
                 })
                 ->addColumn('transaction_code_sub', function ($v) {
                     return $v->transaction_code_sub
                         ? $v->transaction_code_sub->code.' - '.$v->transaction_code_sub->name
+                        : '-';
+                })
+                ->addColumn('display_name', function ($v) {
+                    return $v->transaction_code
+                        ? $v->transaction_code->name
                         : '-';
                 })
                 ->addColumn('display_category', function ($v) use ($categories) {
@@ -84,7 +89,6 @@ class BalanceSheetAccountController extends Controller
             $attributes = [
                 'account_id' => 'Kode Akun',
                 'transaction_code_id' => 'Kode Transaksi',
-                'name' => 'Nama Akun Neraca',
                 'category' => 'Kategori',
                 'is_active' => 'Status',
             ];
@@ -92,7 +96,6 @@ class BalanceSheetAccountController extends Controller
             $rules = [
                 'account_id' => 'required',
                 'transaction_code_id' => ['required', 'integer', Rule::exists('transaction_codes', 'id')],
-                'name' => 'required|max:255',
                 'category' => ['required', Rule::in(['asset', 'liability', 'net_asset'])],
                 'is_active' => 'required|boolean',
             ];

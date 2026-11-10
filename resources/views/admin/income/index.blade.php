@@ -176,6 +176,7 @@
             var date = $('#date').val();
             var account_id = $('#account_id').val();
             var transaction_code_id = $('#transaction_code_id').val();
+            var payment_account_id = $('#payment_account_id').val();
             var amount = $('#amount').val();
 
             // Buat objek FormData untuk mengirim data form, termasuk file
@@ -184,6 +185,7 @@
             formData.append('date', date);
             formData.append('account_id', account_id);
             formData.append('transaction_code_id', transaction_code_id);
+            formData.append('payment_account_id', payment_account_id);
             formData.append('amount', amount);
             formData.append('_token', "{{ csrf_token() }}");
 
@@ -327,6 +329,7 @@
                 $("#amount").val(formatRupiah2(data.amount));
 
                 $("#account_id").val(String(data.account_id));
+                $("#payment_account_id").val(String(data.payment_account_id));
 
                 $("#transaction_code_id").html(
                     '<option value="">- Pilih -</option>'

@@ -54,6 +54,8 @@ class UserController extends Controller
                     $status ='<span class="badge badge-success">Bendahara Penerimaan</span>';
                 }else if($v->group_id==8){
                     $status ='<span class="badge badge-danger">Bendahara Pengeluaran</span>';
+                }else if($v->group_id==9){
+                    $status ='<span class="badge badge-warning">Akuntan</span>';
                 }
                 return $status;
             })

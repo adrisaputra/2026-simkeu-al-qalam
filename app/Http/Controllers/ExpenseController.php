@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helpers;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -16,7 +17,8 @@ class ExpenseController extends Controller
     {
         $title = "Pengeluaran";
         $account = Account::get();
-        return view('admin.expense.index', compact('title', 'account'));
+        $payment_accounts = TransactionCode::whereIn('code', ['100', '101'])->get();
+        return view('admin.expense.index', compact('title', 'account','payment_accounts'));
     }
 
     ## Get Data
@@ -76,18 +78,27 @@ class ExpenseController extends Controller
 
             $attributes = [
                 'date' => 'Tanggal',
-                'amount' => 'Jumlah'
+                'amount' => 'Jumlah',
+                'account_id' => 'Akun',
+                'transaction_code_id' => 'Kode Transaksi',
+                'payment_account_id' => 'Akun Pembayaran'
             ];
 
             if ($action === "Simpan") {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required'
+                    'amount' => 'required',
+                    'account_id' => 'required',
+                    'transaction_code_id' => 'required',
+                    'payment_account_id' => 'required'
                 ];
             } else {
                 $rules = [
                     'date' => 'required|date',
-                    'amount' => 'required'
+                    'amount' => 'required',
+                    'account_id' => 'required',
+                    'transaction_code_id' => 'required',
+                    'payment_account_id' => 'required'
                 ];
             }
 

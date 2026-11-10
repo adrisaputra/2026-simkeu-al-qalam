@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Student;
 use App\Models\Transaction;
 use App\Models\TransactionBank;
+use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,8 @@ class IncomeController extends Controller
     {
         $title = "pemasukan";
         $account = Account::get();
-        return view('admin.income.index', compact('title','account'));
+        $payment_accounts = TransactionCode::whereIn('code', ['100', '101'])->get();
+        return view('admin.income.index', compact('title','account','payment_accounts'));
     }
 
     ## Get Data
@@ -110,7 +112,8 @@ class IncomeController extends Controller
                 'date' => 'Tanggal',
                 'amount' => 'Jumlah',
                 'account_id' => 'Akun',
-                'transaction_code_id' => 'Kode Transaksi'
+                'transaction_code_id' => 'Kode Transaksi',
+                'payment_account_id' => 'Akun Pembayaran'
             ];
 
             if ($action === "Simpan") {
@@ -118,14 +121,16 @@ class IncomeController extends Controller
                     'date' => 'required|date',
                     'amount' => 'required',
                     'account_id' => 'required',
-                    'transaction_code_id' => 'required'
+                    'transaction_code_id' => 'required',
+                    'payment_account_id' => 'required'
                 ];
             } else {
                 $rules = [
                     'date' => 'required|date',
                     'amount' => 'required',
                     'account_id' => 'required',
-                    'transaction_code_id' => 'required'
+                    'transaction_code_id' => 'required',
+                    'payment_account_id' => 'required'
                 ];
             }
 
@@ -145,6 +150,7 @@ class IncomeController extends Controller
             $income->account_id = $request->account_id;
             $income->transaction_code_id = $request->transaction_code_id;
             $income->transaction_code_sub_id = $request->transaction_code_sub_id ?? null;
+            $income->payment_account_id = $request->payment_account_id;
             $income->desc = $request->desc;
             $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;
@@ -172,6 +178,7 @@ class IncomeController extends Controller
             $income->account_id = $request->account_id;
             $income->transaction_code_id = $request->transaction_code_id;
             $income->transaction_code_sub_id = $request->transaction_code_sub_id ?? null;
+            $income->payment_account_id = $request->payment_account_id;
             $income->desc = $request->desc;
             $income->amount = str_replace('.', '', $request->amount) ?? 0;
             $income->user_id = Auth::user()->id;

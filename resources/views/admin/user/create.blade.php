@@ -64,6 +64,7 @@
 							<option value="6">Admin Bendahara Yayasan</option>
 							<option value="7">Bendahara Penerimaan</option>
 							<option value="8">Bendahara pengeluaran</option>
+							<option value="9">Akuntan</option>
 						</select>
 						<div id="group_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
 					</div>

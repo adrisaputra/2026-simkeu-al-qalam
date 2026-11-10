@@ -226,31 +226,20 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
-                        <li class="menu @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) active @endif">
-                            <a href="#employee" data-toggle="collapse" @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) aria-expanded="true" @endif class="dropdown-toggle">
+                        <li class="menu @if(Request::segment(1)=="balance_sheet_details") active @endif">
+                            <a href="{{ url('balance_sheet_details') }}" @if(in_array(Request::segment(1), ['balance_sheet_details'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-profile-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    Neraca
-                                </div>
-                                <div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    <img src="{{ asset('storage/menu/icons8-scale-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Transaksi Neraca</span>
                                 </div>
                             </a>
-                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('balance_sheet_account','balance_sheet_details'))) show @endif" id="employee" data-parent="#accordionExample">
-                                <li @if(Request::segment(1)=="balance_sheet_account") class="active" @endif">
-                                    <a href="{{ url('balance_sheet_account') }}">Akun Neraca</a>
-                                </li>
-                                <li @if(Request::segment(1)=="balance_sheet_details") class="active" @endif" >
-                                    <a href="{{ url('balance_sheet_details') }}">Saldo Neraca</a>
-                                </li>
-                            </ul>
                         </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                             <li class="menu @if(Request::segment(1)=="salary") active @endif">
                                 <a href="{{ url('salary') }}" @if(in_array(Request::segment(1), ['salary'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
-                                        <img src="{{ asset('storage/menu/1695533471.png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <img src="{{ asset('storage/menu/icons8-wallet-100 (2).png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Slip Gaji</span>
                                     </div>
                                 </a>
@@ -272,6 +261,24 @@ $setting = \App\Helpers\Helpers::setting();
                             <div class="heading"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg><span>PENGATURAN</span></div>
+                        </li>
+
+                        <li class="menu @if(Request::segment(1)=="account") active @endif">
+                            <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account','transaction_code','transaction_code_sub'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Kode Akun</span>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="menu @if(Request::segment(1)=="balance_sheet_account") active @endif">
+                            <a href="{{ url('balance_sheet_account') }}" @if(in_array(Request::segment(1), ['balance_sheet_account'])) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Neraca</span>
+                                </div>
+                            </a>
                         </li>
 
                         <li class="menu @if(Request::segment(1)=="work_unit") active @endif">
@@ -297,15 +304,6 @@ $setting = \App\Helpers\Helpers::setting();
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Jenis Tagihan Siswa</span>
-                                </div>
-                            </a>
-                        </li>
-
-                        <li class="menu @if(Request::segment(1)=="account") active @endif">
-                            <a href="{{ url('account') }}" @if(in_array(Request::segment(1), ['account','transaction_code','transaction_code_sub'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                <div class="">
-                                    <img src="{{ asset('storage/menu/icons8-menu-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                    <span>Kode Akun</span>
                                 </div>
                             </a>
                         </li>
