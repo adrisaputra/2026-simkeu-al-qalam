@@ -44,11 +44,24 @@ Route::get('/', [LoginController::class, 'index']);
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout']);
 
-Route::middleware(['role:Admin Finance,Revenue Treasurer,Expenditure Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance, Accountant, Revenue Treasurer, Expenditure Treasurer'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index']);
 });
 
 Route::middleware(['role:Admin Finance'])->group(function () {
+    
+    # Salary
+    Route::get('/salary', [SalaryController::class, 'index'])->name('salary.index');
+    Route::get('/salary/list', [SalaryController::class, 'get_salary_index'])->name('salary.list');
+    Route::post('/salary/validate', [SalaryController::class, 'validate']);
+    Route::get('/salary/edit/{salary}', [SalaryController::class, 'edit']);
+    Route::put('/salary/edit/{salary}', [SalaryController::class, 'update']);
+    Route::delete('/salary/delete/{salary}', [SalaryController::class, 'delete']);
+    Route::post('/salary/sync', [SalaryController::class, 'sync']);
+
+});
+
+Route::middleware(['role:Admin Finance, Accountant'])->group(function () {
 
     // # Academic Year and Student Promotion
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
@@ -94,15 +107,6 @@ Route::middleware(['role:Admin Finance'])->group(function () {
     Route::get('/student/edit/{student}', [StudentController::class, 'edit']);
     Route::put('/student/edit/{student}', [StudentController::class, 'update']);
     Route::delete('/student/delete/{student}', [StudentController::class, 'delete']);
-
-    # Student
-    Route::get('/salary', [SalaryController::class, 'index'])->name('salary.index');
-    Route::get('/salary/list', [SalaryController::class, 'get_salary_index'])->name('salary.list');
-    Route::post('/salary/validate', [SalaryController::class, 'validate']);
-    Route::get('/salary/edit/{salary}', [SalaryController::class, 'edit']);
-    Route::put('/salary/edit/{salary}', [SalaryController::class, 'update']);
-    Route::delete('/salary/delete/{salary}', [SalaryController::class, 'delete']);
-    Route::post('/salary/sync', [SalaryController::class, 'sync']);
 
     // # Desc Category
     Route::get('/student_bill_type', [StudentBillTypeController::class, 'index'])->name('student_bill_type.index');
@@ -178,7 +182,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
 
 });
 
-Route::middleware(['role:Admin Finance,Revenue Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance, Accountant, Revenue Treasurer'])->group(function () {
 
     // # Income
     Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
@@ -193,7 +197,7 @@ Route::middleware(['role:Admin Finance,Revenue Treasurer'])->group(function () {
 
 });
 
-Route::middleware(['role:Admin Finance,Expenditure Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance, Accountant, Expenditure Treasurer'])->group(function () {
 
     // # Expense
     Route::get('/expense', [ExpenseController::class, 'index'])->name('expense.index');

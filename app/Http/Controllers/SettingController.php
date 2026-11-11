@@ -41,6 +41,8 @@ class SettingController extends Controller
            $setting->email = $request->email;
            $setting->application_name = $request->application_name;
            $setting->short_application_name = $request->short_application_name;
+           $setting->first_saldo_cash = str_replace('.', '', $request->first_saldo_cash) ?? 0;
+           $setting->first_saldo_bank = str_replace('.', '', $request->first_saldo_bank) ?? 0;
 
            if ($setting->small_icon && $request->file('small_icon') != "") {
                Storage::delete('upload/setting/'.$setting->small_icon);

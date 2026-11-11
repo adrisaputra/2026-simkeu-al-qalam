@@ -27,6 +27,24 @@
             <div id="email-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
 		</div>
     </div>
+    
+    <hr>
+    
+    <div class="form-group row mb-4">
+        <label class="col-xl-3 col-sm-3 col-sm-2 col-form-label">{{ __('Saldo Awal Kas Tunai') }}</label>
+        <div class="col-xl-9 col-lg-9 col-sm-10">
+            <input type="text" name="first_saldo_cash" id="first_saldo_cash" class="form-control form-control-sm" placeholder="" onkeyup="formatRupiah(this, '.')" value="{{ \App\Helpers\Helpers::format_number($setting->first_saldo_cash) }}"/>
+            <div id="first_saldo_cash-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+		</div>
+    </div>
+        
+    <div class="form-group row mb-4">
+        <label class="col-xl-3 col-sm-3 col-sm-2 col-form-label">{{ __('Saldo Awal Kas Bank') }}</label>
+        <div class="col-xl-9 col-lg-9 col-sm-10">
+            <input type="text" name="first_saldo_bank" id="first_saldo_bank" class="form-control form-control-sm" placeholder="" onkeyup="formatRupiah(this, '.')" value="{{ \App\Helpers\Helpers::format_number($setting->first_saldo_bank) }}"/>
+            <div id="first_saldo_bank-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+		</div>
+    </div>
         
     <hr>
     

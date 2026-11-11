@@ -57,6 +57,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Tutup</button>
+                    <a href="{{ asset('storage/format_import/Format Import Transaksi.xlsx')}}" class="btn btn-warning">Download Format</a>
                     <button type="submit" class="btn btn-primary">Import</button>
                 </div>
             </div>

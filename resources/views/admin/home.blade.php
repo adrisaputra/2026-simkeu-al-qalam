@@ -18,7 +18,7 @@
 			@if(in_array(Auth::user()->group->name, ['Admin Finance']))
 			<div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
 				<a href="#">
-					<div class="widget widget-one_hybrid widget-followers" style="background:#8bc34a;">
+					<div class="widget widget-one_hybrid widget-followers" style="background:#8bc34a;padding: 20px 20px 0px 20px;">
 						<div class="widget-heading">
 							<div class="row" style="color: #ffffff;">
 								<div class="col-md-8">
@@ -27,7 +27,7 @@
 								</div>
 								<div class="col-md-4">
 									<center>
-										<img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="60px" style="padding-top: 30px;">
+										<img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="60px" style="padding-top: 40px;">
 									</center>
 								</div>
 							</div>
@@ -42,7 +42,7 @@
 			</div>
 			<div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
 				<a href="#">
-					<div class="widget widget-one_hybrid widget-followers" style="background: #e71717e0;">
+					<div class="widget widget-one_hybrid widget-followers" style="background: #e71717e0;padding: 20px 20px 0px 20px;">
 						<div class="widget-heading">
 							<div class="row" style="color: #ffffff;">
 								<div class="col-md-8">
@@ -51,7 +51,7 @@
 								</div>
 								<div class="col-md-4">
 									<center>
-										<img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="60px" style="padding-top: 30px;">
+										<img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="60px" style="padding-top: 40px;">
 									</center>
 								</div>
 							</div>
@@ -66,7 +66,7 @@
 			</div>
 			<div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
 				<a href="#">
-					<div class="widget widget-one_hybrid widget-followers" style="background: #2196f3;">
+					<div class="widget widget-one_hybrid widget-followers" style="background: #2196f3;padding: 20px 20px 0px 20px;">
 						<div class="widget-heading">
 							<div class="row" style="color: #ffffff;">
 								<div class="col-md-8">
@@ -75,7 +75,7 @@
 								</div>
 								<div class="col-md-4">
 									<center>
-										<img src="{{ asset('storage/menu/icons8-wallet-100.png') }}" width="60px" style="padding-top: 30px;">
+										<img src="{{ asset('storage/menu/icons8-wallet-100.png') }}" width="60px" style="padding-top: 40px;">
 									</center>
 								</div>
 							</div>
@@ -90,7 +90,7 @@
 			</div>
 			<div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
 				<a href="#">
-					<div class="widget widget-one_hybrid widget-followers" style="background: #ff9800;">
+					<div class="widget widget-one_hybrid widget-followers" style="background: #ff9800;padding: 20px 20px 0px 20px;">
 						<div class="widget-heading">
 							<div class="row" style="color: #ffffff;">
 								<div class="col-md-8">
@@ -99,7 +99,7 @@
 								</div>
 								<div class="col-md-4">
 									<center>
-										<img src="{{ asset('storage/menu/icons8-asset-100.png') }}" width="60px" style="padding-top: 30px;">
+										<img src="{{ asset('storage/menu/icons8-asset-100.png') }}" width="60px" style="padding-top: 40px;">
 									</center>
 								</div>
 							</div>
@@ -268,8 +268,15 @@
         enabled: false
     },
 
+    // legend: {
+    //     enabled: false
+    // },
+
     legend: {
-        enabled: false
+        enabled: true,
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
     },
 
     plotOptions: {

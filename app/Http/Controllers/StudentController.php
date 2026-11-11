@@ -179,33 +179,33 @@ class StudentController extends Controller
                 continue;
             }
 
-            $classes = Classes::where('name', $row[4])->firstOrFail();
-            $data = $row[2] ?? null;
+            $classes = Classes::where('name', $row[5])->firstOrFail();
+            // $data = $row[2] ?? null;
 
-            if ($data && str_contains($data, '/')) {
-                $hasil = explode('/', $data, 2);
+            // if ($data && str_contains($data, '/')) {
+            //     $hasil = explode('/', $data, 2);
 
-                $nisn = trim($hasil[0]);
-                $nis = trim($hasil[1]);
-            } else {
-                $data = trim((string) $data);
+            //     $nisn = trim($hasil[0]);
+            //     $nis = trim($hasil[1]);
+            // } else {
+            //     $data = trim((string) $data);
 
-                if (strlen($data) > 8) {
-                    $nisn = $data;
-                    $nis  = null;
-                } else {
-                    $nisn = null;
-                    $nis  = $data ?: null;
-                }
-            }
+            //     if (strlen($data) > 8) {
+            //         $nisn = $data;
+            //         $nis  = null;
+            //     } else {
+            //         $nisn = null;
+            //         $nis  = $data ?: null;
+            //     }
+            // }
 
             Student::Create(
                 [
                     'classes_id' => $classes->id,
                     'nipd' => $row[1] ?? null,
-                    'nisn' => $nisn ?? null,
-                    'nis' => $nis ?? null,
-                    'name' => $row[3] ?? null,
+                    'nisn' => $row[2] ?? null,
+                    'nis' => $row[3] ?? null,
+                    'name' => $row[4] ?? null,
                 ]
             );
 

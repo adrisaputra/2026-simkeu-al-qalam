@@ -98,8 +98,8 @@ class Helpers
     public static function opening_balance()
     {
         return [
-            18 => 10000000, // Kas Tunai
-            19 => 50000000, // Kas Bank
+            18 => self::setting()->first_saldo_cash, // Kas Tunai
+            19 => self::setting()->first_saldo_bank, // Kas Bank
         ];
     }
     

@@ -25,6 +25,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Tutup</button>
+                    <a href="{{ asset('storage/format_import/Format Import Siswa.xlsx')}}" class="btn btn-warning">Download Format</a>
                     <button type="submit" class="btn btn-primary" id="action" title="Tambah Data"> Simpan</button>
                 </div>
             </div>

@@ -16,7 +16,7 @@
 
                 <div class="modal-body">
                     <input type="hidden" class="form-control form-control-sm" name="id" id="id_balance_sheet_detail" />
-                    <div class="form-group">
+                    {{--<div class="form-group">
                         <p>{{ __('Akun Neraca') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <select class="form-control form-control-sm" name="balance_sheet_account_id" id="balance_sheet_account_id">
                             <option value="">- Pilih Akun Neraca -</option>
@@ -25,7 +25,7 @@
                             @endforeach
                         </select>
                         <div id="balance_sheet_account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
-                    </div>
+                    </div>--}}
 
                     <div class="form-group">
                         <p>{{ __('Tahun') }} <span class="required" style="color: #dd4b39;">*</span></p>

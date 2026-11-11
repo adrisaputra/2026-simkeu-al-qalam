@@ -119,7 +119,7 @@
             var id_balance_sheet_detail = $('#id_balance_sheet_detail').val();
             var formData = new FormData();
             formData.append('id', id_balance_sheet_detail);
-            formData.append('balance_sheet_account_id', $('#balance_sheet_account_id').val());
+            // formData.append('balance_sheet_account_id', $('#balance_sheet_account_id').val());
             formData.append('year', $('#year').val());
             formData.append('amount', $('#amount').val());
             formData.append('notes', $('#notes').val());
@@ -217,7 +217,7 @@
             type: 'GET',
             success: function (response) {
                 document.getElementById('id_balance_sheet_detail').value = response.data.id;
-                document.getElementById('balance_sheet_account_id').value = response.data.balance_sheet_account_id;
+                // document.getElementById('balance_sheet_account_id').value = response.data.balance_sheet_account_id;
                 document.getElementById('year').value = response.data.year;
                 document.getElementById('amount').value = formatRupiah2(response.data.amount);
                 document.getElementById('notes').value = response.data.notes;

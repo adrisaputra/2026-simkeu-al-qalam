@@ -121,7 +121,7 @@ $setting = \App\Helpers\Helpers::setting();
                                 </div>
                             </div>
                         </div>
-                        @if(Auth::user()->group->name == 'Admin KPI')
+                        @if(Auth::user()->group->name == 'Admin Finance')
                         <div class="dropdown-item">
                             <a href="{{ url('setting') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings">
@@ -193,7 +193,7 @@ $setting = \App\Helpers\Helpers::setting();
                         </a>
                     </li>
 
-                        @if(in_array(Auth::user()->group->name, ['Admin Finance']))
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
                             <li class="menu @if(Request::segment(1)=="student") active @endif">
                                 <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student','student_bill'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
@@ -204,7 +204,7 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
-                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Revenue Treasurer']))
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Revenue Treasurer']))
                             <li class="menu @if(Request::segment(1)=="income") active @endif">
                                 <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
@@ -215,7 +215,7 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
-                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Expenditure Treasurer']))
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Expenditure Treasurer']))
                             <li class="menu @if(Request::segment(1)=="expense") active @endif">
                                 <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
@@ -226,6 +226,7 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
                         <li class="menu @if(Request::segment(1)=="balance_sheet_details") active @endif">
                             <a href="{{ url('balance_sheet_details') }}" @if(in_array(Request::segment(1), ['balance_sheet_details'])) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
@@ -234,6 +235,7 @@ $setting = \App\Helpers\Helpers::setting();
                                 </div>
                             </a>
                         </li>
+                        @endif
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                             <li class="menu @if(Request::segment(1)=="salary") active @endif">
@@ -246,8 +248,7 @@ $setting = \App\Helpers\Helpers::setting();
                             </li>
                         @endif
 
-                        @if(Auth::user()->group->name == 'Admin Finance')
-                        
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
                         <li class="menu @if(Request::segment(1)==" print") active @endif">
                             <a href="{{ url('print') }}" @if(Request::segment(1)=="print" ) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
@@ -307,7 +308,9 @@ $setting = \App\Helpers\Helpers::setting();
                                 </div>
                             </a>
                         </li>
+                        @endif
 
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance']))
                         <li class="menu @if(Request::segment(1)==" log") active @endif">
                             <a href="{{ url('log') }}" @if(Request::segment(1)=="log" ) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">

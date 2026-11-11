@@ -101,7 +101,7 @@ class BalanceSheetDetailController extends Controller
     {
         if ($request->ajax()) {
             $attributes = [
-                'balance_sheet_account_id' => 'Akun Neraca',
+                // 'balance_sheet_account_id' => 'Akun Neraca',
                 'year' => 'Tahun',
                 'amount' => 'Jumlah',
                 'notes' => 'Catatan',
@@ -115,7 +115,7 @@ class BalanceSheetDetailController extends Controller
             }
 
             $rules = [
-                'balance_sheet_account_id' => 'required',
+                // 'balance_sheet_account_id' => 'required',
                 'amount' => 'required',
                 'notes' => 'nullable|string',
             ];
@@ -131,16 +131,9 @@ class BalanceSheetDetailController extends Controller
     {
         if ($request->ajax()) {
             $data = $request->validate([
-                'balance_sheet_account_id' => 'required|integer|exists:balance_sheet_accounts,id',
-                'year' => [
-                    'required',
-                    'integer',
-                    'min:1900',
-                    'max:9999',
-                    Rule::unique('balance_sheet_details', 'year')
-                        ->where('balance_sheet_account_id', $request->input('balance_sheet_account_id')),
-                ],
-                'amount' => ['required', 'numeric', 'between:-9999999999999.99,9999999999999.99', 'decimal:0,2'],
+                'balance_sheet_account_id' => 'nullable|string',
+                'year' => 'nullable|string',
+                'amount' => 'required',
                 'notes' => 'nullable|string',
             ], [], [
                 'balance_sheet_account_id' => 'Akun Neraca',
@@ -226,17 +219,9 @@ class BalanceSheetDetailController extends Controller
     {
         if ($request->ajax()) {
             $data = $request->validate([
-                'balance_sheet_account_id' => 'required|integer|exists:balance_sheet_accounts,id',
-                'year' => [
-                    'required',
-                    'integer',
-                    'min:1900',
-                    'max:9999',
-                    Rule::unique('balance_sheet_details', 'year')
-                        ->where('balance_sheet_account_id', $request->input('balance_sheet_account_id'))
-                        ->ignore($balance_sheet_detail->id),
-                ],
-                'amount' => ['required'],
+                'balance_sheet_account_id' => 'nullable|string',
+                'year' => 'nullable|string',
+                'amount' => 'required',
                 'notes' => 'nullable|string',
             ], [], [
                 'balance_sheet_account_id' => 'Akun Neraca',
@@ -245,7 +230,6 @@ class BalanceSheetDetailController extends Controller
                 'notes' => 'Catatan',
             ]);
 
-            $balance_sheet_detail->balance_sheet_account_id = $data['balance_sheet_account_id'];
             $balance_sheet_detail->year = $data['year'];
             $balance_sheet_detail->amount = str_replace('.', '', $data['amount']) ?? 0;
             $balance_sheet_detail->notes = $data['notes'] ?? null;
