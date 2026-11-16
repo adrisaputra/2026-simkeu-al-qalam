@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Models\Classes;
+use App\Models\EmployeeKpi;
 use App\Models\EmployeeKpiBonus;
+use App\Models\EmployeeKpiIndicator;
+use App\Models\EmployeeReport;
+use App\Models\EmployeeReportCategory;
 use App\Models\PeriodizationHistory;
+use App\Models\ReportRange;
 use App\Models\Salary;
 use App\Models\Transaction;
 use App\Models\TransactionBank;
@@ -1203,31 +1208,84 @@ class PrintController extends Controller
         $no = 1;
 
         foreach ($salary as $v) {
+            
+            $employee_report = EmployeeReport::
+                    whereHas('employee_report_period', function ($query) use ($v) {
+                        $query->where('employee_id', $v->employee_id)
+                        ->whereMonth('date', $v->month)
+                        ->whereyear('date', $v->year)
+                        ->where('is_locked', true)
+                        ->whereHas('employee_report_category');
+                    })->sum('value');
+                        
+            $employee_report_category = EmployeeReportCategory::where('employee_id', $v->employee_id)
+                                                    ->where('month', $v->month)
+                                                    ->where('year', $v->year)
+                                                    ->first();
 
-            $employee_kpi_ttq = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($v) {
-                        $query->where('employee_id', $v->employee_id)
-                        ->where('month', $v->month)
-                        ->where('year', $v->year)
-                        ->where('category', 1);
-                    })->sum('value');
-            
-            $employee_kpi_catering = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($v) {
-                        $query->where('employee_id', $v->employee_id)
-                        ->where('month', $v->month)
-                        ->where('year', $v->year)
-                        ->where('category', 2);
-                    })->sum('value');
-            
-            $employee_kpi_jp = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($v) {
-                        $query->where('employee_id', $v->employee_id)
-                        ->where('month', $v->month)
-                        ->where('year', $v->year)
-                        ->where('category', 3);
-                    })->sum('value');
-            
+            $report_range = ReportRange::where('report_category_id', $employee_report_category?->report_category_id)
+                ->where('min_value', '<=', $employee_report)
+                ->where('max_value', '>=', $employee_report)
+                ->first();
+                
+            $employee_kpi = EmployeeKpi::where('employee_id', $v->employee_id)
+                ->where('month', $v->month)
+                ->where('year', $v->year)
+                ->get();
+
+            $weight_task_value = 0;
+            $total_employee_kpi = 0;
+
+            foreach ($employee_kpi as $x) {
+
+                $value = EmployeeKpiIndicator::whereHas(
+                    'employee_kpi_period',
+                    function ($query) use ($v, $x) {
+                        $query->where('employee_kpi_id', $x->id)
+                            ->where('employee_id', $v->employee_id)
+                            ->where('month', $v->month)
+                            ->where('year', $v->year)
+                            ->whereHas('employee_kpi');
+                    }
+                )->sum('value');
+
+                // Bobot task saat ini
+                $weight = $x->weight_task_value ?? 0;
+
+                // Total bobot semua task
+                $weight_task_value += $weight;
+
+                // Hitung nilai berdasarkan bobot task ini
+                $total_employee_kpi += $value * $weight / 100;
+            }
+
+            // Nilai C
+            $score_report = $report_range->score ?? 0;
+
+            // Nilai D
+            $score_kpi = $total_employee_kpi;
+
+            // Nilai E (Average C dan D)
+            $average_score = ($score_report + $score_kpi) / 2;
+
+            // Nilai G (Persentase bonus)
+            $percentage = match (true) {
+                $average_score >= 90 => 1.00,
+                $average_score >= 80 => 0.90,
+                $average_score >= 70 => 0.80,
+                $average_score >= 60 => 0.70,
+                $average_score >= 50 => 0.60,
+                $average_score >= 40 => 0.50,
+                $average_score >= 30 => 0.40,
+                default => 0.30,
+            };
+
+            // Nilai H
+            $basic_bonus = 200000;
+
+            // Nilai I (Total bonus)
+            $total_bonus = $basic_bonus * $percentage;
+
             $periodization = PeriodizationHistory::where('employee_id', $v->employee_id)->latest('id')->first();
              switch ($periodization->periodization) {
                 case 0:
@@ -1248,59 +1306,64 @@ class PrintController extends Controller
 
             $tmt = Carbon::parse($v->employee->tmt);
 
-            // $masa_kerja = $tmt->diff(now());
+            // Tentukan awal perhitungan TMT
+            if ($tmt->day >= 15) {
+                $tmt->addMonthNoOverflow();
+            }
+
+            $tmt->startOfMonth();
+
+            // Tanggal perhitungan berdasarkan periode gaji
             $tanggal_hitung = Carbon::create($v->year, $v->month, 1)->endOfMonth();
+
+            // Hitung masa kerja
             $masa_kerja = $tmt->diff($tanggal_hitung);
 
             $tahun = $masa_kerja->y;
             $bulan = $masa_kerja->m;
 
-            $masa_kerja_value = $tahun . ' Thn ' . $bulan . ' Bln';
-            
             $total_bulan = ($tahun * 12) + $bulan;
 
-            // Tentukan status dan tambahan gaji
-            if ($total_bulan < 12) {
-                $status = 'GTTY';
-                $tambahan_gaji = 50000;
-            } 
-            
             if ($v->employee->niy != null) {
                 $status = 'GTY';
-
-                if ($total_bulan < 72) {
-                    $tambahan_gaji = 75000;
-                } elseif ($total_bulan < 132) {
-                    $tambahan_gaji = 100000;
-                } else {
-                    $tambahan_gaji = 150000;
-                }
+            } elseif ($total_bulan < 12) {
+                $status = 'GTTY';
             } else {
                 $status = '-';
-                $tambahan_gaji = 0;
             }
+
+            $length_of_service = Helpers::length_of_service($v->employee->tmt, $v->month, $v->year);
+            $salary_allowance = Helpers::salary_allowance($v->employee->tmt, $v->employee->niy, $v->month, $v->year);
 
             $sheet->setCellValue('A' . $rows, $no++);
             $sheet->setCellValue('B' . $rows, $v->employee?->name);
             $sheet->setCellValue('C' . $rows, $periodization);
             $sheet->setCellValue('D' . $rows, $status);
-            $sheet->setCellValue('E' . $rows, $masa_kerja_value);
+            $sheet->setCellValue('E' . $rows, $length_of_service);
             $sheet->setCellValue('F' . $rows, $v->employee?->education);
-            $sheet->setCellValue('G' . $rows, '=' . $v->salary .'+'.$tambahan_gaji);
-            $sheet->setCellValue('H' . $rows, '=50%*G' . $rows);
-            $sheet->setCellValue('I' . $rows, '=12%*G' . $rows);
-            $sheet->setCellValue('J' . $rows, '=I'.$rows);
-            $sheet->setCellValue('K' . $rows, $v->allowance4);
-            $sheet->setCellValue('L' . $rows, '=2%*G' . $rows);
-            $sheet->setCellValue('M' . $rows, $v->allowance6);
-            $sheet->setCellValue('N' . $rows, $employee_kpi_ttq);
+            $sheet->setCellValue('G' . $rows, '=' . $v->salary .'+'.$salary_allowance);
+            $sheet->setCellValue('H' . $rows, $v->allowance1);
+            if($status=='GTY'){
+                $sheet->setCellValue('I' . $rows, '=12%*G' . $rows);
+            } else if($status=='GTTY'){
+                $sheet->setCellValue('I' . $rows, '=10%*G' . $rows);
+            }
+            $sheet->setCellValue('J' . $rows, '=12%*G'.$rows);
+            if($status=='GTY' && $v->allowance3){
+                $sheet->setCellValue('K' . $rows, '=12%*G' . $rows);
+            }
+            if($status=='GTY'){
+                $sheet->setCellValue('L' . $rows, '=12%*G' . $rows);
+                $sheet->setCellValue('M' . $rows, $v->allowance2);
+            } 
+            $sheet->setCellValue('N' . $rows, $v->ttq);
             $sheet->setCellValue('O' . $rows, $v->salary_adjustment);
             $sheet->setCellValue('P' . $rows, $v->bos);
-            $sheet->setCellValue('Q' . $rows, $employee_kpi_jp);
-            $sheet->setCellValue('R' . $rows, '');
-            $sheet->setCellValue('S' . $rows, $employee_kpi_catering);
+            $sheet->setCellValue('Q' . $rows, $v->jp);
+            $sheet->setCellValue('R' . $rows, $total_bonus);
+            $sheet->setCellValue('S' . $rows, $v->meal_allowance);
             $sheet->setCellValue('T' . $rows, $v->rumbay);
-            $sheet->setCellValue('U' . $rows, '=SUM(H' . $rows . ':S' . $rows . ')');
+            $sheet->setCellValue('U' . $rows, '=SUM(G' . $rows . ':S' . $rows . ')');
             $sheet->setCellValue('V' . $rows, '=U' . $rows . '-T' . $rows . '-S' . $rows . '-M' . $rows . '-L' . $rows . '');
             $sheet->getStyle('G' . $rows . ':V' . $rows)->getNumberFormat()->setFormatCode('#,##0');
             $rows++;
@@ -1366,6 +1429,8 @@ class PrintController extends Controller
         $sheet->getColumnDimension('F')->setWidth(15);
         $sheet->getColumnDimension('G')->setWidth(15);
         $sheet->getColumnDimension('H')->setWidth(5);
+        // $sheet->getRowDimension(1)->setRowHeight(10);
+        // $sheet->getRowDimension(2)->setRowHeight(10);
             
         $rows = 1;
 
@@ -1374,6 +1439,11 @@ class PrintController extends Controller
             // Fungsi untuk menentukan koordinat baris
             $r = fn($row) => $rows + $row - 1;
 
+            for ($i = 1; $i <= 37; $i++) {
+                $sheet->getRowDimension($r($i))->setRowHeight(9.75);
+            }
+
+            $sheet->getStyle('A'.$r(1).':J'.$r(37))->getFont()->setSize(10);
             // =========================
             // HEADER YAYASAN
             // =========================
@@ -1390,7 +1460,7 @@ class PrintController extends Controller
 
             // Posisi gambar mengikuti awal setiap slip
             $drawing->setCoordinates('C'.$r(1));
-            $drawing->setHeight(60);
+            $drawing->setHeight(40);
             $drawing->setWorksheet($sheet);
 
             $sheet->setCellValue('B'.$r(1), 'YAYASAN PENDIDIKAN ALQALAM KENDARI');
@@ -1431,12 +1501,11 @@ class PrintController extends Controller
             $sheet->getStyle('B'.$r(5).':G'.$r(6))
                 ->getAlignment()->setHorizontal('center');
 
-            $sheet->getStyle('B'.$r(5).':G'.$r(6))
+            $sheet->getStyle('B'.$r(5).':G'.$r(35))
                 ->getAlignment()->setVertical('center');
 
             $sheet->getStyle('B'.$r(5).':G'.$r(6))
                 ->getFont()->setBold(true);
-
 
             // =========================
             // IDENTITAS PEGAWAI
@@ -1459,7 +1528,7 @@ class PrintController extends Controller
 
             $sheet->setCellValue('B'.$r(10), 'JABATAN');
             $sheet->setCellValue('D'.$r(10), ': ');
-
+            
 
             // =========================
             // HEADER TABEL

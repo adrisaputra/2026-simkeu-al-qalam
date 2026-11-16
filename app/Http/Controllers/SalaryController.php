@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\EmployeeKpiBonus;
 use App\Models\Salary;
 use App\Models\WorkUnit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -42,11 +43,10 @@ class SalaryController extends Controller
             'allowance1',
             'allowance2',
             'allowance3',
-            'allowance4',
-            'allowance5',
-            'allowance6',
+            'ttq',
             'salary_adjustment',
             'bos',
+            'jp',
             'meal_allowance',
             'rumbay',
             'salary_amount',
@@ -93,6 +93,10 @@ class SalaryController extends Controller
             $month = $request->input('get_month') ?? date('m');
             $year = $request->input('get_year') ?? date('Y');
 
+            $salary_employee_ids = Salary::where('month', $month)
+                ->where('year', $year)
+                ->pluck('employee_id');
+
             $query = Employee::query()
                         ->leftJoin(
                             'work_units',
@@ -103,7 +107,8 @@ class SalaryController extends Controller
                         ->select(
                             'employees.*',
                             'work_units.name as work_unit_name'
-                        );
+                        )
+                        ->whereIn('employees.id', $salary_employee_ids);
                 
                         if ($request->has('get_work_unit') && !empty($request->input('get_work_unit'))) {
                             $get_work_unit = $request->input('get_work_unit');
@@ -125,18 +130,13 @@ class SalaryController extends Controller
                 ->addColumn('display_work_unit_name', function ($v) {
                     return $v->work_unit->name;
                 })
-                ->addColumn('tmt_display', function ($v) {
-                    return Helpers::date($v->tmt);
+                ->addColumn('tmt_display', function ($v) use ($month,$year) {
+                    return Helpers::date($v->tmt).'<br><b>'.Helpers::length_of_service($v->tmt, $month, $year);
                 })
                 ->addColumn('display_status', function ($v) use ($month,$year){
                     $salary = Salary::where('employee_id', $v->id)->where('month',$month)->where('year',$year)->first();
-                    if($salary){ 
-                        if($salary->status==true){
-                            return '<span class="badge badge-success">Disesuaikan</span>';
-                        }else{
-                            return '<span class="badge badge-info">Tidak Disesuaikan</span>';
-                        } 
-                    } 
+                    $salary_allowance = Helpers::salary_allowance($v->tmt, $v->niy, $month, $year);
+                    return Helpers::format_number($salary->salary + $salary_allowance);
                 })
                 ->addColumn('action', function ($v) use ($month,$year){
                     $salary = Salary::where('employee_id', $v->id)->where('month',$month)->where('year',$year)->first();
@@ -160,7 +160,7 @@ class SalaryController extends Controller
                         $q->where('tmt', 'like', "%{$keyword}%");
                     });
                 })
-                ->rawColumns(['name_display', 'display_status', 'action'])->make(true);
+                ->rawColumns(['name_display', 'tmt_display', 'display_status', 'action'])->make(true);
         }
     }
 
@@ -188,6 +188,7 @@ class SalaryController extends Controller
     public function edit(Request $request, Salary $salary)
     {
         if ($request->ajax()) {
+            $salary->load('employee');
             return response()->json(['success' => true, 'data' => $salary]);
         }
     }
@@ -197,49 +198,17 @@ class SalaryController extends Controller
     {
         if ($request->ajax()) {
 
-            $salary->salary = str_replace('.', '', $request->salary) ?? 0;
-            $salary->allowance1 = str_replace('.', '', $request->allowance1) ?? 0;
-            $salary->allowance2 = str_replace('.', '', $request->allowance2) ?? 0;
-            $salary->allowance3 = str_replace('.', '', $request->allowance3) ?? 0;
-            $salary->allowance4 = str_replace('.', '', $request->allowance4) ?? 0;
-            $salary->allowance5 = str_replace('.', '', $request->allowance5) ?? 0;
-            $salary->allowance6 = str_replace('.', '', $request->allowance6) ?? 0;
-            $salary->salary_adjustment = str_replace('.', '', $request->salary_adjustment) ?? 0;
-            $salary->bos = str_replace('.', '', $request->bos) ?? 0;
-            
-            $employee_kpi_ttq = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($salary) {
-                        $query->where('employee_id', $salary->employee_id)
-                        ->where('month', $salary->month)
-                        ->where('year', $salary->year)
-                        ->where('category', 1);
-                    })->sum('value');
-            
-            $employee_kpi_catering = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($salary) {
-                        $query->where('employee_id', $salary->employee_id)
-                        ->where('month', $salary->month)
-                        ->where('year', $salary->year)
-                        ->where('category', 2);
-                    })->sum('value');
-            
-            $employee_kpi_jp = EmployeeKpiBonus::
-                    whereHas('employee_kpi_period', function ($query) use ($salary) {
-                        $query->where('employee_id', $salary->employee_id)
-                        ->where('month', $salary->month)
-                        ->where('year', $salary->year)
-                        ->where('category', 3);
-                    })->sum('value');
-            
-            $salary->meal_allowance = str_replace('.', '', $request->meal_allowance) ?? 0;
-            $salary->rumbay = str_replace('.', '', $request->rumbay) ?? 0;
-            // $salary->status = $request->status;
+            $salary->salary = $request->salary ? str_replace('.', '', $request->salary) : 0;
+            $salary->allowance1 = $request->allowance1 ? str_replace('.', '', $request->allowance1) : 0;
+            $salary->allowance2 = $request->allowance2 ? str_replace('.', '', $request->allowance2) : 0;
+            $salary->allowance3 = $request->allowance3;
+            $salary->ttq = $request->ttq ? str_replace('.', '', $request->ttq) : 0;
+            $salary->salary_adjustment = $request->salary_adjustment ? str_replace('.', '', $request->salary_adjustment) : 0;
+            $salary->bos = $request->bos ? str_replace('.', '', $request->bos) : 0;
+            $salary->jp = $request->jp ? str_replace('.', '', $request->jp) : 0;
+            $salary->meal_allowance = $request->meal_allowance ? str_replace('.', '', $request->meal_allowance) : 0;
+            $salary->rumbay = $request->rumbay ? str_replace('.', '', $request->rumbay) : 0;
             $salary->status = 1;
-            // $salary->salary_amount = $salary->salary + $salary->allowance1 + $salary->allowance2 
-            //                         + $salary->allowance3 + $salary->allowance4 + $salary->allowance5 
-            //                         + $salary->allowance6 + $salary->salary_adjustment + $salary->bos
-            //                         + $employee_kpi_ttq + $employee_kpi_catering + $employee_kpi_jp
-            //                         + $salary->meal_allowance + $salary->rumbay;
             $salary->save();
 
             activity()->log('Edit Salary Data With ID = '.$salary->id);
@@ -264,8 +233,13 @@ class SalaryController extends Controller
         if ($request->ajax()) {
             $employees = Employee::get();
 
-            // Periode bulan ini
-            $currentDate = now();
+            // Periode yang dipilih
+            $currentDate = Carbon::create(
+                $request->year,
+                $request->month,
+                1
+            );
+
             $month = $currentDate->format('m');
             $year = $currentDate->format('Y');
 
@@ -286,11 +260,10 @@ class SalaryController extends Controller
                 'allowance1',
                 'allowance2',
                 'allowance3',
-                'allowance4',
-                'allowance5',
-                'allowance6',
+                'ttq',
                 'salary_adjustment',
                 'bos',
+                'jp',
                 'meal_allowance',
                 'rumbay',
                 'salary_amount',

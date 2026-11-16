@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Setting;   //nama model
 use App\Models\Transaction;
+use Carbon\Carbon;
 
 class Helpers
 {
@@ -128,4 +129,71 @@ class Helpers
 
         return $saldo_awal + $pemasukan - $pengeluaran;
     }
+
+    public static function length_of_service($tmt, $month, $year)
+    {
+         
+        $tmt = Carbon::parse($tmt);
+
+        // Tentukan awal perhitungan TMT
+        if ($tmt->day >= 15) {
+            $tmt->addMonthNoOverflow();
+        }
+
+        $tmt->startOfMonth();
+
+        // Tanggal perhitungan berdasarkan periode gaji
+        $tanggal_hitung = Carbon::create($year, $month, 1)->endOfMonth();
+
+        // Hitung masa kerja
+        $masa_kerja = $tmt->diff($tanggal_hitung);
+
+        $tahun = $masa_kerja->y;
+        $bulan = $masa_kerja->m;
+
+        return $tahun . ' Thn ' . $bulan . ' Bln';
+    }
+
+    public static function salary_allowance($tmt, $niy, $month, $year)
+    {
+         
+        $tmt = Carbon::parse($tmt);
+
+        // Tentukan awal perhitungan TMT
+        if ($tmt->day >= 15) {
+            $tmt->addMonthNoOverflow();
+        }
+
+        $tmt->startOfMonth();
+
+        // Tanggal perhitungan berdasarkan periode gaji
+        $tanggal_hitung = Carbon::create($year, $month, 1)->endOfMonth();
+
+        // Hitung masa kerja
+        $masa_kerja = $tmt->diff($tanggal_hitung);
+
+        $tahun = $masa_kerja->y;
+        $bulan = $masa_kerja->m;
+
+        $total_bulan = ($tahun * 12) + $bulan;
+
+        // Tentukan status dan tambahan gaji
+        if ($niy != null) {
+            if ($total_bulan < 72) {
+                $salary_allowance = 75000;
+            } elseif ($total_bulan < 132) {
+                $salary_allowance = 100000;
+            } else {
+                $salary_allowance = 150000;
+            }
+        } elseif ($total_bulan < 12) {
+            $salary_allowance = 50000;
+        } else {
+            $salary_allowance = 0;
+        }
+
+        return $salary_allowance;
+    }
+
+
 }

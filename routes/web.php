@@ -44,7 +44,7 @@ Route::get('/', [LoginController::class, 'index']);
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout']);
 
-Route::middleware(['role:Admin Finance, Accountant, Revenue Treasurer, Expenditure Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance,Accountant,Revenue Treasurer,Expenditure Treasurer'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index']);
 });
 
@@ -61,7 +61,7 @@ Route::middleware(['role:Admin Finance'])->group(function () {
 
 });
 
-Route::middleware(['role:Admin Finance, Accountant'])->group(function () {
+Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
 
     // # Academic Year and Student Promotion
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
@@ -182,7 +182,7 @@ Route::middleware(['role:Admin Finance, Accountant'])->group(function () {
 
 });
 
-Route::middleware(['role:Admin Finance, Accountant, Revenue Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance,Accountant,Revenue Treasurer'])->group(function () {
 
     // # Income
     Route::get('/income', [IncomeController::class, 'index'])->name('income.index');
@@ -197,7 +197,7 @@ Route::middleware(['role:Admin Finance, Accountant, Revenue Treasurer'])->group(
 
 });
 
-Route::middleware(['role:Admin Finance, Accountant, Expenditure Treasurer'])->group(function () {
+Route::middleware(['role:Admin Finance,Accountant,Expenditure Treasurer'])->group(function () {
 
     // # Expense
     Route::get('/expense', [ExpenseController::class, 'index'])->name('expense.index');
