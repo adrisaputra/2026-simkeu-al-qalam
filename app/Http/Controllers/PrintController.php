@@ -1436,14 +1436,17 @@ class PrintController extends Controller
 
         foreach ($salary as $v) {
 
+        
             // Fungsi untuk menentukan koordinat baris
             $r = fn($row) => $rows + $row - 1;
 
-            for ($i = 1; $i <= 37; $i++) {
+            for ($i = 1; $i <= 38; $i++) {
                 $sheet->getRowDimension($r($i))->setRowHeight(9.75);
             }
 
-            $sheet->getStyle('A'.$r(1).':J'.$r(37))->getFont()->setSize(10);
+            $sheet->getRowDimension($r(11))->setRowHeight(0);
+
+            $sheet->getStyle('A'.$r(1).':J'.$r(38))->getFont()->setSize(10);
             // =========================
             // HEADER YAYASAN
             // =========================
@@ -1546,30 +1549,233 @@ class PrintController extends Controller
             // RINCIAN GAJI
             // =========================
 
+            $employee_report = EmployeeReport::
+                    whereHas('employee_report_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->employee_id)
+                        ->whereMonth('date', $request->month)
+                        ->whereyear('date', $request->year)
+                        ->where('is_locked', true)
+                        ->whereHas('employee_report_category');
+                    })->sum('value');
+                        
+            $employee_report_category = EmployeeReportCategory::where('employee_id', $v->employee_id)
+                                                    ->where('month', $request->month)
+                                                    ->where('year', $request->year)
+                                                    ->first();
+
+            $report_range = ReportRange::where('report_category_id', $employee_report_category?->report_category_id)
+                ->where('min_value', '<=', $employee_report)
+                ->where('max_value', '>=', $employee_report)
+                ->first();
+                
+            $employee_kpi = EmployeeKpi::where('employee_id', $v->employee_id)
+                ->where('month', $request->month)
+                ->where('year', $request->year)
+                ->get();
+
+            $weight_task_value = 0;
+            $total_employee_kpi = 0;
+
+            foreach ($employee_kpi as $x) {
+
+                $value = EmployeeKpiIndicator::whereHas(
+                    'employee_kpi_period',
+                    function ($query) use ($v, $x, $request) {
+                        $query->where('employee_kpi_id', $x->id)
+                            ->where('employee_id', $v->employee_id)
+                            ->where('month', $request->month)
+                            ->where('year', $request->year)
+                            ->whereHas('employee_kpi');
+                    }
+                )->sum('value');
+
+                // Bobot task saat ini
+                $weight = $x->weight_task_value ?? 0;
+
+                // Total bobot semua task
+                $weight_task_value += $weight;
+
+                // Hitung nilai berdasarkan bobot task ini
+                $total_employee_kpi += $value * $weight / 100;
+            }
+
+            // Nilai C
+            $score_report = $report_range->score ?? 0;
+
+            // Nilai D
+            $score_kpi = $total_employee_kpi;
+
+            // Nilai E (Average C dan D)
+            $average_score = ($score_report + $score_kpi) / 2;
+
+            // Nilai G (Persentase bonus)
+            $percentage = match (true) {
+                $average_score >= 90 => 1.00,
+                $average_score >= 80 => 0.90,
+                $average_score >= 70 => 0.80,
+                $average_score >= 60 => 0.70,
+                $average_score >= 50 => 0.60,
+                $average_score >= 40 => 0.50,
+                $average_score >= 30 => 0.40,
+                default => 0.30,
+            };
+
+            // Nilai H
+            $basic_bonus = 200000;
+
+            // Nilai I (Total bonus)
+            $total_bonus = $basic_bonus * $percentage;
+
+            $periodization = PeriodizationHistory::where('employee_id', $v->employee_id)->latest('id')->first();
+             switch ($periodization->periodization) {
+                case 0:
+                    $periodization = '-';break;
+                case 1:
+                    $periodization = 'I';break;
+                case 2:
+                    $periodization = 'II';break;
+                case 3:
+                    $periodization = 'III';break;
+                case 4:
+                    $periodization = 'IV';break;
+                case 5:
+                    $periodization = 'V';break;
+                default:
+                    $periodization = null;
+            }
+
+            $tmt = Carbon::parse($v->employee->tmt);
+
+            // Tentukan awal perhitungan TMT
+            if ($tmt->day >= 15) {
+                $tmt->addMonthNoOverflow();
+            }
+
+            $tmt->startOfMonth();
+
+            // Tanggal perhitungan berdasarkan periode gaji
+            $tanggal_hitung = Carbon::create($request->year, $request->month, 1)->endOfMonth();
+
+            // Hitung masa kerja
+            $masa_kerja = $tmt->diff($tanggal_hitung);
+
+            $tahun = $masa_kerja->y;
+            $bulan = $masa_kerja->m;
+
+            $total_bulan = ($tahun * 12) + $bulan;
+
+            if ($v->employee->niy != null) {
+                $status = 'GTY';
+            } elseif ($total_bulan < 12) {
+                $status = 'GTTY';
+            } else {
+                $status = '-';
+            }
+
+            $salary_allowance = Helpers::salary_allowance($v->employee->tmt, $v->employee->niy, $request->month, $request->year);
+            $fix_salary = $v->salary + $salary_allowance;
+
             $rincian = [
                 'Gaji pokok / Gaji Honor',
                 'Tunjangan Jabatan',
                 'Tunjangan Transportasi',
                 'Tunjangan Komunikasi',
                 'Tunjangan Keluarga',
-                'Tunjangan Kesehatan',
                 'Tunjangan Pensiun',
-                'Kelebihan JP',
-                'Uang Makan',
+                'Tunjangan Kesehatan',
                 'Bonus TTQ',
+                'Penyesuaian',
+                'BOS',
+                'Kelebihan JP',
                 'Tunjangan Kinerja',
+                'Uang Makan',
+                'Pot Rumbai',
             ];
 
             foreach ($rincian as $index => $nama) {
 
                 $row = $r(14 + $index);
+                $fixSalaryRow = $r(14);
 
                 $sheet->setCellValue('B'.$row, $index + 1);
                 $sheet->setCellValue('C'.$row, $nama);
-                $sheet->setCellValue('D'.$row, '');
-                $sheet->setCellValue('E'.$row, '');
-                $sheet->setCellValue('F'.$row, '');
-                $sheet->setCellValue('G'.$row, '');
+                
+                 switch ($index) {
+
+                    case 0:
+                        $sheet->setCellValue('E'.$row, $fix_salary);
+                        break;
+
+                    case 1:
+                        $sheet->setCellValue('E'.$row, $v->allowance1);
+                        break;
+
+                    case 2:
+                        if ($status == 'GTY') {
+                            $sheet->setCellValue('D'.$row, 12);
+                            $sheet->setCellValue('E'.$row, '=12%*$E$'.$fixSalaryRow);
+                        } elseif ($status == 'GTTY') {
+                            $sheet->setCellValue('D'.$row, 10);
+                            $sheet->setCellValue('E'.$row, '=10%*$E$'.$fixSalaryRow);
+                        }
+                        break;
+
+                    case 3:
+                        $sheet->setCellValue('D'.$row, 12);
+                        $sheet->setCellValue('E'.$row, '=12%*$E$'.$fixSalaryRow);
+                        break;
+
+                    case 4:
+                        if ($status == 'GTY' && $v->allowance3) {
+                            $sheet->setCellValue('D'.$row, 12);
+                            $sheet->setCellValue('E'.$row, '=12%*$E$'.$fixSalaryRow);
+                        }
+                        break;
+
+                    case 5:
+                        if ($status == 'GTY') {
+                            $sheet->setCellValue('D'.$row, 12);
+                            $sheet->setCellValue('F'.$row, '=12%*$E$'.$fixSalaryRow);
+                        }
+                        break;
+
+                    case 6:
+                        if ($status == 'GTY') {
+                            $sheet->setCellValue('F'.$row, $v->allowance2);
+                        }
+                        break;
+
+                    case 7:
+                        $sheet->setCellValue('E'.$row, $v->ttq);
+                        break;
+
+                    case 8:
+                        $sheet->setCellValue('E'.$row, $v->salary_adjustment);
+                        break;
+
+                    case 9:
+                        $sheet->setCellValue('E'.$row, $v->bos);
+                        break;
+
+                    case 10:
+                        $sheet->setCellValue('E'.$row, $v->jp);
+                        break;
+
+                    case 11:
+                        $sheet->setCellValue('E'.$row, $total_bonus);
+                        break;
+
+                    case 12:
+                        $sheet->setCellValue('E'.$row, $v->meal_allowance);
+                        break;
+
+                    case 13:
+                        $sheet->setCellValue('E'.$row, $v->rumbay);
+                        break;
+                 }
+
+                $sheet->setCellValue('G'.$row, '=SUM(E'.$row.':F'.$row.')');
+                $sheet->getStyle('E'.$row.':G'.$r(30))->getNumberFormat()->setFormatCode('#,##0');
             }
 
 
@@ -1578,20 +1784,25 @@ class PrintController extends Controller
             // =========================
 
             $totals = [
-                25 => 'Jumlah Gaji',
-                26 => 'Terbayar ke BPJS',
-                27 => 'Jumlah Yang Tersimpan',
-                28 => 'Total Yang Diterima',
+                28 => 'Jumlah Gaji',
+                29 => 'Jumlah Yang Tersimpan',
+                30 => 'Total Yang Diterima',
             ];
 
             foreach ($totals as $row => $label) {
 
                 $sheet->mergeCells('B'.$r($row).':D'.$r($row));
-
                 $sheet->setCellValue('B'.$r($row), $label);$sheet->getStyle('B'.$r($row))->getFont()->setBold(true);
-                $sheet->setCellValue('E'.$r($row), '');$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
-                $sheet->setCellValue('F'.$r($row), '');$sheet->getStyle('F'.$r($row))->getFont()->setBold(true);
-                $sheet->setCellValue('G'.$r($row), '');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
+                if($row == 28){
+                    $sheet->setCellValue('G'.$r($row), '=SUM(G'.$r(14).':G'.$r(26).')');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
+                } else if($row == 29){
+                    $sheet->setCellValue('F'.$r($row), '=SUM(F'.$r(19).':F'.$r(20).')');$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
+                    $sheet->setCellValue('G'.$r($row), '=F'.$r($row));$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
+                } else if($row == 30){
+                    $sheet->setCellValue('G'.$r($row), '=G'.$r(28).'-G'.$r(29).'-G'.$r(26).'-G'.$r(27));$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
+                } 
+                // $sheet->setCellValue('F'.$r($row), '');$sheet->getStyle('F'.$r($row))->getFont()->setBold(true);
+                // $sheet->setCellValue('G'.$r($row), '');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
             }
 
 
@@ -1599,51 +1810,70 @@ class PrintController extends Controller
             // TANDA TANGAN
             // =========================
 
-            $sheet->setCellValue('C'.$r(31), 'Yang Menerima');
-            $sheet->setCellValue('C'.$r(35), $v->employee->name);
+            $sheet->setCellValue('C'.$r(33), 'Yang Menerima');
+            $sheet->setCellValue('C'.$r(37), $v->employee->name);
 
             $tanggal = Carbon::createFromDate($request->year, $request->month, 1)
-                        ->addMonth()
-                        ->translatedFormat('F Y');
-
-            $sheet->mergeCells('F'.$r(30).':G'.$r(30));
-            $sheet->setCellValue('F'.$r(30), 'Kendari, 15 '.$tanggal);
-
-            $sheet->mergeCells('F'.$r(31).':G'.$r(31));
-            $sheet->setCellValue('F'.$r(31), 'Yang Membayar');
+                ->addMonth()
+                ->translatedFormat('F Y');
 
             $sheet->mergeCells('F'.$r(32).':G'.$r(32));
-            $sheet->setCellValue('F'.$r(32), 'Bendahara Yayasan');
+            $sheet->setCellValue('F'.$r(32), 'Kendari, 15 '.$tanggal);
 
-            $sheet->mergeCells('F'.$r(35).':G'.$r(35));
-            $sheet->setCellValue('F'.$r(35), '');
+            $sheet->mergeCells('F'.$r(33).':G'.$r(33));
+            $sheet->setCellValue('F'.$r(33), 'Yang Membayar');
+
+            $sheet->mergeCells('F'.$r(34).':G'.$r(34));
+            $sheet->setCellValue('F'.$r(34), 'Bendahara Yayasan');
+
+            $drawing = new Drawing();
+
+            $drawing->setName('ttd bendahara');
+            $drawing->setDescription('ttd bendahara');
+            $drawing->setPath(public_path('storage/upload/setting/ttd bendahara (1).png'));
+
+            // Posisi gambar mengikuti awal setiap slip
+            $drawing->setCoordinates('G'.$r(34));
+            $drawing->setHeight(50);
+            $drawing->setOffsetX(-25);
+            $drawing->setWorksheet($sheet);
+
+            $sheet->mergeCells('F'.$r(37).':G'.$r(37));
+            $sheet->setCellValue('F'.$r(37), ' Restu A.Utami, S.Si');
 
 
             // =========================
             // STYLE
             // =========================
 
-            $sheet->getStyle('C'.$r(30).':G'.$r(35))
+            $sheet->getStyle('C'.$r(32).':G'.$r(37))
                 ->getAlignment()->setHorizontal('center');
 
             $sheet->getStyle('B'.$r(13).':G'.$r(13))
                 ->getFont()->setBold(true);
 
             // Border slip
-            $sheet->getStyle('B'.$r(13).':G'.$r(28))
+            $sheet->getStyle('B'.$r(13).':G'.$r(30))
                 ->getBorders()->getAllBorders()
                 ->setBorderStyle(
                     \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
                 );
 
+            $sheet->getStyle('A'.$r(38).':H'.$r(38))
+            ->getBorders()
+            ->getBottom()
+            ->setBorderStyle(
+                \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+            );
+
             // Alignment tabel
             $sheet->getStyle('B'.$r(13).':G'.$r(28))
                 ->getAlignment()->setVertical('center');
 
-            $sheet->getStyle('B'.$r(13).':B'.$r(24))
+            $sheet->getStyle('B'.$r(13).':B'.$r(27))
                 ->getAlignment()->setHorizontal('center');
 
-            $sheet->getStyle('D'.$r(13).':G'.$r(28))
+            $sheet->getStyle('D'.$r(13).':D'.$r(28))
                 ->getAlignment()->setHorizontal('center');
 
             // =========================
@@ -1651,9 +1881,9 @@ class PrintController extends Controller
             // =========================
 
             // 35 baris slip + 2 baris kosong
-            $rows += 37;
+            $rows += 38;
             
-            $sheet->getStyle('B'.$r(13).':G'.$r(28))
+            $sheet->getStyle('B'.$r(13).':G'.$r(29))
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(
