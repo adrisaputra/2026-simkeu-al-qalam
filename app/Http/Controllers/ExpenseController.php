@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Helpers\Helpers;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\TransactionAllocation;
 use App\Models\TransactionCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class ExpenseController extends Controller
@@ -16,9 +18,10 @@ class ExpenseController extends Controller
     public function index()
     {
         $title = "Pengeluaran";
-        $account = Account::get();
+        $account = Account::whereIn('id', ['2','3','4','5'])->get();
         $payment_accounts = TransactionCode::whereIn('code', ['100', '101'])->get();
-        return view('admin.expense.index', compact('title', 'account','payment_accounts'));
+        $receipt_account = TransactionCode::where('account_id', 1)->get();
+        return view('admin.expense.index', compact('title', 'account','payment_accounts','receipt_account'));
     }
 
     ## Get Data
@@ -112,16 +115,31 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         if ($request->ajax()) {
-            $expense = new Transaction();
-            $expense->date = $request->date;
-            $expense->type = 'expense';
-            $expense->account_id = $request->account_id;
-            $expense->transaction_code_id = $request->transaction_code_id;
-            $expense->transaction_code_sub_id = $request->transaction_code_sub_id;
-            $expense->desc = $request->desc;
-            $expense->amount = str_replace('.', '', $request->amount) ?? 0;
-            $expense->user_id = Auth::user()->id;
-            $expense->save();
+            DB::transaction(function () use ($request) {
+                $expense = new Transaction();
+                $expense->date = $request->date;
+                $expense->type = 'expense';
+                $expense->account_id = $request->account_id;
+                $expense->transaction_code_id = $request->transaction_code_id;
+                $expense->transaction_code_sub_id = $request->transaction_code_sub_id;
+                $expense->desc = $request->desc;
+                $expense->amount = str_replace('.', '', $request->amount) ?? 0;
+                $expense->user_id = Auth::user()->id;
+                $expense->save();
+
+                if ($request->filled('receipt_account_id')) {
+                    $transaction_allocation = new TransactionAllocation();
+                    $transaction_allocation->transaction_id = $expense->id;
+                    $transaction_allocation->account_id = 1;
+                    $transaction_allocation->transaction_code_id = $request->receipt_account_id;
+                    $transaction_allocation->date = $request->date;
+                    $transaction_allocation->desc = $request->desc;
+                    $transaction_allocation->amount = str_replace('.', '', $request->amount) ?? 0;
+                    $transaction_allocation->user_id = Auth::user()->id;
+                    $transaction_allocation->save();
+                }
+
+            });
 
             activity()->log('Create Data Transaction');
             return response()->json(['success' => true, 'message' => 'Tambah Data Berhasil']);

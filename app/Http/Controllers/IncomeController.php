@@ -23,8 +23,9 @@ class IncomeController extends Controller
     {
         $title = "pemasukan";
         $account = Account::get();
+        $transaction_code = TransactionCode::where('account_id',1)->get();
         $payment_accounts = TransactionCode::whereIn('code', ['100', '101'])->get();
-        return view('admin.income.index', compact('title','account','payment_accounts'));
+        return view('admin.income.index', compact('title','account','transaction_code','payment_accounts'));
     }
 
     ## Get Data
@@ -147,7 +148,7 @@ class IncomeController extends Controller
             $income = new Transaction();
             $income->date = $request->date;
             $income->type = 'income';
-            $income->account_id = $request->account_id;
+            $income->account_id = 1;
             $income->transaction_code_id = $request->transaction_code_id;
             $income->transaction_code_sub_id = $request->transaction_code_sub_id ?? null;
             $income->payment_account_id = $request->payment_account_id;

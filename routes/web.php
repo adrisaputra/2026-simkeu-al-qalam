@@ -17,6 +17,7 @@ use App\Http\Controllers\StudentBillController;
 use App\Http\Controllers\StudentBillTypeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentPromotionController;
+use App\Http\Controllers\TransactionAllocationController;
 use App\Http\Controllers\TransactionCodeController;
 use App\Http\Controllers\TransactionCodeSubController;
 use App\Http\Controllers\UserController;
@@ -62,6 +63,13 @@ Route::middleware(['role:Admin Finance'])->group(function () {
 });
 
 Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
+
+    ## Transaction Allocation
+    Route::get('/transaction_allocation', [TransactionAllocationController::class, 'index'])->name('transaction_allocation.index');
+    Route::get('/transaction_allocation/list', [TransactionAllocationController::class, 'get_transaction_allocation_index'])->name('transaction_allocation.list');
+    Route::get('/transaction_allocation/detail/{transaction_code}', [TransactionAllocationController::class, 'detail']);
+    Route::get('/transaction_allocation/detail_list/{transaction_code}', [TransactionAllocationController::class, 'get_transaction_allocation_detail'])->name('transaction_allocation_detail.list');
+    
 
     // # Academic Year and Student Promotion
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
@@ -117,9 +125,7 @@ Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
     Route::put('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'update']);
     Route::get('/student_bill_type/delete/{student_bill_type}', [StudentBillTypeController::class, 'delete']);
 
-    Route::get('/student_bill/{student}', [StudentBillController::class, 'index']);
-    Route::get('/student_bill/list/{student}', [StudentBillController::class, 'get_student_bill_index'])->name('student_bill.list');
-    Route::get('/student_bill/store/{student_bill_type}', [StudentBillController::class, 'store']);
+    Route::get('/student_bill', [StudentBillController::class, 'index']);
 
     // # Transaction Code
     Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');

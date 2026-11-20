@@ -17,10 +17,12 @@ use App\Models\TransactionBank;
 use App\Models\WorkUnit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -1106,24 +1108,51 @@ class PrintController extends Controller
 
         if ($request->work_unit_id2) {
             $work_unit = WorkUnit::where('id', $request->work_unit_id2)->first();
+            // $salary = Salary::with('employee')
+            //         ->where('salaries.month', $request->month)
+            //         ->where('salaries.year', $request->year)
+            //         ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
+            //         ->where('employees.work_unit_id', $request->work_unit_id2)
+            //         ->orderBy('employees.name', 'ASC')
+            //         ->select('salaries.*')
+            //         ->get();
+            
+            $employeeIds = DB::connection('simpeg_mysql')
+                ->table('employees')
+                ->where('work_unit_id', $request->work_unit_id2)
+                ->pluck('id');
+
             $salary = Salary::with('employee')
-                    ->where('salaries.month', $request->month)
-                    ->where('salaries.year', $request->year)
-                    ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
-                    ->where('employees.work_unit_id', $request->work_unit_id2)
-                    ->orderBy('employees.name', 'ASC')
-                    ->select('salaries.*')
-                    ->get();
+                ->where('month', $request->month)
+                ->where('year', $request->year)
+                ->whereIn('employee_id', $employeeIds)
+                ->get()
+                ->sortBy(fn ($item) => $item->employee->name)
+                ->values();
+            
             
         } else {
             $work_unit = NULL;
+            // $salary = Salary::with('employee')
+            //         ->where('salaries.month', $request->month)
+            //         ->where('salaries.year', $request->year)
+            //         ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
+            //         ->orderBy('employees.name', 'ASC')
+            //         ->select('salaries.*')
+            //         ->get();
+                    
+            $employeeIds = DB::connection('simpeg_mysql')
+                ->table('employees')
+                ->pluck('id');
+
             $salary = Salary::with('employee')
-                    ->where('salaries.month', $request->month)
-                    ->where('salaries.year', $request->year)
-                    ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
-                    ->orderBy('employees.name', 'ASC')
-                    ->select('salaries.*')
-                    ->get();
+                ->where('month', $request->month)
+                ->where('year', $request->year)
+                ->whereIn('employee_id', $employeeIds)
+                ->get()
+                ->sortBy(fn ($item) => $item->employee->name)
+                ->values();
+            
         }
 
         // Atur lebar kolom
@@ -1150,6 +1179,7 @@ class PrintController extends Controller
         $sheet->getColumnDimension('U')->setWidth(12);
         $sheet->getColumnDimension('V')->setWidth(12);
         $sheet->getColumnDimension('W')->setWidth(12);
+        $sheet->getColumnDimension('X')->setWidth(12);
 
         if ($work_unit) {
             $sheet->mergeCells('A1:N1');
@@ -1180,10 +1210,10 @@ class PrintController extends Controller
         $sheet->setCellValue('D5', 'Status Kepegawaian'); $sheet->mergeCells('D5:D6');
         $sheet->setCellValue('E5', 'TMT'); $sheet->mergeCells('E5:E6');
         $sheet->setCellValue('F5', 'Pendidikan'); $sheet->mergeCells('F5:F6');
-        $sheet->setCellValue('G5', 'Jumlah Gaji/Honor + Tunjangan'); $sheet->mergeCells('G5:S5');
-        $sheet->setCellValue('T5', 'Pot. Rumbay'); $sheet->mergeCells('T5:T6');
-        $sheet->setCellValue('U5', 'Jumlah Gaji'); $sheet->mergeCells('U5:U6');
-        $sheet->setCellValue('V5', 'Jumlah yang diterima'); $sheet->mergeCells('V5:V6');
+        $sheet->setCellValue('G5', 'Jumlah Gaji/Honor + Tunjangan'); $sheet->mergeCells('G5:U5');
+        $sheet->setCellValue('V5', 'Pot. Rumbay'); $sheet->mergeCells('V5:V6');
+        $sheet->setCellValue('W5', 'Jumlah Gaji'); $sheet->mergeCells('W5:W6');
+        $sheet->setCellValue('X5', 'Jumlah yang diterima'); $sheet->mergeCells('X5:X6');
 
         $sheet->setCellValue('G6', 'Gaji Pokok/ Gaji Honor');
         $sheet->setCellValue('H6', 'Tunj. Jabatan');
@@ -1197,12 +1227,14 @@ class PrintController extends Controller
         $sheet->setCellValue('P6', 'BOS');
         $sheet->setCellValue('Q6', 'Kelebihan JP');
         $sheet->setCellValue('R6', 'Tunjangan Kinerja');
-        $sheet->setCellValue('S6', 'Uang Makan');
+        $sheet->setCellValue('S6', 'Guru Pengganti');
+        $sheet->setCellValue('T6', 'Ketercapaian Catering');
+        $sheet->setCellValue('U6', 'Uang Makan');
 
-        $sheet->getStyle('A5:V6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A5:V6')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A5:V6')->getFont()->setBold(true);
-        $sheet->getStyle('A5:V6')->getAlignment()->setWrapText(true);
+        $sheet->getStyle('A5:X6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:X6')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A5:X6')->getFont()->setBold(true);
+        $sheet->getStyle('A5:X6')->getAlignment()->setWrapText(true);
 
         $rows = 7;
         $no = 1;
@@ -1335,6 +1367,35 @@ class PrintController extends Controller
             $length_of_service = Helpers::length_of_service($v->employee->tmt, $v->month, $v->year);
             $salary_allowance = Helpers::salary_allowance($v->employee->tmt, $v->employee->niy, $v->month, $v->year);
 
+            $employee_kpi_ttq = EmployeeKpiBonus::where('category', 1)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_kpi_catering = EmployeeKpiBonus::where('category', 2)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_kpi_jp = EmployeeKpiBonus::where('category', 3)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_report_gr = EmployeeReport::where('category', 4)
+                    ->whereHas('employee_report_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->whereMonth('date', $request->month)
+                        ->whereyear('date', $request->year)
+                        ->where('is_locked', true);
+                    })->sum('value');
+                    
             $sheet->setCellValue('A' . $rows, $no++);
             $sheet->setCellValue('B' . $rows, $v->employee?->name);
             $sheet->setCellValue('C' . $rows, $periodization);
@@ -1353,26 +1414,30 @@ class PrintController extends Controller
                 $sheet->setCellValue('K' . $rows, '=12%*G' . $rows);
             }
             if($status=='GTY'){
-                $sheet->setCellValue('L' . $rows, '=12%*G' . $rows);
+                $sheet->setCellValue('L' . $rows, '=2%*G' . $rows);
                 $sheet->setCellValue('M' . $rows, $v->allowance2);
             } 
-            $sheet->setCellValue('N' . $rows, $v->ttq);
+            // $sheet->setCellValue('N' . $rows, $v->ttq);
+            $sheet->setCellValue('N' . $rows, $employee_kpi_ttq);
             $sheet->setCellValue('O' . $rows, $v->salary_adjustment);
             $sheet->setCellValue('P' . $rows, $v->bos);
-            $sheet->setCellValue('Q' . $rows, $v->jp);
+            // $sheet->setCellValue('Q' . $rows, $v->jp);
+            $sheet->setCellValue('Q' . $rows, $employee_kpi_jp);
             $sheet->setCellValue('R' . $rows, $total_bonus);
-            $sheet->setCellValue('S' . $rows, $v->meal_allowance);
-            $sheet->setCellValue('T' . $rows, $v->rumbay);
-            $sheet->setCellValue('U' . $rows, '=SUM(G' . $rows . ':S' . $rows . ')');
-            $sheet->setCellValue('V' . $rows, '=U' . $rows . '-T' . $rows . '-S' . $rows . '-M' . $rows . '-L' . $rows . '');
-            $sheet->getStyle('G' . $rows . ':V' . $rows)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->setCellValue('S' . $rows, $employee_kpi_catering);
+            $sheet->setCellValue('T' . $rows, $employee_report_gr * 5000);
+            $sheet->setCellValue('U' . $rows, $v->meal_allowance);
+            $sheet->setCellValue('V' . $rows, $v->rumbay);
+            $sheet->setCellValue('W' . $rows, '=SUM(G' . $rows . ':U' . $rows . ')');
+            $sheet->setCellValue('X' . $rows, '=W' . $rows . '-V' . $rows . '-U' . $rows . '-M' . $rows . '-L' . $rows . '');
+            $sheet->getStyle('G' . $rows . ':X' . $rows)->getNumberFormat()->setFormatCode('#,##0');
             $rows++;
         }
 
         // Border dan alignment
-        $sheet->getStyle('A5:V' . ($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+        $sheet->getStyle('A5:X' . ($rows - 1))->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $sheet->getStyle('A5:A' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('U5:V' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('U5:X' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('C7:E' . ($rows - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         $type = 'xlsx';
@@ -1398,30 +1463,77 @@ class PrintController extends Controller
         $spreadsheet->setActiveSheetIndex(0);
         $sheet = $spreadsheet->getActiveSheet();
 
+        $sheet->getPageSetup()
+            ->setFitToWidth(1)
+            ->setFitToHeight(1);
+
+        $sheet->getPageSetup()
+            ->setFitToPage(true);
+
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            ->setFitToPage(true)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+
+        $sheet->getPageMargins()
+            ->setTop(0.3)
+            ->setBottom(0.3)
+            ->setLeft(0.3)
+            ->setRight(0.3);
+        
         if ($request->work_unit_id2) {
             $work_unit = WorkUnit::where('id', $request->work_unit_id2)->first();
+            // $salary = Salary::with('employee')
+            //         ->where('salaries.month', $request->month)
+            //         ->where('salaries.year', $request->year)
+            //         ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
+            //         ->where('employees.work_unit_id', $request->work_unit_id2)
+            //         ->orderBy('employees.name', 'ASC')
+            //         ->select('salaries.*')
+            //         ->get();
+            
+            $employeeIds = DB::connection('simpeg_mysql')
+                ->table('employees')
+                ->where('work_unit_id', $request->work_unit_id2)
+                ->pluck('id');
+
             $salary = Salary::with('employee')
-                    ->where('salaries.month', $request->month)
-                    ->where('salaries.year', $request->year)
-                    ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
-                    ->where('employees.work_unit_id', $request->work_unit_id2)
-                    ->orderBy('employees.name', 'ASC')
-                    ->select('salaries.*')
-                    ->get();
+                ->where('month', $request->month)
+                ->where('year', $request->year)
+                ->whereIn('employee_id', $employeeIds)
+                ->get()
+                ->sortBy(fn ($item) => $item->employee->name)
+                ->values();
+            
             
         } else {
             $work_unit = NULL;
+            // $salary = Salary::with('employee')
+            //         ->where('salaries.month', $request->month)
+            //         ->where('salaries.year', $request->year)
+            //         ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
+            //         ->orderBy('employees.name', 'ASC')
+            //         ->select('salaries.*')
+            //         ->get();
+            
+            $employeeIds = DB::connection('simpeg_mysql')
+                ->table('employees')
+                ->pluck('id');
+
             $salary = Salary::with('employee')
-                    ->where('salaries.month', $request->month)
-                    ->where('salaries.year', $request->year)
-                    ->join('db_2025_simpeg_al_qalam.employees', 'salaries.employee_id', '=', 'employees.id')
-                    ->orderBy('employees.name', 'ASC')
-                    ->select('salaries.*')
-                    ->get();
+                ->where('month', $request->month)
+                ->where('year', $request->year)
+                ->whereIn('employee_id', $employeeIds)
+                ->get()
+                ->sortBy(fn ($item) => $item->employee->name)
+                ->values();
+            
         }
 
         // Atur lebar kolom
-        $sheet->getColumnDimension('A')->setWidth(5); 
+        $sheet->getColumnDimension('A')->setWidth(9); 
         $sheet->getColumnDimension('B')->setWidth(5);  
         $sheet->getColumnDimension('C')->setWidth(22);  
         $sheet->getColumnDimension('D')->setWidth(6);  
@@ -1434,19 +1546,25 @@ class PrintController extends Controller
             
         $rows = 1;
 
-        foreach ($salary as $v) {
+        foreach ($salary as $loopIndex => $v) {
 
+            // if (($loopIndex + 1) % 2 == 0) {
+            //     $sheet->setBreak(
+            //         'A'.$rows,
+            //         \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::BREAK_ROW
+            //     );
+            // }
         
             // Fungsi untuk menentukan koordinat baris
             $r = fn($row) => $rows + $row - 1;
 
-            for ($i = 1; $i <= 38; $i++) {
-                $sheet->getRowDimension($r($i))->setRowHeight(9.75);
+            for ($i = 1; $i <= 40; $i++) {
+                $sheet->getRowDimension($r($i))->setRowHeight(10.4);
             }
 
             $sheet->getRowDimension($r(11))->setRowHeight(0);
 
-            $sheet->getStyle('A'.$r(1).':J'.$r(38))->getFont()->setSize(10);
+            $sheet->getStyle('A'.$r(1).':J'.$r(38))->getFont()->setSize(11);
             // =========================
             // HEADER YAYASAN
             // =========================
@@ -1504,7 +1622,7 @@ class PrintController extends Controller
             $sheet->getStyle('B'.$r(5).':G'.$r(6))
                 ->getAlignment()->setHorizontal('center');
 
-            $sheet->getStyle('B'.$r(5).':G'.$r(35))
+            $sheet->getStyle('B'.$r(5).':G'.$r(40))
                 ->getAlignment()->setVertical('center');
 
             $sheet->getStyle('B'.$r(5).':G'.$r(6))
@@ -1675,6 +1793,35 @@ class PrintController extends Controller
             $salary_allowance = Helpers::salary_allowance($v->employee->tmt, $v->employee->niy, $request->month, $request->year);
             $fix_salary = $v->salary + $salary_allowance;
 
+            $employee_kpi_ttq = EmployeeKpiBonus::where('category', 1)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_kpi_catering = EmployeeKpiBonus::where('category', 2)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_kpi_jp = EmployeeKpiBonus::where('category', 3)
+                    ->whereHas('employee_kpi_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year);
+                    })->sum('value');
+            
+            $employee_report_gr = EmployeeReport::where('category', 4)
+                    ->whereHas('employee_report_period', function ($query) use ($v, $request) {
+                        $query->where('employee_id', $v->id)
+                        ->whereMonth('date', $request->month)
+                        ->whereyear('date', $request->year)
+                        ->where('is_locked', true);
+                    })->sum('value');
+                    
             $rincian = [
                 'Gaji pokok / Gaji Honor',
                 'Tunjangan Jabatan',
@@ -1688,6 +1835,8 @@ class PrintController extends Controller
                 'BOS',
                 'Kelebihan JP',
                 'Tunjangan Kinerja',
+                'Guru Pengganti',
+                'Ketercapaian Catering',
                 'Uang Makan',
                 'Pot Rumbai',
             ];
@@ -1734,8 +1883,8 @@ class PrintController extends Controller
 
                     case 5:
                         if ($status == 'GTY') {
-                            $sheet->setCellValue('D'.$row, 12);
-                            $sheet->setCellValue('F'.$row, '=12%*$E$'.$fixSalaryRow);
+                            $sheet->setCellValue('D'.$row, 2);
+                            $sheet->setCellValue('F'.$row, '=2%*$E$'.$fixSalaryRow);
                         }
                         break;
 
@@ -1746,7 +1895,7 @@ class PrintController extends Controller
                         break;
 
                     case 7:
-                        $sheet->setCellValue('E'.$row, $v->ttq);
+                        $sheet->setCellValue('E'.$row, $employee_kpi_ttq);
                         break;
 
                     case 8:
@@ -1758,7 +1907,7 @@ class PrintController extends Controller
                         break;
 
                     case 10:
-                        $sheet->setCellValue('E'.$row, $v->jp);
+                        $sheet->setCellValue('E'.$row, $employee_kpi_jp);
                         break;
 
                     case 11:
@@ -1766,16 +1915,24 @@ class PrintController extends Controller
                         break;
 
                     case 12:
-                        $sheet->setCellValue('E'.$row, $v->meal_allowance);
+                        $sheet->setCellValue('E'.$row, $employee_report_gr);
                         break;
 
                     case 13:
+                        $sheet->setCellValue('E'.$row, $employee_kpi_catering);
+                        break;
+
+                    case 14:
+                        $sheet->setCellValue('E'.$row, $v->meal_allowance);
+                        break;
+
+                    case 15:
                         $sheet->setCellValue('E'.$row, $v->rumbay);
                         break;
                  }
 
                 $sheet->setCellValue('G'.$row, '=SUM(E'.$row.':F'.$row.')');
-                $sheet->getStyle('E'.$row.':G'.$r(30))->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('E'.$row.':G'.$r(32))->getNumberFormat()->setFormatCode('#,##0');
             }
 
 
@@ -1784,22 +1941,22 @@ class PrintController extends Controller
             // =========================
 
             $totals = [
-                28 => 'Jumlah Gaji',
-                29 => 'Jumlah Yang Tersimpan',
-                30 => 'Total Yang Diterima',
+                30 => 'Jumlah Gaji',
+                31 => 'Jumlah Yang Tersimpan',
+                32 => 'Total Yang Diterima',
             ];
 
             foreach ($totals as $row => $label) {
 
                 $sheet->mergeCells('B'.$r($row).':D'.$r($row));
                 $sheet->setCellValue('B'.$r($row), $label);$sheet->getStyle('B'.$r($row))->getFont()->setBold(true);
-                if($row == 28){
-                    $sheet->setCellValue('G'.$r($row), '=SUM(G'.$r(14).':G'.$r(26).')');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
-                } else if($row == 29){
-                    $sheet->setCellValue('F'.$r($row), '=SUM(F'.$r(19).':F'.$r(20).')');$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
-                    $sheet->setCellValue('G'.$r($row), '=F'.$r($row));$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
-                } else if($row == 30){
-                    $sheet->setCellValue('G'.$r($row), '=G'.$r(28).'-G'.$r(29).'-G'.$r(26).'-G'.$r(27));$sheet->getStyle('E'.$r($row))->getFont()->setBold(true);
+                if($row == 30){
+                    $sheet->setCellValue('G'.$r($row), '=SUM(G'.$r(14).':G'.$r(28).')');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
+                } else if($row == 31){
+                    $sheet->setCellValue('F'.$r($row), '=SUM(F'.$r(19).':F'.$r(20).')');
+                    $sheet->setCellValue('G'.$r($row), '=F'.$r($row));$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
+                } else if($row == 32){
+                    $sheet->setCellValue('G'.$r($row), '=G'.$r(30).'-G'.$r(31).'-G'.$r(28).'-G'.$r(29));$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
                 } 
                 // $sheet->setCellValue('F'.$r($row), '');$sheet->getStyle('F'.$r($row))->getFont()->setBold(true);
                 // $sheet->setCellValue('G'.$r($row), '');$sheet->getStyle('G'.$r($row))->getFont()->setBold(true);
@@ -1810,21 +1967,21 @@ class PrintController extends Controller
             // TANDA TANGAN
             // =========================
 
-            $sheet->setCellValue('C'.$r(33), 'Yang Menerima');
-            $sheet->setCellValue('C'.$r(37), $v->employee->name);
+           $sheet->setCellValue('C'.$r(35), 'Yang Menerima');
+            $sheet->setCellValue('C'.$r(39), $v->employee->name);
 
             $tanggal = Carbon::createFromDate($request->year, $request->month, 1)
                 ->addMonth()
                 ->translatedFormat('F Y');
 
-            $sheet->mergeCells('F'.$r(32).':G'.$r(32));
-            $sheet->setCellValue('F'.$r(32), 'Kendari, 15 '.$tanggal);
-
-            $sheet->mergeCells('F'.$r(33).':G'.$r(33));
-            $sheet->setCellValue('F'.$r(33), 'Yang Membayar');
-
             $sheet->mergeCells('F'.$r(34).':G'.$r(34));
-            $sheet->setCellValue('F'.$r(34), 'Bendahara Yayasan');
+            $sheet->setCellValue('F'.$r(34), 'Kendari, 15 '.$tanggal);
+
+            $sheet->mergeCells('F'.$r(35).':G'.$r(35));
+            $sheet->setCellValue('F'.$r(35), 'Yang Membayar');
+
+            $sheet->mergeCells('F'.$r(36).':G'.$r(36));
+            $sheet->setCellValue('F'.$r(36), 'Bendahara Yayasan');
 
             $drawing = new Drawing();
 
@@ -1832,48 +1989,40 @@ class PrintController extends Controller
             $drawing->setDescription('ttd bendahara');
             $drawing->setPath(public_path('storage/upload/setting/ttd bendahara (1).png'));
 
-            // Posisi gambar mengikuti awal setiap slip
-            $drawing->setCoordinates('G'.$r(34));
+            $drawing->setCoordinates('G'.$r(36));
             $drawing->setHeight(50);
             $drawing->setOffsetX(-25);
             $drawing->setWorksheet($sheet);
 
-            $sheet->mergeCells('F'.$r(37).':G'.$r(37));
-            $sheet->setCellValue('F'.$r(37), ' Restu A.Utami, S.Si');
+            $sheet->mergeCells('F'.$r(39).':G'.$r(39));
+            $sheet->setCellValue('F'.$r(39), 'Restu A.Utami, S.Si');
 
-
-            // =========================
             // STYLE
-            // =========================
-
-            $sheet->getStyle('C'.$r(32).':G'.$r(37))
+            $sheet->getStyle('C'.$r(34).':G'.$r(39))
                 ->getAlignment()->setHorizontal('center');
 
             $sheet->getStyle('B'.$r(13).':G'.$r(13))
                 ->getFont()->setBold(true);
 
-            // Border slip
-            $sheet->getStyle('B'.$r(13).':G'.$r(30))
+            $sheet->getStyle('B'.$r(15).':G'.$r(32))
                 ->getBorders()->getAllBorders()
                 ->setBorderStyle(
                     \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
                 );
 
-            $sheet->getStyle('A'.$r(38).':H'.$r(38))
-            ->getBorders()
-            ->getBottom()
-            ->setBorderStyle(
-                \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
-            );
+            $sheet->getStyle('A'.$r(40).':H'.$r(40))
+                ->getBorders()->getBottom()
+                ->setBorderStyle(
+                    \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                );
 
-            // Alignment tabel
-            $sheet->getStyle('B'.$r(13).':G'.$r(28))
+            $sheet->getStyle('B'.$r(13).':G'.$r(30))
                 ->getAlignment()->setVertical('center');
 
-            $sheet->getStyle('B'.$r(13).':B'.$r(27))
+            $sheet->getStyle('B'.$r(13).':B'.$r(29))
                 ->getAlignment()->setHorizontal('center');
 
-            $sheet->getStyle('D'.$r(13).':D'.$r(28))
+            $sheet->getStyle('D'.$r(13).':D'.$r(30))
                 ->getAlignment()->setHorizontal('center');
 
             // =========================
@@ -1881,9 +2030,9 @@ class PrintController extends Controller
             // =========================
 
             // 35 baris slip + 2 baris kosong
-            $rows += 38;
+            $rows += 41;
             
-            $sheet->getStyle('B'.$r(13).':G'.$r(29))
+            $sheet->getStyle('B'.$r(13).':G'.$r(31))
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(

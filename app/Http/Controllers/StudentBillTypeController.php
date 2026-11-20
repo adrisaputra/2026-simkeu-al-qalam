@@ -32,10 +32,10 @@ class StudentBillTypeController extends Controller
 
             $query = StudentBillType::query();
 
-            // if ($request->filled('get_work_unit')) {
+            if ($request->filled('get_work_unit')) {
                 $get_work_unit = $request->input('get_work_unit');
                 $query->where('work_unit_id', $get_work_unit);
-            // }
+            }
 
             $student_bill_type = $query->limit(10);
 
@@ -79,9 +79,6 @@ class StudentBillTypeController extends Controller
                 }
             })
             ->addColumn('action', function ($v) {
-                $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                        </a>';
                 $btn = '<a href="#" onClick="getData('.$v->id.')" id="'.$v->id.'" title="Edit" data-toggle="modal" data-target="#exampleModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 text-success"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         </a>';
@@ -135,7 +132,7 @@ class StudentBillTypeController extends Controller
             $student_bill_type->transaction_code_id = $request->transaction_code_id;
             $student_bill_type->transaction_code_sub_id = $request->transaction_code_sub_id;
             $student_bill_type->frequency = $request->frequency;
-            $student_bill_type->default_amount = str_replace('.', '', $request->default_amount) ?? 0;
+            $student_bill_type->default_amount = $request->default_amount ? str_replace('.', '', $request->default_amount) : 0;
             $student_bill_type->save();
             
             activity()->log('Create Data Student Bill Type');

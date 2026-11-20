@@ -51,7 +51,6 @@
 											<th>Kode Transaksi</th>
 											<th>Frekuensi Tagihan</th>
 											<th>Nominal (Rp)</th>
-											<th style="width: 15%"></th>
 											<th style="width: 10%"></th>
 										</tr>
 									</thead>
@@ -86,7 +85,6 @@
                 {data: 'display_transaction_code', name: 'display_transaction_code'},
                 {data: 'display_frequency', name: 'frequency'},
                 {data: 'display_default_amount', name: 'default_amount'},
-                {data: 'student_bill_academic_year', name: 'student_bill_academic_year'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
 			order: [

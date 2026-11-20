@@ -235,10 +235,10 @@
                 document.getElementById("allowance1").value = formatRupiah2(response.data.allowance1);
                 document.getElementById("allowance2").value = formatRupiah2(response.data.allowance2);
                 document.getElementById("allowance3").value = formatRupiah2(response.data.allowance3);
-                document.getElementById("ttq").value = formatRupiah2(response.data.ttq);
+                // document.getElementById("ttq").value = formatRupiah2(response.data.ttq);
                 document.getElementById("salary_adjustment").value = formatRupiah2(response.data.salary_adjustment);
                 document.getElementById("bos").value = formatRupiah2(response.data.bos);
-                document.getElementById("jp").value = formatRupiah2(response.data.jp);
+                // document.getElementById("jp").value = formatRupiah2(response.data.jp);
                 document.getElementById("meal_allowance").value = formatRupiah2(response.data.meal_allowance);
                 document.getElementById("rumbay").value = formatRupiah2(response.data.rumbay);
             },

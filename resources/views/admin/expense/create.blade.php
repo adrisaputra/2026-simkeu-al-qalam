@@ -22,7 +22,7 @@
                         <input type="text" class="form-control form-control-sm" id="date" value="{{ date('Y-m-d') }}" name="date" placeholder="Tanggal" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 1rem;">
+                    <div class="form-group" >
                         <p>{{ __('Akun') }} <span class="required" style="color: #dd4b39;">*</span></p>
                         <select class="form-control form-control-sm" name="account_id" id="account_id" onchange="getTransactionCode();">
                             <option value="">- Pilih - </option>
@@ -33,17 +33,17 @@
                         <div id="account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 1rem;">
+                    <div class="form-group">
                         <p>{{ __('Kode Transaksi') }} <span class="required" style="color: #dd4b39;">*</span></p>
-                        <select class="basic form-control form-control-sm" name="transaction_code_id" id="transaction_code_id" onchange="getTransactionCodeSub()">
+                        <select class="form-control form-control-sm" name="transaction_code_id" id="transaction_code_id" onchange="getTransactionCodeSub()">
                             <option value="">- Pilih - </option>
                         </select>
-                        <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;margin-top: -1.25rem;"></div>
+                        <div id="transaction_code_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: -0.5rem;">
+                    <div class="form-group">
                         <p>{{ __('Sub Kode Transaksi') }}</p>
-                        <select class="basic form-control form-control-sm" name="transaction_code_sub_id" id="transaction_code_sub_id">
+                        <select class="form-control form-control-sm" name="transaction_code_sub_id" id="transaction_code_sub_id">
                             <option value="">- Pilih - </option>
                         </select>
                         <div id="transaction_code_sub_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
@@ -62,8 +62,23 @@
                         <div id="payment_account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>
 
+                    <hr>
+                    <p style="text-align:center;font-weight:bold;font-size:18px">Sumber</p>
                     <div class="form-group">
-                        <p>{{ __('Peruntukan') }}</p>
+                        <p>{{ __('Akun Penerimaan') }} <span class="required" style="color: #dd4b39;">*</span></p>
+                        <select class="form-control form-control-sm" name="receipt_account_id" id="receipt_account_id">
+                            <option value="">- Pilih -</option>
+                            @foreach ($receipt_account as $v)
+                                <option value="{{ $v->id }}">
+                                    {{ $v->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div id="receipt_account_id-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <p>{{ __('Keterangan') }}</p>
                         <input type="text" class="form-control form-control-sm" name="desc" id="desc">
                         <div id="desc-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>

@@ -194,36 +194,56 @@ $setting = \App\Helpers\Helpers::setting();
                     </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
-                            <li class="menu @if(Request::segment(1)=="student") active @endif">
-                                <a href="{{ url('student') }}" @if(in_array(Request::segment(1), ['student','student_bill'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                    <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-student-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                        <span>Data Siswa</span>
-                                    </div>
-                                </a>
-                            </li>
+                         <li class="menu @if(in_array(Request::segment(1), array('student','student_bill'))) active @endif">
+                            <a href="#student" data-toggle="collapse" @if(in_array(Request::segment(1), array('student','student_bill'))) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-student-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Siswa</span>
+                                </div>
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </a>
+                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('student','student_bill'))) show @endif" id="student" data-parent="#accordionExample">
+                                <li @if(Request::segment(1)=="student") class="active" @endif" >
+                                    <a href="{{ url('student') }}"> Data Siswa </a>
+                                </li>
+                            <li @if(Request::segment(1)=="student_bill") class="active" @endif" >
+                                    <a href="{{ url('student_bill') }}"> Tagihan Siswa </a>
+                                </li>
+                            </ul>
+                        </li>
                         @endif
 
-                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Revenue Treasurer']))
-                            <li class="menu @if(Request::segment(1)=="income") active @endif">
-                                <a href="{{ url('income') }}" @if(in_array(Request::segment(1), ['income'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                    <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-sign-in-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                        <span>Penerimaan</span>
-                                    </div>
-                                </a>
-                            </li>
-                        @endif
-
-                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Expenditure Treasurer']))
-                            <li class="menu @if(Request::segment(1)=="expense") active @endif">
-                                <a href="{{ url('expense') }}" @if(in_array(Request::segment(1), ['expense'])) aria-expanded="true" @endif class="dropdown-toggle">
-                                    <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-login-rounded-up-100.png') }}" width="30" height="30" style="margin-right: 18px">
-                                        <span>Pengeluaran</span>
-                                    </div>
-                                </a>
-                            </li>
+                        @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Revenue Treasurer','Expenditure Treasurer']))
+                        <li class="menu @if(in_array(Request::segment(1), array('income','expanse','transaction_allocation'))) active @endif">
+                            <a href="#wallet" data-toggle="collapse" @if(in_array(Request::segment(1), array('income','expanse','transaction_allocation'))) aria-expanded="true" @endif class="dropdown-toggle">
+                                <div class="">
+                                    <img src="{{ asset('storage/menu/icons8-wallet-100.png') }}" width="30" height="30" style="margin-right: 18px">
+                                    <span>Keuangan</span>
+                                </div>
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </a>
+                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('income','expanse','transaction_allocation'))) show @endif" id="wallet" data-parent="#accordionExample">
+                                @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Revenue Treasurer']))
+                                <li @if(Request::segment(1)=="income") class="active" @endif" >
+                                    <a href="{{ url('income') }}"> Penerimaan </a>
+                                </li>
+                                @endif
+                                @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant','Expenditure Treasurer']))
+                                <li @if(Request::segment(1)=="expense") class="active" @endif">
+                                    <a href="{{ url('expense') }}"> Pengeluaran </a>
+                                </li>
+                                @endif
+                                @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
+                                <li @if(Request::segment(1)=="transaction_allocation") class="active" @endif">
+                                    <a href="{{ url('transaction_allocation') }}"> Alokasi Dana </a>
+                                </li>
+                                @endif
+                            </ul>
+                        </li>
                         @endif
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
@@ -241,7 +261,7 @@ $setting = \App\Helpers\Helpers::setting();
                             <li class="menu @if(Request::segment(1)=="salary") active @endif">
                                 <a href="{{ url('salary') }}" @if(in_array(Request::segment(1), ['salary'])) aria-expanded="true" @endif class="dropdown-toggle">
                                     <div class="">
-                                        <img src="{{ asset('storage/menu/icons8-wallet-100 (2).png') }}" width="30" height="30" style="margin-right: 18px">
+                                        <img src="{{ asset('storage/menu/icons8-wallet-101.png') }}" width="30" height="30" style="margin-right: 18px">
                                         <span>Slip Gaji</span>
                                     </div>
                                 </a>

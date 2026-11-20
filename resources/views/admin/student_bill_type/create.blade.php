@@ -60,7 +60,7 @@
                     </div>
 
                     <div class="form-group">
-                        <p>{{ __('Jumlah') }}</p>
+                        <p>{{ __('Nominal (Rp)') }}</p>
                         <input type="text" class="form-control form-control-sm" name="default_amount" id="default_amount" onkeyup="formatRupiah(this, '.')">
                         <div id="default_amount-error" class="fv-plugins-message-container invalid-feedback" style="display: block;"></div>
                     </div>

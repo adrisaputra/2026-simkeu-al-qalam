@@ -50,11 +50,11 @@
                         <div id="allowance2-error" class="fv-plugins-message-container invalid-feedback"></div>
                     </div>
 
-                    <div class="form-group">
+                    {{--<div class="form-group">
                         <p>{{ __('Bonus TTQ') }}</p>
                         <input type="text" class="form-control form-control-sm" name="ttq" id="ttq" onkeyup="formatRupiah(this, '.')">
                         <div id="ttq-error" class="fv-plugins-message-container invalid-feedback"></div>
-                    </div>
+                    </div>--}}
 
                     <div class="form-group">
                         <p>{{ __('Penyesuaian') }}</p>
@@ -68,11 +68,11 @@
                         <div id="bos-error" class="fv-plugins-message-container invalid-feedback"></div>
                     </div>
 
-                    <div class="form-group">
+                    {{--<div class="form-group">
                         <p>{{ __('Kelebihan JP') }}</p>
                         <input type="text" class="form-control form-control-sm" name="jp" id="jp" onkeyup="formatRupiah(this, '.')">
                         <div id="jp-error" class="fv-plugins-message-container invalid-feedback"></div>
-                    </div>
+                    </div>--}}
 
                     <div class="form-group">
                         <p>{{ __('Uang Makan') }}</p>
