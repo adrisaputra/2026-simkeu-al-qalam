@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
-    use SoftDeletes;
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'classes_id',
@@ -29,11 +30,11 @@ class Student extends Model
         return $this->hasOne('App\Models\Income');
     }
 
-    public function student_bill()
+    public function student_bill(): HasMany
     {
-        return $this->hasOne('App\Models\StudentBill');
+        return $this->hasMany(StudentBill::class);
     }
-    
+
     public function student_class_histories()
     {
         return $this->hasMany('App\Models\StudentClassHistory');

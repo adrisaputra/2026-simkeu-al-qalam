@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'date',
         'type',
@@ -17,7 +18,7 @@ class Transaction extends Model
         'payment_account_id',
         'desc',
         'amount',
-        'user_id'
+        'user_id',
     ];
 
     public function transaction_code()
@@ -35,9 +36,13 @@ class Transaction extends Model
         return $this->belongsTo('App\Models\User');
     }
 
+    public function transaction_bank()
+    {
+        return $this->hasOne(TransactionBank::class);
+    }
+
     public function transaction_banks()
     {
         return $this->hasMany(TransactionBank::class);
     }
-    
 }

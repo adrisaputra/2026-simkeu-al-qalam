@@ -1,340 +1,282 @@
 @extends('admin.layout')
+
 @section('content')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-
-        <!--  BEGIN CONTENT AREA  -->
-        <div id="content" class="main-content">
-            <div class="layout-px-spacing">
-
-                <div class="row layout-top-spacing">
-                    <div id="tableHover" class="col-lg-12 col-12 layout-spacing">
-                        <div class="statbox widget box box-shadow">
-                            <div class="widget-header">
-                                <div class="row">
-                                    <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-							 		<h4>Data {{ __($title) }}</h4>
-                                    </div>                 
-                                </div>
+<div id="content" class="main-content">
+    <div class="layout-px-spacing">
+        <div class="row layout-top-spacing">
+            <div class="col-12">
+                <div class="statbox widget box box-shadow">
+                    <div class="widget-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4>Tagihan Siswa</h4>
                             </div>
-	
-							<div class="widget-content widget-content-area">
-								<div class="row">
-									<div class="col-xl-9 col-md-12 col-sm-12 col-12">
-										<a href="{{ url(Request::segment(1).'/'.Request::segment(2)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
-									</div>
-                                    
-                                    <div class="col-xl-3 col-md-12 col-sm-12 col-12">
-                                        <select id="get_academic_year" name="get_academic_year" onchange="getClasses2();" class="form-control form-control-sm" style="height: 38px;padding: 5px;">
-                                            <option value="">- Pilih Periode -</option>
-                                            @foreach($academic_year as $v)
-                                                <option value="{{ $v->id }}" @if($v->id == $academic_year_active->id ) selected @endif>{{ $v->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-								</div>
-							</div>
-						
-                            <div class="widget-content widget-content-area" style="padding-top: 0px;">
-                            <p style="font-size:18px;font-weight:bold;text-align:center">{{ $student->name}} <br> Kelas {{ $student->classes->name}}</p>
-							<div class="table-responsive">
-								<table class="table table-bordered table-hover mb-12" id="student-bill-table">
-									<thead>
-										<tr>
-											<th style="width: 2%">Number</th>
-											<th style="width: 2%">No</th>
-											<th>Jenis Tagihan</th>
-											<th>Periode</th>
-											<th>Nominal (Rp)</th>
-											<th>Yang Terbayarkan (Rp)</th>
-											<th>Sisa Utang (Rp)</th>
-											<th>Status</th>
-											<th style="width: 15%"></th>
-										</tr>
-									</thead>
-								</table>
+                            <div class="col-md-4 text-md-right mb-3 mb-md-0">
+                                <a href="{{ route('student_bill.create') }}" class="btn mb-2 mr-1 btn-success" >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> Buat Tagihan Siswa
+                                </a>
                             </div>
                         </div>
                     </div>
+
+                    <div class="widget-content widget-content-area">
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        @if($errors->has('bill'))
+                            <div class="alert alert-danger">{{ $errors->first('bill') }}</div>
+                        @endif
+
+                        <div class="row mb-4">
+                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                                <a href="#">
+                                    <div class="widget widget-one_hybrid widget-followers" style="background:#2196f3;padding: 20px 20px 0px 20px;">
+                                        <div class="widget-heading">
+                                            <div class="row" style="color: #ffffff;">
+                                                <div class="col-md-12">
+                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->total_amount) }}</p>
+                                                    <h6 style="color: #ffffff;">Total Tagihan</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                                <a href="#">
+                                    <div class="widget widget-one_hybrid widget-followers" style="background:#8bc34a;padding: 20px 20px 0px 20px;">
+                                        <div class="widget-heading">
+                                            <div class="row" style="color: #ffffff;">
+                                                <div class="col-md-12">
+                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->paid_amount) }}</p>
+                                                    <h6 style="color: #ffffff;">Terbayar</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+                                <a href="#">
+                                    <div class="widget widget-one_hybrid widget-followers" style="background:#e71717e0;padding: 20px 20px 0px 20px;">
+                                        <div class="widget-heading">
+                                            <div class="row" style="color: #ffffff;">
+                                                <div class="col-md-12">
+                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->remaining_amount) }}</p>
+                                                    <h6 style="color: #ffffff;">Sisa Tagihan</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <h5>Filter Data</h5>
+                        <form method="GET" action="{{ route('student_bill.index') }}" class="mb-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label for="work_unit_id">Jenjang</label>
+                                    <select id="work_unit_id" name="work_unit_id" class="form-control form-control-sm" onchange="this.form.class_id.value=''; this.form.student_bill_type_id.value='';getClasses();getStudentBillType()">
+                                        <option value="">Semua Jenjang</option>
+                                        @foreach($workUnits as $workUnit)
+                                            <option value="{{ $workUnit->id }}" @selected(($filters['work_unit_id'] ?? '') == $workUnit->id)>
+                                                {{ $workUnit->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="academic_year_id">Tahun Ajaran</label>
+                                    <select id="academic_year_id" name="academic_year_id" class="form-control form-control-sm">
+                                        <option value="">Semua Tahun Ajaran</option>
+                                        @foreach($academicYears as $academicYear)
+                                            <option value="{{ $academicYear->id }}" @selected(($filters['academic_year_id'] ?? '') == $academicYear->id)>
+                                                {{ $academicYear->name }}{{ $academicYear->is_active ? ' (Aktif)' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="class_id">Kelas</label>
+                                    <select id="class_id" name="class_id" class="form-control form-control-sm">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" @selected(($filters['class_id'] ?? '') == $class->id)>
+                                                {{ $class->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="student_bill_type_id">Jenis Tagihan</label>
+                                    <select id="student_bill_type_id" name="student_bill_type_id" class="form-control form-control-sm">
+                                        <option value="">Semua Tagihan</option>
+                                        @if(!empty($filters['work_unit_id']))
+                                            @foreach($billTypes as $billType)
+                                                <option value="{{ $billType->id }}" @selected(($filters['student_bill_type_id'] ?? '') == $billType->id)>
+                                                    {{ $billType->transaction_code?->name ?? $billType->name ?? 'Jenis Tagihan '.$billType->id }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="status">Status</label>
+                                    <select id="status" name="status" class="form-control form-control-sm">
+                                        <option value="">Semua Status</option>
+                                        <option value="outstanding" @selected(($filters['status'] ?? '') === 'outstanding')>Ada Tunggakan</option>
+                                        <option value="partial" @selected(($filters['status'] ?? '') === 'partial')>Terbayar Sebagian</option>
+                                        <option value="paid" @selected(($filters['status'] ?? '') === 'paid')>Lunas</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-9">
+                                    <label for="search">Cari Siswa</label>
+                                    <input id="search" name="search" type="search" class="form-control form-control-sm" value="{{ $filters['search'] ?? '' }}" placeholder="Cari nama siswa...">
+                                </div>
+                                <div class="form-group col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn mb-1 mr-1 btn-info"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
+                                    <a href="{{ route('student_bill.index') }}" class="btn mb-1 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Daftar Siswa</h5>
+                            <small class="text-muted">{{ $students->total() }} siswa</small>
+                        </div>
+
+                        @forelse($students as $student)
+                            @php
+                                $totalAmount = (float) $student->total_amount;
+                                $paidAmount = (float) $student->paid_amount;
+                                $remainingAmount = (float) $student->remaining_amount;
+                                $unitName = $workUnits->firstWhere('id', $student->work_unit_id)?->name;
+                            @endphp
+                            <div class="card mb-3">
+                                <div class="card-body"  style="color:#515365">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <b>{{ $student->name }}</b>
+                                            <div class="text-muted small">
+                                                {{ $unitName ?? 'Unit '.$student->work_unit_id }} - Kelas {{ $student->class_name }}
+                                            </div>
+                                        </div>
+                                        @if($totalAmount <= 0)
+                                            <span class="badge badge-secondary">Belum Ada Tagihan</span>
+                                        @elseif($remainingAmount <= 0)
+                                            <span class="badge badge-success">Lunas</span>
+                                        @else
+                                            <span class="badge badge-danger">Ada Tunggakan</span>
+                                        @endif
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="font-size: 16px;">
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted d-block">Total</small>
+                                            <b>Rp{{ \App\Helpers\Helpers::format_number($totalAmount) }}</b>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted d-block">Terbayar</small>
+                                            <b class="text-success">Rp{{ \App\Helpers\Helpers::format_number($paidAmount) }}</b>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted d-block">Sisa</small>
+                                            <b class="{{ $remainingAmount > 0 ? 'text-danger' : 'text-success' }}">
+                                                Rp{{ \App\Helpers\Helpers::format_number($remainingAmount) }}
+                                            </b>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <a href="{{ route('student_bill.show', ['student' => $student->id, 'academic_year_id' => $filters['academic_year_id'] ?? null]) }}" class="btn btn-outline-info btn-sm">
+                                            Detail Tagihan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="alert alert-info mb-0">Tidak ada siswa yang sesuai dengan filter.</div>
+                        @endforelse
+
+                        <div class="mt-3">{{ $students->links() }}</div>
+                    </div>
                 </div>
-
             </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('backend/assets/js/jquery-3.4.1.min.js')}}"></script>
 <script>
-    var table;
-
-    $(document).ready(function () {
-        table = $('#student-bill-table').DataTable({
-            processing: true,
-            serverSide: true,
-			ajax: {
-                url: "{{ route('student_bill.list', ['student' => Crypt::encrypt($student->id)]) }}",
-				type: 'GET',
-				dataType: 'json',
-				data: function (d) {
-					d.get_academic_year = $('#get_academic_year').val(); 
-                }
-			},
-            columns: [
-				{data: 'id', name: 'id', visible: false},
-				{data: 'number', name: 'number'}, // Kolom nomor urut
-                {data: 'display_student_bill_type', name: 'display_student_bill_type'},
-                {data: 'display_periode', name: 'display_periode'},
-                {data: 'display_nominal', name: 'display_nominal'},
-                {data: 'display_paid_off', name: 'display_paid_off'},
-                {data: 'display_difference', name: 'display_difference'},
-                {data: 'display_status', name: 'display_status'},
-                {data: 'action', name: 'action', orderable: false, searchable: false},
-            ],
-			order: [
-				[0, 'desc'] // Mengatur pengurutan kolom pertama (id) secara descending
-			],
-            paging: true,
-            pageLength: 50,
-			drawCallback: function () {
-                var api = this.api();
-                var startIndex = api.context[0]._iDisplayStart; // Indeks baris pertama di halaman
-                api.column(1, {page: 'current'}).nodes().each(function (cell, i) {
-                    cell.innerHTML = startIndex + i + 1; // Menghitung nomor urut berdasarkan indeks baris dan nomor halaman
-                });
-            }
-        });
-
-        $('#get_academic_year').on('change', function () {
-            table.draw(); // Panggil ulang DataTable untuk memperbarui data berdasarkan filter office
-        });
-
-        $('#myForm').submit(function (e) {
-            e.preventDefault(); // Hindari pengiriman form secara default
-
-            var action = document.getElementById('action').innerText;
-            var id_student_bill_type = $('#id_student_bill_type').val();
-            var work_unit_id = $('#work_unit_id').val();
-            var student_bill_id = $('#student_bill_id').val();
-            var frequency = $('#frequency').val();
-
-            // Buat objek FormData untuk mengirim data form, termasuk file
-            var formData = new FormData();
-            formData.append('id', id_student_bill_type);
-            formData.append('work_unit_id', work_unit_id);
-            formData.append('student_bill_id', student_bill_id);
-            formData.append('frequency', frequency);
-            formData.append('_token', "{{ csrf_token() }}");
-
-            // Kirim permintaan validasi ke controller via Ajax
-            var url = "{{ url('/student_bill_type/validate') }}";
-            $.ajax({
-                url: url + "/" + action,
-                type: "POST",
-                data: formData,
-                contentType: false, // Tidak mengatur contentType secara otomatis
-                processData: false, // Tidak memproses data secara otomatis
-                success: function (response) {
-                   
-                    $('.invalid-feedback').html(''); // Hapus pesan kesalahan
-                    $('.is-invalid').removeClass('is-invalid'); // Hapus kelas is-invalid dari bidang-bidang yang divalidasi
-
-                    if (action === "Simpan") {
-                        send();
-                    } else {
-                        update(id_student_bill_type);
-                    }
-
-                },
-                error: function (xhr) {
-                    var errors = xhr.responseJSON.errors;
-
-                    // Bersihkan semua pesan kesalahan sebelum menampilkan yang baru
-                    $('.fv-plugins-message-container').html('');
-
-                    // Tampilkan pesan kesalahan untuk setiap bidang jika ada
-                    if (errors) {
-                        $.each(errors, function (key, value) {
-                            $('#' + key + '-error').html(value[0]);
-                        });
-                    }
-                }
-            });
-        });
-
-    });
-
-    function clearForm(){
-        document.getElementById("head_title").textContent = "Tambah {{ __($title) }}";
-        $('#myForm')[0].reset();
-        document.getElementById("action").textContent = "Simpan";
-    }
-
-    // Fungsi untuk menampilkan notifikasi toast dengan ikon centang
-    function showSuccessToast(message) {
-        Snackbar.show({
-            text: message,
-            showAction: false,
-            actionTextColor: '#fff',
-            backgroundColor: '#8dbf42',
-            pos: 'top-right'
-        });
-    }
-
-    function showFailedToast(message) {
-        Snackbar.show({
-            text: message,
-            showAction: false,
-            actionTextColor: '#fff',
-            backgroundColor: '#e7515a',
-            pos: 'top-right'
-        });
-    }
     
-    // Create Data
-    function send() {
-        var formData = new FormData($('#myForm')[0]); // Buat objek FormData dari formulir
+    function getClasses(selectedClassId = null) {
+        var work_unit_id = $("#work_unit_id").val();
 
-        // Kirim data formulir ke server menggunakan AJAX
-        $.ajax({
-            url: "{{ url('student_bill_type/store') }}",
-            type: "POST",
-            data: formData,
-            contentType: false, // Biarkan jQuery menentukan contentType secara otomatis
-            processData: false, // Biarkan jQuery menangani proses data secara otomatis
-            success: function (response) {
-                showSuccessToast(response.message); // Tampilkan notifikasi toast
-                $('#myForm')[0].reset(); // Reset form setelah berhasil menambahkan data
-                $('#exampleModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: function (xhr) {
-                // Tangani kesalahan jika pengiriman formulir gagal
-                console.error("Error pengiriman formulir:", xhr);
-            }
-        });
-    }
-        
-    // Get Data
-    function getData(id){
-        document.getElementById("head_title").textContent = "Ubah {{ __($title) }}";
-        document.getElementById("action").textContent = "Update";
-        // Kirim data formulir ke server menggunakan AJAX
+        $("#class_id").html(
+            '<option value="">- Pilih Kelas-</option>'
+        );
 
-        var url = "{{ url('/student_bill_type/edit') }}";
+        if (!work_unit_id) {
+            return false;
+        }
+
+        var url = "{{ url('/classes/get') }}";
+
         $.ajax({
-            url: url + "/" + id,
+            url: url + "/" + work_unit_id,
             type: "GET",
-            success: function (response) {
-                document.getElementById("id_student_bill_type").value = response.data.id;
-                document.getElementById("work_unit_id").value = response.data.work_unit_id;
-                document.getElementById("student_bill_id").value = response.data.student_bill_id;
-                document.getElementById("frequency").value = response.data.frequency;
-                document.getElementById("default_amount").value = formatRupiah2(data.default_amount);
+
+            success: function (html) {
+                $("#class_id").html(html);
+
+                // Pilih kelas setelah opsi selesai dimuat
+                if (selectedClassId !== null) {
+                    $("#class_id").val(String(selectedClassId));
+                }
             },
+
             error: function (xhr) {
-                // Tangani kesalahan jika pengiriman formulir gagal
-                showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                console.error("Error pengiriman formulir:", xhr);
+                console.error(xhr.responseText);
             }
         });
+
+        return false;
     }
 
-    // Update Data
-    function update(id) {
-        var formData = new FormData($('#myForm')[0]); // Buat objek FormData dari formulir
-        formData.append('_token', "{{ csrf_token() }}");
-        formData.append('_method', "PUT");
-        
-        // Kirim data formulir ke server menggunakan AJAX
 
-        var url = "{{ url('/student_bill_type/edit') }}";
+    function getStudentBillType(selectedClassId = null) {
+        var work_unit_id = $("#work_unit_id").val();
+
+        $("#student_bill_type_id").html(
+            '<option value="">- Pilih Jenis Tagihan -</option>'
+        );
+
+        if (!work_unit_id) {
+            return false;
+        }
+
+        var url = "{{ url('/student_bill_type/get') }}";
+
         $.ajax({
-            url: url + "/" + id,
-            type: "POST",
-            data: formData,
-            contentType: false, // Biarkan jQuery menentukan contentType secara otomatis
-            processData: false, // Biarkan jQuery menangani proses data secara otomatis
-            success: function (response) {
-                showSuccessToast(response.message); // Tampilkan notifikasi toast untuk keberhasilan
-                $('#myForm')[0].reset(); // Reset form setelah berhasil memperbarui data
-                $('#exampleModal').modal('hide'); // Tutup modal setelah berhasil memperbarui data
-                table.ajax.reload(null, false); // Muat ulang DataTables setelah update
+            url: url + "/" + work_unit_id,
+            type: "GET",
+
+            success: function (html) {
+                $("#student_bill_type_id").html(html);
+
+                // Pilih kelas setelah opsi selesai dimuat
+                if (selectedClassId !== null) {
+                    $("#student_bill_type_id").val(String(selectedClassId));
+                }
             },
+
             error: function (xhr) {
-                // Tangani kesalahan jika pengiriman formulir gagal
-                showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                console.error("Error pengiriman formulir:", xhr);
+                console.error(xhr.responseText);
             }
         });
-    }
-    
-    // Delete Data
-    function deleteData(id) {
-        swal({
-			title: 'Apakah Kamu Yakin?',
-			text: "Anda tidak akan dapat mengembalikan ini!",
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Delete',
-			padding: '2em'
-		}).then(function (result) {
-			if (result.value) {
-				swal(
-					'Deleted!',
-					'Data Berhasil Dihapus.',
-					'success'
-				).then(function () {
-					var url = "{{ url('/student_bill_type/delete') }}";
-                    $.ajax({
-                        url: url + "/" + id,
-                        success: function (response) {
-                            showSuccessToast(response.message);
-                            $('#myForm')[0].reset();
-                            table.ajax.reload(null, false);
-                        },
-                        error: function (xhr) {
-                            showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                            console.error("Error pengiriman formulir:", xhr);
-                        }
-                    });
-				});
-			}
-		});
-	
-    }
 
-     function StudentBillStore(id) {
-        swal({
-			title: 'Apakah Kamu Yakin?',
-			text: "Anda tidak akan dapat mengembalikan ini!",
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Terbitkan Tagihan',
-			padding: '2em'
-		}).then(function (result) {
-			if (result.value) {
-				swal(
-					'Berhasil!',
-					'Tagihan Berhasil Diterbitkan.',
-					'success'
-				).then(function () {
-					var url = "{{ url('/student_bill/store') }}";
-                    $.ajax({
-                        url: url + "/" + id,
-                        success: function (response) {
-                            showSuccessToast(response.message);
-                            $('#myForm')[0].reset();
-                            table.ajax.reload(null, false);
-                        },
-                        error: function (xhr) {
-                            showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                            console.error("Error pengiriman formulir:", xhr);
-                        }
-                    });
-				});
-			}
-		});
-	
+        return false;
     }
-
-
 
 </script>
 @endsection

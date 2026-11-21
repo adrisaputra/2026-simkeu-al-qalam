@@ -11,20 +11,15 @@
                         <div class="statbox widget box box-shadow">
                             <div class="widget-header">
                                 <div class="row">
-                                    <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-							 		<h4>Data {{ __($title) }}</h4>
-                                    </div>                 
+                                    <div class="col-xl-8 col-md-8 col-sm-12 col-12">
+							 		    <h4>Data {{ __($title) }}</h4>
+                                    </div>     
+                                    <div class="col-xl-4 col-md-4 col-sm-12 col-12 text-md-right mb-3 mb-md-0">
+                                        <a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
+                                    </div>            
                                 </div>
                             </div>
 
-							<div class="widget-content widget-content-area">
-								<div class="row">
-									<div class="col-xl-8 col-md-12 col-sm-12 col-12">
-										<a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
-									</div>
-								</div>
-							</div>
-						
                             <div class="widget-content widget-content-area" style="padding-top: 0px;">
                                 <div class="row layout-top-spacing">
 

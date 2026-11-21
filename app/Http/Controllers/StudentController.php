@@ -6,7 +6,6 @@ use App\Models\Classes;
 use App\Models\Student;
 use App\Models\WorkUnit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Yajra\DataTables\DataTables;
 
@@ -16,6 +15,7 @@ class StudentController extends Controller
     {
         $title = 'Siswa';
         $work_unit = WorkUnit::whereIn('id', [3, 4, 5, 6])->get();
+
         return view('admin.student.index', compact('title', 'work_unit'));
     }
 
@@ -25,7 +25,7 @@ class StudentController extends Controller
             $counters = 1;
 
             $query = Student::query();
-                        
+
             if ($request->filled('get_classes')) {
                 $get_classes = $request->input('get_classes');
 
@@ -46,16 +46,17 @@ class StudentController extends Controller
 
             return DataTables::of($student)
                 ->addIndexColumn()
-                ->addColumn('display_work_unit', function ($v){
+                ->addColumn('display_work_unit', function ($v) {
                     return $v->classes->work_unit->name;
                 })
-                ->addColumn('display_classes', function ($v){
+                ->addColumn('display_classes', function ($v) {
                     return $v->classes->name;
                 })
-                ->addColumn('display_student_bill', function ($v){
-                    $url = url('student_bill', Crypt::encrypt($v->id));
+                ->addColumn('display_student_bill', function ($v) {
+                    $url = route('student_bill.show', $v->id);
                     $btn = '<a href="'.$url.'" class="btn btn-info btn-sm position-relative me-5" data-toggle="tooltip" data-placement="top" title="Data">
                             <span>Lihat Tagihan</span></a>';
+
                     return $btn;
                 })
                 ->addColumn('number', function () use (&$counters) {

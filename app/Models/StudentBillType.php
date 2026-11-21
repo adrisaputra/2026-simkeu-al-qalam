@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StudentBillType extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'work_unit_id',
         'transaction_code_id',
@@ -17,20 +19,23 @@ class StudentBillType extends Model
         'is_active',
     ];
 
-    public function work_unit(){
+    public function work_unit()
+    {
         return $this->belongsTo('App\Models\WorkUnit');
     }
-    
-    public function transaction_code(){
+
+    public function transaction_code()
+    {
         return $this->belongsTo('App\Models\TransactionCode');
     }
-    
-    public function transaction_code_sub(){
+
+    public function transaction_code_sub()
+    {
         return $this->belongsTo('App\Models\TransactionCodeSub');
     }
-    
-    public function student_bill()
+
+    public function student_bill(): HasMany
     {
-        return $this->hasOne('App\Models\StudentBill');
+        return $this->hasMany(StudentBill::class);
     }
 }

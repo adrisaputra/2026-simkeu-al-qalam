@@ -208,8 +208,11 @@ $setting = \App\Helpers\Helpers::setting();
                                 <li @if(Request::segment(1)=="student") class="active" @endif" >
                                     <a href="{{ url('student') }}"> Data Siswa </a>
                                 </li>
-                            <li @if(Request::segment(1)=="student_bill") class="active" @endif" >
-                                    <a href="{{ url('student_bill') }}"> Tagihan Siswa </a>
+                                <li @if(Request::segment(1)=="transaction_bank") class="active" @endif" >
+                                    <a href="{{ url('transaction_bank') }}"> Transaksi Bank </a>
+                                </li>
+                                <li @if(Request::segment(1)=="student_bill") class="active" @endif" >
+                                    <a href="{{ url('student_bill') }}"> Tagihan  </a>
                                 </li>
                             </ul>
                         </li>

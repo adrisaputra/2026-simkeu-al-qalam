@@ -322,41 +322,6 @@
 	
     }
 
-    function StudentBillStore(id) {
-        swal({
-			title: 'Apakah Kamu Yakin?',
-			text: "Anda tidak akan dapat mengembalikan ini!",
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Terbitkan Tagihan',
-			padding: '2em'
-		}).then(function (result) {
-			if (result.value) {
-				swal(
-					'Berhasil!',
-					'Tagihan Berhasil Diterbitkan.',
-					'success'
-				).then(function () {
-					var url = "{{ url('/student_bill/store') }}";
-                    $.ajax({
-                        url: url + "/" + id,
-                        success: function (response) {
-                            showSuccessToast(response.message);
-                            $('#myForm')[0].reset();
-                            table.ajax.reload(null, false);
-                        },
-                        error: function (xhr) {
-                            showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
-                            console.error("Error pengiriman formulir:", xhr);
-                        }
-                    });
-				});
-			}
-		});
-	
-    }
-
-
     function getTransactionCodeSub() {
         var transaction_code_id = $("#transaction_code_id").val();
 

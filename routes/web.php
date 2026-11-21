@@ -18,6 +18,7 @@ use App\Http\Controllers\StudentBillTypeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentPromotionController;
 use App\Http\Controllers\TransactionAllocationController;
+use App\Http\Controllers\TransactionBankController;
 use App\Http\Controllers\TransactionCodeController;
 use App\Http\Controllers\TransactionCodeSubController;
 use App\Http\Controllers\UserController;
@@ -50,8 +51,8 @@ Route::middleware(['role:Admin Finance,Accountant,Revenue Treasurer,Expenditure 
 });
 
 Route::middleware(['role:Admin Finance'])->group(function () {
-    
-    # Salary
+
+    // Salary
     Route::get('/salary', [SalaryController::class, 'index'])->name('salary.index');
     Route::get('/salary/list', [SalaryController::class, 'get_salary_index'])->name('salary.list');
     Route::post('/salary/validate', [SalaryController::class, 'validate']);
@@ -64,12 +65,11 @@ Route::middleware(['role:Admin Finance'])->group(function () {
 
 Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
 
-    ## Transaction Allocation
+    // # Transaction Allocation
     Route::get('/transaction_allocation', [TransactionAllocationController::class, 'index'])->name('transaction_allocation.index');
     Route::get('/transaction_allocation/list', [TransactionAllocationController::class, 'get_transaction_allocation_index'])->name('transaction_allocation.list');
     Route::get('/transaction_allocation/detail/{transaction_code}', [TransactionAllocationController::class, 'detail']);
     Route::get('/transaction_allocation/detail_list/{transaction_code}', [TransactionAllocationController::class, 'get_transaction_allocation_detail'])->name('transaction_allocation_detail.list');
-    
 
     // # Academic Year and Student Promotion
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic_years.index');
@@ -124,8 +124,23 @@ Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
     Route::get('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'edit']);
     Route::put('/student_bill_type/edit/{student_bill_type}', [StudentBillTypeController::class, 'update']);
     Route::get('/student_bill_type/delete/{student_bill_type}', [StudentBillTypeController::class, 'delete']);
+    Route::get('/student_bill_type/get/{work_unit}', [StudentBillTypeController::class, 'get']);
 
-    Route::get('/student_bill', [StudentBillController::class, 'index']);
+    Route::get('/student_bill', [StudentBillController::class, 'index'])->name('student_bill.index');
+    Route::get('/student_bill/create', [StudentBillController::class, 'create'])->name('student_bill.create');
+    Route::post('/student_bill/store', [StudentBillController::class, 'store'])->name('student_bill.store');
+    Route::get('/student_bill/{student}', [StudentBillController::class, 'show'])->name('student_bill.show');
+    Route::get('/student_bill/{student_bill}/edit', [StudentBillController::class, 'edit'])->name('student_bill.edit');
+    Route::put('/student_bill/{student_bill}', [StudentBillController::class, 'update'])->name('student_bill.update');
+    Route::delete('/student_bill/{student_bill}', [StudentBillController::class, 'destroy'])->name('student_bill.destroy');
+
+    Route::get('/transaction_bank', [TransactionBankController::class, 'index'])->name('transaction_bank.index');
+    Route::get('/transaction_bank/create', [TransactionBankController::class, 'create'])->name('transaction_bank.create');
+    Route::post('/transaction_bank/store', [TransactionBankController::class, 'store'])->name('transaction_bank.store');
+    Route::get('/transaction_bank/{student}', [TransactionBankController::class, 'show'])->name('transaction_bank.show');
+    Route::get('/transaction_bank/{transaction_bank}/edit', [TransactionBankController::class, 'edit'])->name('transaction_bank.edit');
+    Route::put('/transaction_bank/{transaction_bank}', [TransactionBankController::class, 'update'])->name('transaction_bank.update');
+    Route::delete('/transaction_bank/{transaction_bank}', [TransactionBankController::class, 'destroy'])->name('transaction_bank.destroy');
 
     // # Transaction Code
     Route::get('/transaction_code/{account}', [TransactionCodeController::class, 'index'])->name('transaction_code.index');
