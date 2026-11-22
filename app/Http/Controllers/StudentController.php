@@ -157,6 +157,24 @@ class StudentController extends Controller
         }
     }
 
+    // # Get Data
+    public function get(Request $request)
+    {
+        $students = Student::where('name', 'like', '%' . $request->search . '%')
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
+
+        return response()->json(
+            $students->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'text' => $v->nis . ' - ' . $v->name .' - ' . $v->classes->name,
+                ];
+            })
+        );
+    }
+        
     public function import(Request $request)
     {
         $request->validate([

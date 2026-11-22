@@ -1,5 +1,4 @@
 @extends('admin.layout')
-
 @section('content')
 <div id="content" class="main-content">
     <div class="layout-px-spacing">
@@ -9,191 +8,348 @@
                     <div class="widget-header">
                         <div class="row align-items-center">
                             <div class="col-md-8">
-                                <h4>Detail Tagihan Siswa</h4>
-                            </div>
-                            <div class="col-md-4 text-md-right mb-3 mb-md-0">
-                                <a href="{{ route('student_bill.index') }}" class="btn mb-2 mr-1 btn-danger" data-toggle="tooltip" data-placement="top" title="Kembali"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polyline points="12 8 8 12 12 16"></polyline>
-                                        <line x1="16" y1="12" x2="8" y2="12"></line>
-                                    </svg></a>
+                                <h4>{{ $title }}</h4>
                             </div>
                         </div>
                     </div>
-
+                    @include('admin.transaction_bank.edit')
                     <div class="widget-content widget-content-area">
-
-
-                        <p style="font-size:16px;margin-top:-20px;">
-                        <div class="row">
-                            <div class="col-md-2">Nama Siswa</div>
-                            <div class="col-md-10">: <b>{{ $student->name }}</b></div>
-                            <div class="col-md-2">Jenjang</div>
-                            <div class="col-md-10">: {{ $student->classes?->work_unit?->name ?? '-' }}</div>
-                            <div class="col-md-2">Kelas</div>
-                            <div class="col-md-10">: {{ $student->classes?->name ?? '-' }}</div>
-                        </div>
-                        </p>
-
                         @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
+                            <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
                         @if($errors->has('bill'))
-                        <div class="alert alert-danger">{{ $errors->first('bill') }}</div>
+                            <div class="alert alert-danger">{{ $errors->first('bill') }}</div>
                         @endif
 
-
-                        <div class="row mb-4">
-                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-                                <a href="#">
-                                    <div class="widget widget-one_hybrid widget-followers" style="background:#2196f3;padding: 20px 20px 0px 20px;">
-                                        <div class="widget-heading">
-                                            <div class="row" style="color: #ffffff;">
-                                                <div class="col-md-12">
-                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->total_amount) }}</p>
-                                                    <h6 style="color: #ffffff;">Total Tagihan</h6>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
+                        <p style="font-weight:bold">{{ $transaction->desc }}</p>
+                        <p style="font-size:24px">Rp. {{ \App\Helpers\Helpers::format_number($transaction->amount) }}</p>
+            
+                        <hr>
+                        <div class="row" style="font-size: 16px;">
+                            <div class="col-md-4 mb-2">
+                                <small class="text-muted d-block">Transaksi</small>
+                                <b>{{ \App\Helpers\Helpers::format_number($transaction->transaction_banks->count()) }}</b>
                             </div>
-                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-                                <a href="#">
-                                    <div class="widget widget-one_hybrid widget-followers" style="background:#8bc34a;padding: 20px 20px 0px 20px;">
-                                        <div class="widget-heading">
-                                            <div class="row" style="color: #ffffff;">
-                                                <div class="col-md-12">
-                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->paid_amount) }}</p>
-                                                    <h6 style="color: #ffffff;">Terbayar</h6>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
+                            <div class="col-md-4 mb-2">
+                                <small class="text-muted d-block">Cocok</small>
+                                <b class="text-success">
+                                    <b>{{ \App\Helpers\Helpers::format_number($transaction->transaction_banks->whereNotNull('student_id')->count()) }}</b>
+                                </b>
                             </div>
-                            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-                                <a href="#">
-                                    <div class="widget widget-one_hybrid widget-followers" style="background:#e71717e0;padding: 20px 20px 0px 20px;">
-                                        <div class="widget-heading">
-                                            <div class="row" style="color: #ffffff;">
-                                                <div class="col-md-12">
-                                                    <p class="w-value" style="color: #ffffff;font-size: 28px;">{{ \App\Helpers\Helpers::format_number($summary->remaining_amount) }}</p>
-                                                    <h6 style="color: #ffffff;">Tunggakan</h6>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
+                            <div class="col-md-4 mb-2">
+                                <small class="text-muted d-block">Belum Cocok</small>
+                                <b class="text-danger">
+                                    <b>{{ \App\Helpers\Helpers::format_number($transaction->transaction_banks->whereNull('student_id')->count()) }}</b>
+                                </b>
                             </div>
                         </div>
+                        <hr>
 
-                        {{--<div class="row mb-3">
-                            <div class="col-md-4 mb-2">
-                                <div class="card h-100"><div class="card-body">
-                                    <div class="text-muted">Total Tagihan</div>
-                                    <strong>Rp{{ \App\Helpers\Helpers::format_number($summary->total_amount) }}</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted">Terbayar</div>
-                        <strong class="text-success">Rp{{ \App\Helpers\Helpers::format_number($summary->paid_amount) }}</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted">Tunggakan</div>
-                        <strong class="text-danger">Rp{{ \App\Helpers\Helpers::format_number($summary->remaining_amount) }}</strong>
-                    </div>
-                </div>
-            </div>
-        </div>--}}
+                        <form method="GET" action="{{ route('transaction_bank.show', $transaction->id) }}">
+                            <input type="hidden" name="academic_year_id" value="{{ request('academic_year_id') }}">
+                            <div class="row justify-content-end">
+                                    
+                                <div class="col-md-9">
+                                    <a href="#" class="btn mb-2 mr-1 btn-success" data-placement="top" data-toggle="modal" data-target="#exampleModal" title="Tambah Data" onClick="clearForm()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></a>
+									<a href="{{ url(Request::segment(1).'/'.Request::segment(2)) }}" class="btn mb-2 mr-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
+                                    <a href="{{ url(Request::segment(1)) }}" class="btn mb-2 mr-1 btn-danger" data-toggle="tooltip" data-placement="top" title="Kembali"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg></a>
+                                </div>
+                                
+                                <div class="col-md-3 col-lg-3 col-md-12 col-sm-12 col-12 layout-spacing">
+                                    <select id="status" name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+                                        <option value="">Semua Status</option>
+                                        <option value="unmatched" @selected(($filters['status'] ?? '') === 'unmatched')>Belum cocok</option>
+                                        <option value="matched" @selected(($filters['status'] ?? '') === 'matched')>Cocok</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
 
-        <form method="GET" action="{{ route('student_bill.show', $student->id) }}" class="form-inline mb-3">
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-                    <select id="academic_year_id" name="academic_year_id" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
-                        <option value="">Semua Tahun Ajaran</option>
-                        @foreach($academicYears as $academicYear)
-                        <option value="{{ $academicYear->id }}" @selected(($selectedYear?->id ?? '') == $academicYear->id)>
-                            {{ $academicYear->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        </form>
-
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>Jenis Tagihan</th>
-                        <th>Periode</th>
-                        <th>Jatuh Tempo</th>
-                        <th>Nominal</th>
-                        <th>Terbayar</th>
-                        <th>Sisa</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($bills as $bill)
-                    @php
-                    $billTypeName = $bill->student_bill_type?->transaction_code?->name
-                    ?? $bill->student_bill_type?->name
-                    ?? 'Jenis Tagihan';
-                    $isPaid = (float) $bill->remaining_amount <= 0;
-                        @endphp
-                        <tr>
-                        <td>{{ $billTypeName }}</td>
-                        <td>{{ \Carbon\Carbon::parse($bill->period_start)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($bill->period_end)->format('d/m/Y') }}</td>
-                        <td>{{ $bill->due_date ? \Carbon\Carbon::parse($bill->due_date)->format('d/m/Y') : '-' }}</td>
-                        <td>Rp{{ \App\Helpers\Helpers::format_number($bill->amount) }}</td>
-                        <td class="text-success">Rp{{ \App\Helpers\Helpers::format_number($bill->paid_amount) }}</td>
-                        <td class="{{ $bill->remaining_amount > 0 ? 'text-danger' : 'text-success' }}">
-                            Rp{{ \App\Helpers\Helpers::format_number($bill->remaining_amount) }}
-                        </td>
-                        <td>
-                            @if($isPaid)
-                            <span class="badge badge-success">Lunas</span>
-                            @elseif((float) $bill->paid_amount > 0)
-                            <span class="badge badge-warning">Terbayar Sebagian</span>
-                            @else
-                            <span class="badge badge-danger">Belum Lunas</span>
-                            @endif
-                        </td>
-                        <td class="text-nowrap">
-                            @if((float) $bill->paid_amount <= 0)
-                                <a href="{{ route('student_bill.edit', $bill->id) }}" class="btn btn-sm btn-outline-primary">Ubah</a>
-                                <form method="POST" action="{{ route('student_bill.destroy', $bill->id) }}" class="d-inline" onsubmit="return confirm('Hapus tagihan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
-                                </form>
-                                @else
-                                <span class="text-muted">Ada pembayaran</span>
-                                @endif
-                        </td>
-                        </tr>
+                        @forelse($transaction_bank as $v)
+                            <div class="card mb-3">
+                                <div class="card-body"  style="color:#515365">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            No. Transaksi : <b>{{ $v->transaction_number }}</b>
+                                            <div class="text-muted small">
+                                                {{ \App\Helpers\Helpers::date_indo_full($v->date) }}
+                                            </div>
+                                            <br>
+                                            @if($v->status == 'unmatched')
+                                                Nama : {{ $v->student_name }}<br>
+                                                Kelas : {{ $v->classes }}
+                                            @elseif($v->status == 'matched')
+                                                Nama : {{ $v->student->name }}<br>
+                                                Jenjang : {{ $v->student->classes->work_unit->name ?? '-' }}<br>
+                                                Kelas : {{ $v->student->classes->name ?? '-' }}
+                                            @endif
+                                        </div>
+                                        
+                                        @if($v->status == 'unmatched')
+                                            <span class="badge badge-danger">Belum cocok</span>
+                                        @elseif($v->status == 'matched')
+                                            <span class="badge badge-success">Cocok</span>
+                                        @endif
+                                    </div>
+                                    <hr>
+                                    <div class="row" style="font-size: 16px;">
+                                        <div class="col-md-9">
+                                            <small class="text-muted d-block">{{ $transaction->transaction_code->name}}</small>
+                                            <b>{{ \App\Helpers\Helpers::format_number($v->amount) }}</b>
+                                        </div>
+                                        <div class="col-md-3 d-flex justify-content-end align-items-center">
+                                            @if($v->status == 'unmatched')
+                                            <a href="#" onclick="getData({{ $v->id }})" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#editModal">Cocokkan Siswa</a>
+						                    
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @empty
-                        <tr>
-                            <td colspan="8" class="text-center">Belum ada tagihan untuk tahun ajaran ini.</td>
-                        </tr>
+                            <div class="alert alert-info mb-0">Tidak ada transaksi bank yang sesuai dengan filter.</div>
                         @endforelse
-                </tbody>
-            </table>
+
+                        <div class="mt-3">{{ $transaction_bank->links() }}</div>
+                        
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-</div>
-</div>
-</div>
-</div>
+
+<script src="{{ asset('backend/assets/js/jquery-3.4.1.min.js')}}"></script>
+<script>
+      
+    $(document).ready(function () {
+        
+        $('#student_id').select2({
+            dropdownParent: $('#editModal'),
+            width: '100%',
+            placeholder: 'Ketik nama siswa...',
+            minimumInputLength: 2,
+
+            ajax: {
+                url: "{{ url('/student/get') }}",
+                dataType: 'json',
+                delay: 300,
+
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                    
+                }
+            }
+        });
+
+        $('#myForm').submit(function (e) {
+            e.preventDefault(); // Hindari pengiriman form secara default
+
+            var action = document.getElementById('action').innerText;
+            var id_transaction_bank = $('#id_transaction_bank').val();
+            var student_id = $('#student_id').val();
+
+            // Buat objek FormData untuk mengirim data form, termasuk file
+            var formData = new FormData();
+            formData.append('id', id_transaction_bank);
+            formData.append('student_id', student_id);
+            formData.append('_token', "{{ csrf_token() }}");
+
+            // Kirim permintaan validasi ke controller via Ajax
+            var url = "{{ url('/transaction_bank/validate') }}";
+            $.ajax({
+                url: url + "/" + action,
+                type: "POST",
+                data: formData,
+                contentType: false, // Tidak mengatur contentType secara otomatis
+                processData: false, // Tidak memproses data secara otomatis
+                success: function (response) {
+                   
+                    $('.invalid-feedback').html(''); // Hapus pesan kesalahan
+                    $('.is-invalid').removeClass('is-invalid'); // Hapus kelas is-invalid dari bidang-bidang yang divalidasi
+
+                    if (action === "Simpan") {
+                        send();
+                    } else {
+                        update(id_transaction_bank);
+                    }
+
+                },
+                error: function (xhr) {
+                    var errors = xhr.responseJSON.errors;
+
+                    // Bersihkan semua pesan kesalahan sebelum menampilkan yang baru
+                    $('.fv-plugins-message-container').html('');
+
+                    // Tampilkan pesan kesalahan untuk setiap bidang jika ada
+                    if (errors) {
+                        $.each(errors, function (key, value) {
+                            $('#' + key + '-error').html(value[0]);
+                        });
+                    }
+                }
+            });
+        });
+
+    });
+    
+    // Fungsi untuk menampilkan notifikasi toast dengan ikon centang
+    function showSuccessToast(message) {
+        Snackbar.show({
+            text: message,
+            showAction: false,
+            actionTextColor: '#fff',
+            backgroundColor: '#8dbf42',
+            pos: 'top-right'
+        });
+    }
+
+    function showFailedToast(message) {
+        Snackbar.show({
+            text: message,
+            showAction: false,
+            actionTextColor: '#fff',
+            backgroundColor: '#e7515a',
+            pos: 'top-right'
+        });
+    }
+    
+    // Get Data
+    function getData(id){
+        document.getElementById("head_title").textContent = "Ubah {{ __($title) }}";
+        document.getElementById("action").textContent = "Update";
+        // Kirim data formulir ke server menggunakan AJAX
+
+        var url = "{{ url('/transaction_bank') }}";
+        $.ajax({
+            url: url + "/" + id + "/edit",
+            type: "GET",
+            success: function (response) {
+                document.getElementById("id_transaction_bank").value = response.data.id;
+                            
+                $("#editModal").modal('show');
+
+                $('#student_id').select2('open');
+
+                setTimeout(function () {
+                    $('.select2-container--open .select2-search__field')
+                        .val(response.data.student_name)
+                        .trigger('input');
+                }, 300);
+                console.log(response.data.student_name);
+            },
+            error: function (xhr) {
+                // Tangani kesalahan jika pengiriman formulir gagal
+                showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
+                console.error("Error pengiriman formulir:", xhr);
+            }
+        });
+    }
+
+    // Update Data
+    function update(id) {
+        var formData = new FormData($('#myForm')[0]); // Buat objek FormData dari formulir
+        formData.append('_token', "{{ csrf_token() }}");
+        formData.append('_method', "PUT");
+        
+        // Kirim data formulir ke server menggunakan AJAX
+
+        var url = "{{ url('/transaction_bank') }}";
+        $.ajax({
+            url: url + "/" + id + "/edit",
+            type: "POST",
+            data: formData,
+            contentType: false, // Biarkan jQuery menentukan contentType secara otomatis
+            processData: false, // Biarkan jQuery menangani proses data secara otomatis
+            success: function (response) {
+                showSuccessToast(response.message); // Tampilkan notifikasi toast untuk keberhasilan
+                $('#myForm')[0].reset(); // Reset form setelah berhasil memperbarui data
+                $('#editModal').modal('hide'); // Tutup modal setelah berhasil memperbarui data
+                location.reload();
+            },
+            error: function (xhr) {
+                // Tangani kesalahan jika pengiriman formulir gagal
+                showFailedToast(xhr); // Tampilkan notifikasi toast untuk keberhasilan
+                console.error("Error pengiriman formulir:", xhr);
+            }
+        });
+    }
+    
+    function getClasses(selectedClassId = null) {
+        var work_unit_id = $("#work_unit_id").val();
+
+        $("#class_id").html(
+            '<option value="">- Pilih Kelas-</option>'
+        );
+
+        if (!work_unit_id) {
+            return false;
+        }
+
+        var url = "{{ url('/classes/get') }}";
+
+        $.ajax({
+            url: url + "/" + work_unit_id,
+            type: "GET",
+
+            success: function (html) {
+                $("#class_id").html(html);
+
+                // Pilih kelas setelah opsi selesai dimuat
+                if (selectedClassId !== null) {
+                    $("#class_id").val(String(selectedClassId));
+                }
+            },
+
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function getStudentBillType(selectedClassId = null) {
+        var work_unit_id = $("#work_unit_id").val();
+
+        $("#v_bill_type_id").html(
+            '<option value="">- Pilih Jenis Tagihan -</option>'
+        );
+
+        if (!work_unit_id) {
+            return false;
+        }
+
+        var url = "{{ url('/v_bill_type/get') }}";
+
+        $.ajax({
+            url: url + "/" + work_unit_id,
+            type: "GET",
+
+            success: function (html) {
+                $("#v_bill_type_id").html(html);
+
+                // Pilih kelas setelah opsi selesai dimuat
+                if (selectedClassId !== null) {
+                    $("#v_bill_type_id").val(String(selectedClassId));
+                }
+            },
+
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+
+        return false;
+    }
+
+</script>
 @endsection

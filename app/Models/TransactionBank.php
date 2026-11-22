@@ -14,11 +14,15 @@ class TransactionBank extends Model
         'transaction_code_id',
         'transaction_code_sub_id',
         'student_id',
+        'student_name',
+        'classes',
         'transaction_number',
         'date',
         'time',
+        'import_date',
         'amount',
-        'user_id'
+        'user_id',
+        'status'
     ];
 
     public function desc_category()

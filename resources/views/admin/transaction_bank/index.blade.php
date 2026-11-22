@@ -11,13 +11,10 @@
                             <div class="col-md-8">
                                 <h4>{{ $title }}</h4>
                             </div>
-                            <div class="col-md-4 text-md-right mb-3 mb-md-0">
-                                <a href="" class="btn mb-2 mr-1 btn-success" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> Buat Tagihan Siswa
-                                </a>
-                            </div>
                         </div>
                     </div>
+
+					@include('admin.transaction_bank.import')
 
                     <div class="widget-content widget-content-area">
                         @if(session('success'))
@@ -154,9 +151,12 @@
 
                         <form method="GET" action="{{ route('transaction_bank.index') }}" class="mb-4">
                             <div class="form-row align-items-end">
-                                <div class="form-group col-md-5">
-                                    <label for="academic_year_id">Tahun Ajaran</label>
-                                    <select id="academic_year_id" name="academic_year_id" class="form-control form-control-sm">
+                                <div class="col-md-6">
+                                    <a href="#" class="btn mb-1 btn-info" data-placement="top" data-toggle="modal" data-target="#exampleModalImport" title="Import Data"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></a>
+                                    <a href="{{ url(Request::segment(1)) }}" class="btn mb-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Refresh"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></a>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="academic_year_id" name="academic_year_id" class="form-control form-control-sm" onchange="this.form.submit()">
                                         <option value="">Semua Tahun Ajaran</option>
                                         @foreach($academicYears as $academicYear)
                                             <option value="{{ $academicYear->id }}" @selected(($filters['academic_year_id'] ?? '') == $academicYear->id)>
@@ -165,18 +165,13 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="form-group col-md-5">
-                                    <label for="status">Status</label>
-                                    <select id="status" name="status" class="form-control form-control-sm">
+                                <div class="col-md-3">
+                                    <select id="status" name="status" class="form-control form-control-sm" onchange="this.form.submit()">
                                         <option value="">Semua Status</option>
                                         <option value="unmatched" @selected(($filters['status'] ?? '') === 'unmatched')>Belum cocok</option>
                                         <option value="matched" @selected(($filters['status'] ?? '') === 'matched')>Cocok</option>
                                         <option value="partial" @selected(($filters['status'] ?? '') === 'partial')>Sebagian cocok</option>
                                     </select>
-                                </div>
-                                <div class="form-group col-md-2 d-flex">
-                                    <button type="submit" class="btn mb-1 mr-1 btn-info">Filter</button>
-                                    <a href="{{ route('transaction_bank.index') }}" class="btn mb-1 btn-warning" data-toggle="tooltip" data-placement="top" title="Reset filter">Reset</a>
                                 </div>
                             </div>
                         </form>
@@ -225,9 +220,9 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        {{--<a href="{{ route('v_bill.show', ['v' => $v->id, 'academic_year_id' => $filters['academic_year_id'] ?? null]) }}" class="btn btn-outline-info btn-sm">
-                                            Detail Tagihan
-                                        </a>--}}
+                                        <a href="{{ route('transaction_bank.show', ['transaction' => $v->id, 'academic_year_id' => $filters['academic_year_id'] ?? null]) }}" class="btn btn-outline-info btn-sm">
+                                            Lihat Detail
+                                        </a>
                                     </div>
                                 </div>
                             </div>

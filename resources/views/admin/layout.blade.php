@@ -194,8 +194,8 @@ $setting = \App\Helpers\Helpers::setting();
                     </li>
 
                         @if(in_array(Auth::user()->group->name, ['Admin Finance','Accountant']))
-                         <li class="menu @if(in_array(Request::segment(1), array('student','student_bill'))) active @endif">
-                            <a href="#student" data-toggle="collapse" @if(in_array(Request::segment(1), array('student','student_bill'))) aria-expanded="true" @endif class="dropdown-toggle">
+                         <li class="menu @if(in_array(Request::segment(1), array('student','transaction_bank','student_bill'))) active @endif">
+                            <a href="#student" data-toggle="collapse" @if(in_array(Request::segment(1), array('student','transaction_bank','student_bill'))) aria-expanded="true" @endif class="dropdown-toggle">
                                 <div class="">
                                     <img src="{{ asset('storage/menu/icons8-student-100.png') }}" width="30" height="30" style="margin-right: 18px">
                                     <span>Siswa</span>
@@ -204,7 +204,7 @@ $setting = \App\Helpers\Helpers::setting();
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
                                 </div>
                             </a>
-                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('student','student_bill'))) show @endif" id="student" data-parent="#accordionExample">
+                            <ul class="collapse submenu recent-submenu mini-recent-submenu list-unstyled @if(in_array(Request::segment(1), array('student','transaction_bank','student_bill'))) show @endif" id="student" data-parent="#accordionExample">
                                 <li @if(Request::segment(1)=="student") class="active" @endif" >
                                     <a href="{{ url('student') }}"> Data Siswa </a>
                                 </li>
