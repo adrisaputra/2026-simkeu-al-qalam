@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\Transaction;
 use App\Models\TransactionBank;
 use App\Models\TransactionCode;
+use App\Models\WorkUnit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -106,6 +107,7 @@ class TransactionBankController extends Controller
             'status' => ['nullable', Rule::in(['unmatched', 'matched'])],
         ]);
 
+        $work_unit = WorkUnit::whereIn('id', [3, 4, 5, 6])->get();
         $student = Student::limit(10)->get();
         $query = TransactionBank::query();
 
@@ -122,20 +124,23 @@ class TransactionBankController extends Controller
             'filters',
             'transaction',
             'transaction_bank',
-            'student'
+            'student',
+            'work_unit'
         ));
     }
+
     public function validate(Request $request, $action = null)
     {
         if ($request->ajax()) {
 
             $attributes = [
                 'student_id' => 'Siswa',
+                'student_id2' => 'Siswa',
             ];
 
             if ($action === 'Simpan') {
                 $rules = [
-                    'student_id' => 'required|max:255',
+                    'student_id2' => 'required|max:255',
                 ];
             } else {
                 $rules = [
@@ -146,6 +151,46 @@ class TransactionBankController extends Controller
             $request->validate($rules, [], $attributes);
 
             return response()->json(['success' => true]);
+        }
+    }
+
+    // # Save Data
+    public function store(Request $request)
+    {
+        if ($request->ajax()) {
+            $request->merge([
+                'student_id' => $request->input('student_id') ?? $request->input('student_id2'),
+                'amount' => str_replace('.', '', (string) $request->input('amount')),
+            ]);
+
+            DB::transaction(function () use ($request) {
+                $transaction = Transaction::findOrFail($request->id);
+                $student = Student::with('classes')->findOrFail($request->student_id);
+
+                $transaction_bank = new TransactionBank;
+                $transaction_bank->transaction_id = $transaction->id;
+                $transaction_bank->account_id = 1;
+                $transaction_bank->transaction_code_id = $transaction->transaction_code_id;
+                $transaction_bank->transaction_code_sub_id = $transaction->transaction_code_sub_id;
+                $transaction_bank->student_id = $student->id;
+                $transaction_bank->transaction_number = $request->transaction_number;
+                $transaction_bank->student_name = $student->name;
+                $transaction_bank->classes = $student->classes?->name;
+                $transaction_bank->import_date = now()->toDateString();
+                $transaction_bank->amount = $request->amount;
+                $transaction_bank->user_id = Auth::id();
+                
+                $matchStatus = $student->id ? 'matched' : 'unmatched';
+                $transaction_bank->status = $matchStatus;
+                $transaction_bank->save();
+
+                $transaction->amount = $transaction->transaction_banks()->sum('amount');
+                $transaction->save();
+            });
+
+            activity()->log('Create Data Transaction Bank');
+
+            return response()->json(['success' => true, 'message' => 'Tambah Data Berhasil']);
         }
     }
 

@@ -13,6 +13,7 @@
                         </div>
                     </div>
                     @include('admin.transaction_bank.edit')
+                    @include('admin.transaction_bank.create')
                     <div class="widget-content widget-content-area">
                         @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
@@ -199,8 +200,63 @@
             });
         });
 
+        $('#myForm2').submit(function (e) {
+            e.preventDefault(); // Hindari pengiriman form secara default
+
+            var action = document.getElementById('action').innerText;
+            var id_transaction= $('#id_transaction').val();
+            var student_id2 = $('#student_id2').val();
+
+            // Buat objek FormData untuk mengirim data form, termasuk file
+            var formData = new FormData();
+            formData.append('id', id_transaction);
+            formData.append('student_id2', student_id2);
+            formData.append('_token', "{{ csrf_token() }}");
+
+            // Kirim permintaan validasi ke controller via Ajax
+            var url = "{{ url('/transaction_bank/validate') }}";
+            $.ajax({
+                url: url + "/" + action,
+                type: "POST",
+                data: formData,
+                contentType: false, // Tidak mengatur contentType secara otomatis
+                processData: false, // Tidak memproses data secara otomatis
+                success: function (response) {
+                   
+                    $('.invalid-feedback').html(''); // Hapus pesan kesalahan
+                    $('.is-invalid').removeClass('is-invalid'); // Hapus kelas is-invalid dari bidang-bidang yang divalidasi
+
+                    if (action === "Simpan") {
+                        send();
+                    } else {
+                        update(id_transaction);
+                    }
+
+                },
+                error: function (xhr) {
+                    var errors = xhr.responseJSON.errors;
+
+                    // Bersihkan semua pesan kesalahan sebelum menampilkan yang baru
+                    $('.fv-plugins-message-container').html('');
+
+                    // Tampilkan pesan kesalahan untuk setiap bidang jika ada
+                    if (errors) {
+                        $.each(errors, function (key, value) {
+                            $('#' + key + '-error').html(value[0]);
+                        });
+                    }
+                }
+            });
+        });
+
     });
     
+    function clearForm(){
+        document.getElementById("head_title").textContent = "Tambah {{ __($title) }}";
+        $('#myForm2')[0].reset();
+        document.getElementById("action").textContent = "Simpan";
+    }
+
     // Fungsi untuk menampilkan notifikasi toast dengan ikon centang
     function showSuccessToast(message) {
         Snackbar.show({
@@ -222,6 +278,30 @@
         });
     }
     
+    // Create Data
+    function send() {
+        var formData = new FormData($('#myForm2')[0]); // Buat objek FormData dari formulir
+
+        // Kirim data formulir ke server menggunakan AJAX
+        $.ajax({
+            url: "{{ url('transaction_bank/store') }}",
+            type: "POST",
+            data: formData,
+            contentType: false, // Biarkan jQuery menentukan contentType secara otomatis
+            processData: false, // Biarkan jQuery menangani proses data secara otomatis
+            success: function (response) {
+                showSuccessToast(response.message); // Tampilkan notifikasi toast
+                $('#myForm')[0].reset(); // Reset form setelah berhasil menambahkan data
+                $('#exampleModal').modal('hide');
+                table.ajax.reload(null, false);
+            },
+            error: function (xhr) {
+                // Tangani kesalahan jika pengiriman formulir gagal
+                console.error("Error pengiriman formulir:", xhr);
+            }
+        });
+    }
+        
     // Get Data
     function getData(id){
         document.getElementById("head_title").textContent = "Ubah {{ __($title) }}";
@@ -286,7 +366,7 @@
     function getClasses(selectedClassId = null) {
         var work_unit_id = $("#work_unit_id").val();
 
-        $("#class_id").html(
+        $("#classes_id").html(
             '<option value="">- Pilih Kelas-</option>'
         );
 
@@ -301,11 +381,11 @@
             type: "GET",
 
             success: function (html) {
-                $("#class_id").html(html);
+                $("#classes_id").html(html);
 
                 // Pilih kelas setelah opsi selesai dimuat
                 if (selectedClassId !== null) {
-                    $("#class_id").val(String(selectedClassId));
+                    $("#classes_id").val(String(selectedClassId));
                 }
             },
 
@@ -317,29 +397,30 @@
         return false;
     }
 
-    function getStudentBillType(selectedClassId = null) {
-        var work_unit_id = $("#work_unit_id").val();
+    function getStudent(selectedStudentId = null) {
+        var classes_id = $("#classes_id").val();
+        console.log("Selected Class ID:", classes_id); // Debug: Tampilkan nilai classes_id di konsol
 
-        $("#v_bill_type_id").html(
-            '<option value="">- Pilih Jenis Tagihan -</option>'
+        $("#student_id2").html(
+            '<option value="">- Pilih Siswa-</option>'
         );
 
-        if (!work_unit_id) {
+        if (!classes_id) {
             return false;
         }
 
-        var url = "{{ url('/v_bill_type/get') }}";
+        var url = "{{ url('/student/get2') }}";
 
         $.ajax({
-            url: url + "/" + work_unit_id,
+            url: url + "/" + classes_id,
             type: "GET",
 
             success: function (html) {
-                $("#v_bill_type_id").html(html);
+                $("#student_id2").html(html);
 
-                // Pilih kelas setelah opsi selesai dimuat
-                if (selectedClassId !== null) {
-                    $("#v_bill_type_id").val(String(selectedClassId));
+                // Pilih siswa setelah opsi selesai dimuat
+                if (selectedStudentId !== null) {
+                    $("#student_id2").val(String(selectedStudentId));
                 }
             },
 

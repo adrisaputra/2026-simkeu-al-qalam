@@ -174,7 +174,18 @@ class StudentController extends Controller
             })
         );
     }
-        
+
+    public function get2(Request $request, $classes_id)
+    {
+        $student = Student::where('classes_id', $classes_id)
+            ->orderBy('id', 'ASC')->get();
+
+        echo "<option value=''>- Pilih Siswa -</option>";
+        foreach ($student as $v) {
+            echo "<option value='".$v->id."' >".$v->name.'</option>';
+        }
+    }
+
     public function import(Request $request)
     {
         $request->validate([

@@ -116,6 +116,7 @@ Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
     Route::put('/student/edit/{student}', [StudentController::class, 'update']);
     Route::delete('/student/delete/{student}', [StudentController::class, 'delete']);
     Route::get('/student/get', [StudentController::class, 'get']);
+    Route::get('/student/get2/{classes_id}', [StudentController::class, 'get2']);
 
     // # Desc Category
     Route::get('/student_bill_type', [StudentBillTypeController::class, 'index'])->name('student_bill_type.index');
@@ -137,7 +138,7 @@ Route::middleware(['role:Admin Finance,Accountant'])->group(function () {
 
     Route::get('/transaction_bank', [TransactionBankController::class, 'index'])->name('transaction_bank.index');
     Route::get('/transaction_bank/create', [TransactionBankController::class, 'create'])->name('transaction_bank.create');
-    Route::post('/transaction_bank/store', [TransactionBankController::class, 'store'])->name('transaction_bank.store'); 
+    Route::post('/transaction_bank/store', [TransactionBankController::class, 'store'])->name('transaction_bank.store');
     Route::post('/transaction_bank/validate/{action}', [TransactionBankController::class, 'validate']);
     Route::get('/transaction_bank/{transaction}', [TransactionBankController::class, 'show'])->name('transaction_bank.show');
     Route::get('/transaction_bank/{transaction_bank}/edit', [TransactionBankController::class, 'edit'])->name('transaction_bank.edit');
